@@ -13,8 +13,8 @@
   "scripts": {
     "build": "npx tsc",
     "lint": "eslint src --ext .ts",
-    "fmt": "prettier --config .prettierrc 'src/**/*.ts' --check",
-    "fmt:fix": "prettier --config .prettierrc 'src/**/*.ts' --write",
+    "fmt": "prettier --config .prettierrc 'ts/src/**/*.ts' --check",
+    "fmt:fix": "prettier --config .prettierrc 'ts/src/**/*.ts' --write",
     "prepare": "npx tsc"
   },
   "devDependencies": {
