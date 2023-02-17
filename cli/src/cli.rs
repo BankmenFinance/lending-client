@@ -7,9 +7,21 @@ use solana_sdk::{
 use std::{fs::File, io::Read, str::FromStr, sync::Arc};
 use thiserror::Error;
 
-use crate::{create_lending_profile, create_loan, list_lending_profiles, list_loans, take_loan};
+use crate::{
+    create_collection, create_lending_profile, create_loan, create_token, list_lending_profiles,
+    list_loans, list_tokens, send_token, take_loan,
+};
 
 pub enum CliCommand {
+    CreateCollection,
+    CreateToken {
+        collection_mint: Pubkey,
+    },
+    ListTokens,
+    SendToken {
+        token_mint: Pubkey,
+        destination: Pubkey,
+    },
     CreateLendingProfile {
         collection_name: String,
         collection_mint: Pubkey,
@@ -100,6 +112,27 @@ fn load_keypair(path: &str) -> Result<Keypair, Box<dyn std::error::Error>> {
 
 pub async fn process_command(config: &CliConfig) -> Result<String, Box<dyn std::error::Error>> {
     match &config.command {
+        CliCommand::CreateCollection {} => match create_collection(config).await {
+            Ok(_) => Ok("Successfully created collection.".to_string()),
+            Err(e) => Err(e),
+        },
+        CliCommand::CreateToken { collection_mint } => {
+            match create_token(config, collection_mint).await {
+                Ok(_) => Ok("Successfully created token.".to_string()),
+                Err(e) => Err(e),
+            }
+        }
+        CliCommand::ListTokens {} => match list_tokens(config).await {
+            Ok(_) => Ok("Successfully listed tokens.".to_string()),
+            Err(e) => Err(e),
+        },
+        CliCommand::SendToken {
+            token_mint,
+            destination,
+        } => match send_token(config, token_mint, destination).await {
+            Ok(_) => Ok("Successfully sent token.".to_string()),
+            Err(e) => Err(e),
+        },
         CliCommand::CreateLendingProfile {
             collection_name,
             collection_mint,

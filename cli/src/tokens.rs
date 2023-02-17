@@ -329,6 +329,7 @@ pub async fn list_tokens(cli_config: &CliConfig) -> Result<(), Box<dyn std::erro
 pub async fn send_token(
     cli_config: &CliConfig,
     token_mint: &Pubkey,
+    destination: &Pubkey,
 ) -> Result<(), Box<dyn std::error::Error>> {
     let rpc_client = cli_config.rpc_client.as_ref().unwrap();
 
