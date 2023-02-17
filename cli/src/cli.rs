@@ -60,6 +60,7 @@ pub struct CliConfig {
 }
 
 #[derive(Debug, Error)]
+#[allow(clippy::large_enum_variant)]
 pub enum CliError {
     #[error("Bad parameter: {0}")]
     BadParameters(String),
@@ -88,7 +89,7 @@ fn load_keypair(path: &str) -> Result<Keypair, Box<dyn std::error::Error>> {
     let file_string = &mut String::new();
     let file_read_res = file.read_to_string(file_string);
 
-    let _ = if let Err(e) = file_read_res {
+    if let Err(e) = file_read_res {
         return Err(Box::new(CliError::KeypairFileReadError(e.to_string())));
     };
 
@@ -104,9 +105,7 @@ fn load_keypair(path: &str) -> Result<Keypair, Box<dyn std::error::Error>> {
 
     match keypair {
         Ok(kp) => Ok(kp),
-        Err(e) => {
-            return Err(Box::new(CliError::KeypairLoadError(e.to_string())));
-        }
+        Err(e) => Err(Box::new(CliError::KeypairLoadError(e.to_string()))),
     }
 }
 
@@ -209,11 +208,9 @@ pub fn parse_command(matches: &ArgMatches) -> Result<CliCommandInfo, Box<dyn std
             })
         }
         ("list-lending-profiles", Some(matches)) => {
-            let collection = if let Some(s) = matches.value_of("collecton") {
-                Some(Pubkey::from_str(s).unwrap())
-            } else {
-                None
-            };
+            let collection = matches
+                .value_of("collecton")
+                .map(|s| Pubkey::from_str(s).unwrap());
             Ok(CliCommandInfo {
                 command: CliCommand::ListLendingProfiles { collection },
             })
@@ -241,41 +238,33 @@ pub fn parse_command(matches: &ArgMatches) -> Result<CliCommandInfo, Box<dyn std
             })
         }
         ("list-loans", Some(matches)) => {
-            let lending_profile = if let Some(s) = matches.value_of("lending-profile") {
-                Some(Pubkey::from_str(s).unwrap())
-            } else {
-                None
-            };
+            let lending_profile = matches
+                .value_of("lending-profile")
+                .map(|s| Pubkey::from_str(s).unwrap());
             Ok(CliCommandInfo {
                 command: CliCommand::ListLoans { lending_profile },
             })
         }
         ("create-token", Some(matches)) => {
-            let lending_profile = if let Some(s) = matches.value_of("lending-profile") {
-                Some(Pubkey::from_str(s).unwrap())
-            } else {
-                None
-            };
+            let lending_profile = matches
+                .value_of("lending-profile")
+                .map(|s| Pubkey::from_str(s).unwrap());
             Ok(CliCommandInfo {
                 command: CliCommand::ListLoans { lending_profile },
             })
         }
         ("send-token", Some(matches)) => {
-            let lending_profile = if let Some(s) = matches.value_of("lending-profile") {
-                Some(Pubkey::from_str(s).unwrap())
-            } else {
-                None
-            };
+            let lending_profile = matches
+                .value_of("lending-profile")
+                .map(|s| Pubkey::from_str(s).unwrap());
             Ok(CliCommandInfo {
                 command: CliCommand::ListLoans { lending_profile },
             })
         }
         ("list-tokens", Some(matches)) => {
-            let lending_profile = if let Some(s) = matches.value_of("lending-profile") {
-                Some(Pubkey::from_str(s).unwrap())
-            } else {
-                None
-            };
+            let lending_profile = matches
+                .value_of("lending-profile")
+                .map(|s| Pubkey::from_str(s).unwrap());
             Ok(CliCommandInfo {
                 command: CliCommand::ListLoans { lending_profile },
             })
@@ -295,7 +284,7 @@ pub fn parse_args(matches: &ArgMatches<'_>) -> Result<CliConfig, Box<dyn std::er
     let json_rpc_url = matches.value_of("json_rpc_url").unwrap();
     let keypair_path = matches.value_of("keypair").unwrap();
 
-    let normalized_url = normalize_to_url_if_moniker(json_rpc_url.to_string());
+    let normalized_url = normalize_to_url_if_moniker(json_rpc_url);
     println!("Using JSON-RPC URL: {}", normalized_url);
 
     println!("Loading keypair from: {}", keypair_path);
@@ -309,7 +298,7 @@ pub fn parse_args(matches: &ArgMatches<'_>) -> Result<CliConfig, Box<dyn std::er
         json_rpc_url: normalized_url.to_string(),
         keypair_path: keypair_path.to_string(),
         rpc_client: Some(Arc::new(RpcClient::new_with_commitment(
-            normalized_url.to_string(),
+            normalized_url,
             CommitmentConfig::confirmed(),
         ))),
         keypair: Some(keypair),

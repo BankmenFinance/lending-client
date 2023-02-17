@@ -141,7 +141,7 @@ pub async fn create_collection(cli_config: &CliConfig) -> Result<(), Box<dyn std
 
     let tx = create_transaction(blockhash, &ixs, keypair, None);
 
-    let sig = match send_transaction(&rpc_client, &tx, true).await {
+    let sig = match send_transaction(rpc_client, &tx, true).await {
         Ok(s) => s,
         Err(e) => {
             return Err(Box::new(e));
@@ -252,7 +252,7 @@ pub async fn create_token(
 
     let tx = create_transaction(blockhash, &ixs, keypair, None);
 
-    let sig = match send_transaction(&rpc_client, &tx, true).await {
+    let sig = match send_transaction(rpc_client, &tx, true).await {
         Ok(s) => s,
         Err(e) => {
             return Err(Box::new(e));
@@ -328,10 +328,10 @@ pub async fn list_tokens(cli_config: &CliConfig) -> Result<(), Box<dyn std::erro
 
 pub async fn send_token(
     cli_config: &CliConfig,
-    token_mint: &Pubkey,
-    destination: &Pubkey,
+    _token_mint: &Pubkey,
+    _destination: &Pubkey,
 ) -> Result<(), Box<dyn std::error::Error>> {
-    let rpc_client = cli_config.rpc_client.as_ref().unwrap();
+    let _rpc_client = cli_config.rpc_client.as_ref().unwrap();
 
     Ok(())
 }

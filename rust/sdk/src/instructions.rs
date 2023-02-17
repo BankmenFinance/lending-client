@@ -10,6 +10,7 @@ use crate::{
     CreateCollectionLendingProfileArgs, OfferLoanArgs,
 };
 
+#[allow(clippy::too_many_arguments)]
 pub fn create_lending_profile(
     profile: &Pubkey,
     collection: &Pubkey,
@@ -32,9 +33,7 @@ pub fn create_lending_profile(
         token_program: token::ID,
         rent: rent::ID,
     };
-    let ix_data = crate::instruction::CreateCollectionLendingProfile {
-        _args: args.clone(),
-    };
+    let ix_data = crate::instruction::CreateCollectionLendingProfile { _args: *args };
     Instruction {
         program_id: crate::id(),
         accounts: accounts.to_account_metas(Some(false)),
@@ -42,6 +41,7 @@ pub fn create_lending_profile(
     }
 }
 
+#[allow(clippy::too_many_arguments)]
 pub fn offer_loan(
     profile: &Pubkey,
     loan: &Pubkey,
@@ -67,9 +67,7 @@ pub fn offer_loan(
         token_program: token::ID,
         rent: rent::ID,
     };
-    let ix_data = crate::instruction::OfferLoan {
-        _args: args.clone(),
-    };
+    let ix_data = crate::instruction::OfferLoan { _args: *args };
     Instruction {
         program_id: crate::id(),
         accounts: accounts.to_account_metas(Some(false)),
@@ -77,6 +75,7 @@ pub fn offer_loan(
     }
 }
 
+#[allow(clippy::too_many_arguments)]
 pub fn take_loan(
     profile: &Pubkey,
     loan: &Pubkey,
@@ -113,6 +112,7 @@ pub fn take_loan(
     }
 }
 
+#[allow(clippy::too_many_arguments)]
 pub fn repay_loan(
     profile: &Pubkey,
     loan: &Pubkey,

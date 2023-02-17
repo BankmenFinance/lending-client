@@ -186,7 +186,7 @@ pub async fn create_loan(
 
     let tx = create_transaction(blockhash, &ixs, keypair, None);
 
-    let sig = match send_transaction(&rpc_client, &tx, true).await {
+    let sig = match send_transaction(rpc_client, &tx, true).await {
         Ok(s) => s,
         Err(e) => {
             return Err(Box::new(e));
@@ -217,12 +217,12 @@ pub async fn take_loan(
     let (user, _) = User::derive_address(&keypair.pubkey());
 
     // if we fail fetching the user account, we can proceed anyway
-    let user_account = match get_program_account::<User>(rpc_client, &user).await {
+    let _user_account = match get_program_account::<User>(rpc_client, &user).await {
         Ok(a) => Some(a),
         Err(_) => None,
     };
 
-    let (escrow, _) = Loan::derive_escrow_address(&loan);
+    let (escrow, _) = Loan::derive_escrow_address(loan);
     let (escrow_token_account, _) = Loan::derive_escrow_token_account_address(&escrow);
     let (collateral_metadata, _) = find_metadata_account(collateral_mint);
     let (collateral_edition, _) = find_master_edition_account(collateral_mint);
@@ -274,7 +274,7 @@ pub async fn take_loan(
 
     let tx = create_transaction(blockhash, &ixs, keypair, None);
 
-    let sig = match send_transaction(&rpc_client, &tx, true).await {
+    let sig = match send_transaction(rpc_client, &tx, true).await {
         Ok(s) => s,
         Err(e) => {
             return Err(Box::new(e));

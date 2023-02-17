@@ -130,6 +130,7 @@ pub async fn list_lending_profiles(
     Ok(())
 }
 
+#[allow(clippy::too_many_arguments)]
 pub async fn create_lending_profile(
     cli_config: &CliConfig,
     collection_name: &str,
@@ -178,7 +179,7 @@ pub async fn create_lending_profile(
 
     let tx = create_transaction(blockhash, &ixs, keypair, None);
 
-    let sig = match send_transaction(&rpc_client, &tx, true).await {
+    let sig = match send_transaction(rpc_client, &tx, true).await {
         Ok(s) => s,
         Err(e) => {
             return Err(Box::new(e));
