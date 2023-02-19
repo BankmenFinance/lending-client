@@ -327,6 +327,11 @@
           ]
         },
         {
+          "name": "lenderAccount",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
           "name": "lender",
           "isMut": false,
           "isSigner": true,
@@ -443,6 +448,11 @@
           "docs": [
             "The lender's token account."
           ]
+        },
+        {
+          "name": "borrowerAccount",
+          "isMut": true,
+          "isSigner": false
         },
         {
           "name": "borrower",
@@ -563,6 +573,11 @@
           ]
         },
         {
+          "name": "borrowerAccount",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
           "name": "borrower",
           "isMut": true,
           "isSigner": true,
@@ -584,6 +599,22 @@
           "isSigner": false,
           "docs": [
             "The Metaplex Token Metadata Program."
+          ]
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false,
+          "docs": [
+            "The System Program."
+          ]
+        },
+        {
+          "name": "rent",
+          "isMut": false,
+          "isSigner": false,
+          "docs": [
+            "The Rent Sysvar."
           ]
         }
       ],
@@ -636,11 +667,11 @@
           ]
         },
         {
-          "name": "collateralMetadata",
+          "name": "collateralEdition",
           "isMut": false,
           "isSigner": false,
           "docs": [
-            "The collateral metadata account."
+            "The collateral master edition account."
           ]
         },
         {
@@ -652,24 +683,21 @@
           ]
         },
         {
-          "name": "lender",
+          "name": "borrower",
           "isMut": true,
           "isSigner": false
         },
         {
-          "name": "borrower",
+          "name": "lenderAccount",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "lender",
           "isMut": true,
           "isSigner": true,
           "docs": [
             "The wallet address of the borrower."
-          ]
-        },
-        {
-          "name": "systemProgram",
-          "isMut": false,
-          "isSigner": false,
-          "docs": [
-            "The System Program."
           ]
         },
         {
@@ -687,11 +715,95 @@
           "docs": [
             "The Metaplex Token Metadata Program."
           ]
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "sweepTokenFees",
+      "accounts": [
+        {
+          "name": "profile",
+          "isMut": true,
+          "isSigner": false,
+          "docs": [
+            "The book of loans for a given collection."
+          ]
         },
         {
-          "name": "rent",
+          "name": "tokenMint",
           "isMut": false,
+          "isSigner": false,
+          "docs": [
+            "The token mint used to issue loans through this [`CollectionLendingProfile`]."
+          ]
+        },
+        {
+          "name": "tokenVault",
+          "isMut": true,
+          "isSigner": false,
+          "docs": [
+            "The fee token vault."
+          ]
+        },
+        {
+          "name": "vaultSigner",
+          "isMut": false,
+          "isSigner": false,
+          "docs": [
+            "The vault signer PDA for the fee token vault."
+          ]
+        },
+        {
+          "name": "feesDestination",
+          "isMut": true,
+          "isSigner": false,
+          "docs": [
+            "The destination token account for the fees."
+          ]
+        },
+        {
+          "name": "authority",
+          "isMut": false,
+          "isSigner": true,
+          "docs": [
+            "The authority of the [`CollectionLendingProfile`]."
+          ]
+        },
+        {
+          "name": "tokenProgram",
+          "isMut": false,
+          "isSigner": false,
+          "docs": [
+            "The Token Program."
+          ]
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "sweepNativeFees",
+      "accounts": [
+        {
+          "name": "profile",
+          "isMut": true,
+          "isSigner": false,
+          "docs": [
+            "The book of loans for a given collection."
+          ]
+        },
+        {
+          "name": "feesDestination",
+          "isMut": true,
           "isSigner": false
+        },
+        {
+          "name": "authority",
+          "isMut": false,
+          "isSigner": true,
+          "docs": [
+            "The authority of the [`CollectionLendingProfile`]."
+          ]
         }
       ],
       "args": []

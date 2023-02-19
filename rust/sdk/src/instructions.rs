@@ -85,6 +85,7 @@ pub fn take_loan(
     collateral_edition: &Pubkey,
     escrow: &Pubkey,
     escrow_token_account: &Pubkey,
+    borrower_account: &Pubkey,
     borrower_token_account: &Pubkey,
     borrower_collateral_account: &Pubkey,
     borrower: &Pubkey,
@@ -98,11 +99,14 @@ pub fn take_loan(
         collateral_edition: *collateral_edition,
         escrow: *escrow,
         escrow_token_account: *escrow_token_account,
+        borrower_account: *borrower_account,
         borrower_token_account: *borrower_token_account,
         borrower_collateral_account: *borrower_collateral_account,
         borrower: *borrower,
         token_program: token::ID,
         metadata_program: mpl_token_metadata::ID,
+        system_program: system_program::ID,
+        rent: rent::ID,
     };
     let ix_data = crate::instruction::TakeLoan {};
     Instruction {
@@ -122,6 +126,7 @@ pub fn repay_loan(
     collateral_mint: &Pubkey,
     collateral_edition: &Pubkey,
     escrow: &Pubkey,
+    borrower_account: &Pubkey,
     borrower_token_account: &Pubkey,
     borrower_collateral_account: &Pubkey,
     borrower: &Pubkey,
@@ -138,6 +143,7 @@ pub fn repay_loan(
         collateral_mint: *collateral_mint,
         collateral_edition: *collateral_edition,
         token_vault: *token_vault,
+        borrower_account: *borrower_account,
         borrower_token_account: *borrower_token_account,
         borrower_collateral_account: *borrower_collateral_account,
         lender: *lender,
