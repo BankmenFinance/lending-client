@@ -7,6 +7,7 @@ export const B_VAULT_AUTHORITY = 'VAULT_AUTHORITY';
 export const B_LOAN = 'LOAN';
 export const B_ESCROW = 'LOAN_ESCROW';
 export const B_ESCROW_TOKEN_ACCOUNT = 'LOAN_ESCROW_TOKEN_ACCOUNT';
+export const B_USER = 'USER_ACCOUNT';
 
 export const CONFIGS: { [key in Cluster]: Config } = {
   localnet: {

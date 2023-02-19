@@ -4,6 +4,7 @@ import type { Lending } from '../generated/types/lending';
 
 type _CollectionLendingProfile = TypeDef<Lending['accounts'][0], Lending>;
 export type LoanState = TypeDef<Lending['accounts'][1], Lending>;
+export type UserAccount = TypeDef<Lending['accounts'][2], Lending>;
 
 export type CreateCollectionLendingProfileArgs = TypeDef<
   Lending['types'][0],

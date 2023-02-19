@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { PublicKey, SystemProgram, SYSVAR_RENT_PUBKEY } from '@solana/web3.js';
 import { LendingClient } from '../client';
 import { deriveCollectionLendingProfileAddress } from '../utils';
@@ -45,7 +46,6 @@ export class CollectionLendingProfile {
       profile,
       client.programId
     );
-    args.vaultSignerBump = vaultSignerBump;
     const ix = await client.methods
       .createCollectionLendingProfile(args)
       .accountsStrict({
@@ -69,6 +69,28 @@ export class CollectionLendingProfile {
     };
   }
 
+  static async loadAll(
+    client: LendingClient,
+    _onStateUpdate?: StateUpdateHandler<CollectionLendingProfileState>
+  ): Promise<CollectionLendingProfile[]> {
+    const lendingProfileAccounts =
+      await client.accounts.collectionLendingProfile.all();
+    const loans = [];
+
+    for (const lendingProfileAccount of lendingProfileAccounts) {
+      loans.push(
+        new CollectionLendingProfile(
+          client,
+          lendingProfileAccount.publicKey,
+          lendingProfileAccount.account as CollectionLendingProfileState,
+          _onStateUpdate
+        )
+      );
+    }
+
+    return loans;
+  }
+
   static async load(
     client: LendingClient,
     address: PublicKey,
@@ -90,6 +112,10 @@ export class CollectionLendingProfile {
 
   get tokenMint() {
     return this.state.tokenMint;
+  }
+
+  get tokenVault() {
+    return this.state.tokenVault;
   }
 
   async getAssociatedTokenAddress(): Promise<PublicKey> {
