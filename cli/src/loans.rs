@@ -260,6 +260,7 @@ pub async fn take_loan(
         &collateral_edition,
         &escrow,
         &escrow_token_account,
+        &user,
         &borrower_token_account,
         &borrower_collateral_account,
         &keypair.pubkey(),
