@@ -15,7 +15,8 @@ export const CONFIGS: { [key in Cluster]: Config } = {
     PROGRAM_ID: new PublicKey('6prLRRLSvwWLkCBc7V2B3FWi716AssNyPfp1NH88751v')
   },
   devnet: {
-    RPC_ENDPOINT: 'https://devnet.api.solana.com',
+    RPC_ENDPOINT:
+      'https://light-weathered-diagram.solana-devnet.discover.quiknode.pro/47012912d873fd5d66210ca13d41a2a01d520fbc/',
     PROGRAM_ID: new PublicKey('6prLRRLSvwWLkCBc7V2B3FWi716AssNyPfp1NH88751v')
   },
   'mainnet-beta': {
