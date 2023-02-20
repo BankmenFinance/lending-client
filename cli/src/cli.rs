@@ -32,7 +32,7 @@ pub enum CliCommand {
         fee_rate: u64,
     },
     ListLendingProfiles {
-        collection: Option<Pubkey>,
+        collection_mint: Option<Pubkey>,
     },
     CreateLoan {
         lending_profile: Pubkey,
@@ -121,7 +121,7 @@ pub async fn process_command(config: &CliConfig) -> Result<String, Box<dyn std::
                 Err(e) => Err(e),
             }
         }
-        CliCommand::ListTokens {} => match list_tokens(config).await {
+        CliCommand::ListTokens => match list_tokens(config).await {
             Ok(_) => Ok("Successfully listed tokens.".to_string()),
             Err(e) => Err(e),
         },
@@ -155,8 +155,8 @@ pub async fn process_command(config: &CliConfig) -> Result<String, Box<dyn std::
             Ok(_) => Ok("Successfully created lending profile.".to_string()),
             Err(e) => Err(e),
         },
-        CliCommand::ListLendingProfiles { collection } => {
-            match list_lending_profiles(config, collection.as_ref()).await {
+        CliCommand::ListLendingProfiles { collection_mint } => {
+            match list_lending_profiles(config, collection_mint.as_ref()).await {
                 Ok(_) => Ok("Successfully listed lending profiles.".to_string()),
                 Err(e) => Err(e),
             }
@@ -208,11 +208,11 @@ pub fn parse_command(matches: &ArgMatches) -> Result<CliCommandInfo, Box<dyn std
             })
         }
         ("list-lending-profiles", Some(matches)) => {
-            let collection = matches
+            let collection_mint = matches
                 .value_of("collecton")
                 .map(|s| Pubkey::from_str(s).unwrap());
             Ok(CliCommandInfo {
-                command: CliCommand::ListLendingProfiles { collection },
+                command: CliCommand::ListLendingProfiles { collection_mint },
             })
         }
         ("create-loan", Some(matches)) => {
@@ -245,30 +245,37 @@ pub fn parse_command(matches: &ArgMatches) -> Result<CliCommandInfo, Box<dyn std
                 command: CliCommand::ListLoans { lending_profile },
             })
         }
+        ("create-collection", Some(_matches)) => Ok(CliCommandInfo {
+            command: CliCommand::CreateCollection,
+        }),
         ("create-token", Some(matches)) => {
-            let lending_profile = matches
-                .value_of("lending-profile")
-                .map(|s| Pubkey::from_str(s).unwrap());
+            let collection_mint = matches
+                .value_of("collection-mint")
+                .map(|s| Pubkey::from_str(s).unwrap())
+                .unwrap();
             Ok(CliCommandInfo {
-                command: CliCommand::ListLoans { lending_profile },
+                command: CliCommand::CreateToken { collection_mint },
             })
         }
         ("send-token", Some(matches)) => {
-            let lending_profile = matches
-                .value_of("lending-profile")
-                .map(|s| Pubkey::from_str(s).unwrap());
+            let token_mint = matches
+                .value_of("token-mint")
+                .map(|s| Pubkey::from_str(s).unwrap())
+                .unwrap();
+            let destination = matches
+                .value_of("destination")
+                .map(|s| Pubkey::from_str(s).unwrap())
+                .unwrap();
             Ok(CliCommandInfo {
-                command: CliCommand::ListLoans { lending_profile },
+                command: CliCommand::SendToken {
+                    token_mint,
+                    destination,
+                },
             })
         }
-        ("list-tokens", Some(matches)) => {
-            let lending_profile = matches
-                .value_of("lending-profile")
-                .map(|s| Pubkey::from_str(s).unwrap());
-            Ok(CliCommandInfo {
-                command: CliCommand::ListLoans { lending_profile },
-            })
-        }
+        ("list-tokens", Some(_matches)) => Ok(CliCommandInfo {
+            command: CliCommand::ListTokens,
+        }),
         ("", None) => {
             eprintln!("{}", matches.usage());
             Err(CliError::CommandNotRecognized(

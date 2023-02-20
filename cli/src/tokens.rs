@@ -1,15 +1,22 @@
 use anchor_lang::prelude::Pubkey;
-use anchor_spl::token::{self, spl_token::instruction::initialize_mint, Mint};
+use anchor_spl::token::{
+    self,
+    spl_token::instruction::{initialize_mint, mint_to},
+    Mint,
+};
 use clap::{App, Arg, SubCommand};
 use gbg_lending_client::utils::{create_transaction, send_transaction};
 use mpl_token_metadata::{
     instruction::{create_master_edition_v3, create_metadata_accounts_v3, verify_collection},
     pda::{find_master_edition_account, find_metadata_account},
-    state::{Collection, Creator, MAX_METADATA_LEN},
+    state::{Collection, Creator},
 };
 use solana_account_decoder::UiAccountData;
 use solana_client::rpc_request::TokenAccountsFilter;
 use solana_sdk::{signature::Keypair, signer::Signer, system_instruction::create_account};
+use spl_associated_token_account::{
+    get_associated_token_address, instruction::create_associated_token_account,
+};
 
 use crate::CliConfig;
 
@@ -19,48 +26,39 @@ pub trait TokenSubCommands {
 
 impl TokenSubCommands for App<'_, '_> {
     fn token_subcommands(self) -> Self {
-        self.subcommand(
-            SubCommand::with_name("list-tokens")
-                .about("Lists all NFTs held.")
-                .arg(
-                    Arg::with_name("collection")
-                        .short("c")
-                        .takes_value(true)
-                        .long("collection")
-                        .value_name("OPTIONAL")
-                        .help("The Collection Mint, value should be a pubkey."),
-                ),
-        )
-        .subcommand(SubCommand::with_name("create-collection").about("Creates a Collection NFT."))
-        .subcommand(
-            SubCommand::with_name("create-token")
-                .about("Creates an NFT.")
-                .arg(
-                    Arg::with_name("collection-mint")
-                        .short("c")
-                        .takes_value(true)
-                        .long("collection-mint")
-                        .help("The Collection Mint, value should be a pubkey."),
-                ),
-        )
-        .subcommand(
-            SubCommand::with_name("send-token")
-                .about("Sends an NFT.")
-                .arg(
-                    Arg::with_name("token-mint")
-                        .short("t")
-                        .takes_value(true)
-                        .long("token-mint")
-                        .help("The Token Mint, value should be a pubkey."),
-                )
-                .arg(
-                    Arg::with_name("destination")
-                        .short("d")
-                        .takes_value(true)
-                        .long("destination")
-                        .help("The destination, value should be a pubkey."),
-                ),
-        )
+        self.subcommand(SubCommand::with_name("list-tokens").about("Lists all NFTs held."))
+            .subcommand(
+                SubCommand::with_name("create-collection").about("Creates a Collection NFT."),
+            )
+            .subcommand(
+                SubCommand::with_name("create-token")
+                    .about("Creates an NFT.")
+                    .arg(
+                        Arg::with_name("collection-mint")
+                            .short("c")
+                            .takes_value(true)
+                            .long("collection-mint")
+                            .help("The Collection Mint, value should be a pubkey."),
+                    ),
+            )
+            .subcommand(
+                SubCommand::with_name("send-token")
+                    .about("Sends an NFT.")
+                    .arg(
+                        Arg::with_name("token-mint")
+                            .short("t")
+                            .takes_value(true)
+                            .long("token-mint")
+                            .help("The Token Mint, value should be a pubkey."),
+                    )
+                    .arg(
+                        Arg::with_name("destination")
+                            .short("d")
+                            .takes_value(true)
+                            .long("destination")
+                            .help("The destination, value should be a pubkey."),
+                    ),
+            )
     }
 }
 
@@ -69,18 +67,24 @@ pub async fn create_collection(cli_config: &CliConfig) -> Result<(), Box<dyn std
     let keypair = cli_config.keypair.as_ref().unwrap();
 
     let mint = Keypair::new();
+
     // nft accouts
     let metadata = find_metadata_account(&mint.pubkey()).0;
     let edition = find_master_edition_account(&mint.pubkey()).0;
 
-    let metadata_rent = rpc_client
-        .get_minimum_balance_for_rent_exemption(MAX_METADATA_LEN)
-        .await
-        .unwrap();
+    println!(
+        "Collection Mint: {}\nMetadata Account: {}\nEdition: {}",
+        mint.pubkey(),
+        metadata,
+        edition
+    );
+
     let mint_rent = rpc_client
         .get_minimum_balance_for_rent_exemption(Mint::LEN)
         .await
         .unwrap();
+
+    let ata = get_associated_token_address(&keypair.pubkey(), &mint.pubkey());
 
     let ixs = vec![
         create_account(
@@ -90,14 +94,21 @@ pub async fn create_collection(cli_config: &CliConfig) -> Result<(), Box<dyn std
             Mint::LEN as u64,
             &token::ID,
         ),
-        initialize_mint(&token::ID, &mint.pubkey(), &keypair.pubkey(), None, 0).unwrap(),
-        create_account(
+        initialize_mint(
+            &token::ID,
+            &mint.pubkey(),
             &keypair.pubkey(),
-            &metadata,
-            metadata_rent,
-            MAX_METADATA_LEN as u64,
-            &mpl_token_metadata::id(),
+            Some(&keypair.pubkey()),
+            0,
+        )
+        .unwrap(),
+        create_associated_token_account(
+            &keypair.pubkey(),
+            &keypair.pubkey(),
+            &mint.pubkey(),
+            &token::ID,
         ),
+        mint_to(&token::ID, &mint.pubkey(), &ata, &keypair.pubkey(), &[], 1)?,
         create_metadata_accounts_v3(
             mpl_token_metadata::id(),
             metadata,
@@ -128,7 +139,7 @@ pub async fn create_collection(cli_config: &CliConfig) -> Result<(), Box<dyn std
             keypair.pubkey(),
             metadata,
             keypair.pubkey(),
-            Some(1),
+            Some(0),
         ),
     ];
 
@@ -139,7 +150,7 @@ pub async fn create_collection(cli_config: &CliConfig) -> Result<(), Box<dyn std
         }
     };
 
-    let tx = create_transaction(blockhash, &ixs, keypair, None);
+    let tx = create_transaction(blockhash, &ixs, keypair, Some(&[&mint]));
 
     let sig = match send_transaction(rpc_client, &tx, true).await {
         Ok(s) => s,
@@ -171,10 +182,8 @@ pub async fn create_token(
     let metadata = find_metadata_account(&mint.pubkey()).0;
     let edition = find_master_edition_account(&mint.pubkey()).0;
 
-    let metadata_rent = rpc_client
-        .get_minimum_balance_for_rent_exemption(MAX_METADATA_LEN)
-        .await
-        .unwrap();
+    let ata = get_associated_token_address(&keypair.pubkey(), &mint.pubkey());
+
     let mint_rent = rpc_client
         .get_minimum_balance_for_rent_exemption(Mint::LEN)
         .await
@@ -188,14 +197,21 @@ pub async fn create_token(
             Mint::LEN as u64,
             &token::ID,
         ),
-        initialize_mint(&token::ID, &mint.pubkey(), &keypair.pubkey(), None, 0).unwrap(),
-        create_account(
+        initialize_mint(
+            &token::ID,
+            &mint.pubkey(),
             &keypair.pubkey(),
-            &metadata,
-            metadata_rent,
-            MAX_METADATA_LEN as u64,
-            &mpl_token_metadata::id(),
+            Some(&keypair.pubkey()),
+            0,
+        )
+        .unwrap(),
+        create_associated_token_account(
+            &keypair.pubkey(),
+            &keypair.pubkey(),
+            &mint.pubkey(),
+            &token::ID,
         ),
+        mint_to(&token::ID, &mint.pubkey(), &ata, &keypair.pubkey(), &[], 1)?,
         create_metadata_accounts_v3(
             mpl_token_metadata::id(),
             metadata,
@@ -250,7 +266,7 @@ pub async fn create_token(
         }
     };
 
-    let tx = create_transaction(blockhash, &ixs, keypair, None);
+    let tx = create_transaction(blockhash, &ixs, keypair, Some(&[&mint]));
 
     let sig = match send_transaction(rpc_client, &tx, true).await {
         Ok(s) => s,
