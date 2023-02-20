@@ -1,5 +1,6 @@
 pub mod client;
 pub mod error;
+pub mod instructions;
 pub mod utils;
 
 pub mod prelude {
@@ -8,7 +9,7 @@ pub mod prelude {
     pub use crate::utils::*;
 }
 use anchor_lang::prelude::Pubkey;
-use gbg_lending_sdk::{CollectionLendingProfile, Loan, User};
+use lending::{CollectionLendingProfile, Loan, User};
 
 #[derive(Default, Clone)]
 pub struct LoanAccount {

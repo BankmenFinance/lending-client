@@ -1,13 +1,11 @@
 use anchor_spl::{associated_token::get_associated_token_address, token};
 use clap::{App, Arg, SubCommand};
 use gbg_lending_client::{
+    instructions::{offer_loan as offer_loan_ix, take_loan as take_loan_ix},
     prelude::LendingClient,
     utils::{create_transaction, get_program_account, send_transaction},
 };
-use gbg_lending_sdk::{
-    instructions::{offer_loan as offer_loan_ix, take_loan as take_loan_ix},
-    CollectionLendingProfile, Loan, OfferLoanArgs, User,
-};
+use lending::{CollectionLendingProfile, Loan, OfferLoanArgs, User};
 use mpl_token_metadata::pda::{find_master_edition_account, find_metadata_account};
 use solana_sdk::{pubkey::Pubkey, signer::Signer};
 use spl_associated_token_account::instruction::create_associated_token_account;

@@ -6,7 +6,6 @@
         "editor.formatOnSave": true
     },
     "rust-analyzer.linkedProjects": [
-        "rust/sdk/Cargo.toml",
         "rust/client/Cargo.toml",
         "cli/Cargo.toml"
     ],

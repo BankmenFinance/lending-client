@@ -1,17 +1,16 @@
+use crate::{
+    prelude::LendingClientError,
+    utils::{deserialize_account, get_program_accounts},
+    CollectionLendingProfileAccount, LoanAccount, UserAccount,
+};
 use anchor_lang::prelude::Pubkey;
-use gbg_lending_sdk::prelude::*;
+use lending::{CollectionLendingProfile, Loan, User};
 use log::warn;
 use solana_client::{
     nonblocking::rpc_client::RpcClient,
     rpc_filter::{Memcmp, MemcmpEncodedBytes, MemcmpEncoding, RpcFilterType},
 };
 use std::sync::Arc;
-
-use crate::{
-    prelude::LendingClientError,
-    utils::{deserialize_account, get_program_accounts},
-    CollectionLendingProfileAccount, LoanAccount, UserAccount,
-};
 
 pub struct LendingClient {
     pub rpc_client: Arc<RpcClient>,
@@ -34,13 +33,12 @@ impl LendingClient {
             CollectionLendingProfile,
         >() as u64)];
 
-        let accounts =
-            match get_program_accounts(&self.rpc_client, filters, &gbg_lending_sdk::id()).await {
-                Ok(a) => a,
-                Err(e) => {
-                    return Err(LendingClientError::ClientError(e));
-                }
-            };
+        let accounts = match get_program_accounts(&self.rpc_client, filters, &lending::id()).await {
+            Ok(a) => a,
+            Err(e) => {
+                return Err(LendingClientError::ClientError(e));
+            }
+        };
 
         let mut profiles = Vec::new();
 
@@ -91,13 +89,12 @@ impl LendingClient {
             }));
         }
 
-        let accounts =
-            match get_program_accounts(&self.rpc_client, filters, &gbg_lending_sdk::id()).await {
-                Ok(a) => a,
-                Err(e) => {
-                    return Err(LendingClientError::ClientError(e));
-                }
-            };
+        let accounts = match get_program_accounts(&self.rpc_client, filters, &lending::id()).await {
+            Ok(a) => a,
+            Err(e) => {
+                return Err(LendingClientError::ClientError(e));
+            }
+        };
 
         let mut loans = Vec::new();
 
@@ -131,13 +128,12 @@ impl LendingClient {
         let filters: Vec<RpcFilterType> =
             vec![RpcFilterType::DataSize(std::mem::size_of::<User>() as u64)];
 
-        let accounts =
-            match get_program_accounts(&self.rpc_client, filters, &gbg_lending_sdk::id()).await {
-                Ok(a) => a,
-                Err(e) => {
-                    return Err(LendingClientError::ClientError(e));
-                }
-            };
+        let accounts = match get_program_accounts(&self.rpc_client, filters, &lending::id()).await {
+            Ok(a) => a,
+            Err(e) => {
+                return Err(LendingClientError::ClientError(e));
+            }
+        };
 
         let mut users = Vec::new();
 

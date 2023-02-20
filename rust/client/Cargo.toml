@@ -15,20 +15,22 @@ keywords = ["solana", "anchor", "gbg lending", "cpi"]
 default = [ "devnet" ]
 devnet = [
     "anchor-spl/devnet",
-    "gbg-lending-sdk/devnet"
+    "lending/devnet"
 ]
 mainnet-beta = [
-    "gbg-lending-sdk/mainnet-beta"
+    "lending/mainnet-beta"
 ]
 
 [dependencies]
+anchor-client = "0.26.0"
 anchor-lang = "0.26.0"
 anchor-spl = { version = "0.26.0", features = [
     "token",
     "associated_token",
 ]}
-gbg-lending-sdk = { path = "../sdk" }
+lending = { path = "../../../lending/programs/lending/", features = [ "client" ] }
 log = "0.4.17"
+mpl-token-metadata = { version = "1.8.1", features = [ "no-entrypoint" ] }
 solana-account-decoder = "~1.14.12"
 solana-client = "~1.14.12"
 solana-sdk = "~1.14.12"

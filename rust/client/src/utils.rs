@@ -16,6 +16,105 @@ use solana_sdk::{
     signer::Signer,
     transaction::Transaction,
 };
+use std::{
+    fs::File,
+    io::Read,
+    path::Path,
+    str::{from_utf8, FromStr, Utf8Error},
+};
+use thiserror::Error;
+
+#[derive(Debug, Error)]
+pub enum KeypairError {
+    #[error("Error opening keypair file: {:?}", self)]
+    FileOpen(std::io::Error),
+    #[error("Error reading keypair file: {:?}", self)]
+    FileRead(std::io::Error),
+    #[error("Provided keypair file contents do not match keypair length.")]
+    SizeMismatch,
+    #[error("Error loading keypair.")]
+    Load,
+}
+
+/// The length in bytes of a keypair, to match the underlying Ed25519 Keypair.
+pub const KEYPAIR_LENGTH: usize = 64;
+
+/// Loads a Solana [`Keypair`] from a file at the given path.
+///
+/// ### Errors
+///
+/// This function will return an error if something goes wrong while attempting to open or
+/// read the file, or finally in case the [`Keypair`] bytes in the file are invalid.
+///
+/// ### Format
+///
+/// The file should have the following format, and in total should have [`KEYPAIR_LENGTH`] bytes.
+///
+/// \[123, 34, 78, 0, 1, 3, 45 (...)\]
+#[inline(always)]
+pub fn load_keypair<P>(path: P) -> Result<Keypair, KeypairError>
+where
+    P: AsRef<Path>,
+{
+    let fd = File::open(path);
+
+    let mut file = match fd {
+        Ok(f) => f,
+        Err(e) => {
+            return Err(KeypairError::FileOpen(e));
+        }
+    };
+
+    let file_string = &mut String::new();
+    let file_read_res = file.read_to_string(file_string);
+
+    let _ = if let Err(e) = file_read_res {
+        return Err(KeypairError::FileRead(e));
+    };
+
+    let keypair_bytes: Vec<u8> = file_string
+        .replace('[', "")
+        .replace(']', "")
+        .replace(',', " ")
+        .split(' ')
+        .map(|x| u8::from_str(x).unwrap())
+        .collect();
+
+    if keypair_bytes.len() != KEYPAIR_LENGTH {
+        return Err(KeypairError::SizeMismatch);
+    }
+
+    let keypair = Keypair::from_bytes(keypair_bytes.as_ref());
+
+    match keypair {
+        Ok(kp) => Ok(kp),
+        Err(_) => Err(KeypairError::Load),
+    }
+}
+
+/// Encodes a string into an array of bytes fixed with 32 length.
+#[inline(always)]
+pub fn encode_string(alias: &str) -> [u8; 32] {
+    let mut encoded = [0_u8; 32];
+    let alias_bytes = alias.as_bytes();
+    assert!(alias_bytes.len() <= 32);
+    for (i, byte) in alias_bytes.iter().enumerate() {
+        encoded[i] = *byte;
+    }
+    encoded
+}
+
+#[inline(always)]
+pub fn decode_string(data: &[u8]) -> Result<String, Utf8Error> {
+    let str = match from_utf8(data) {
+        Ok(s) => s,
+        Err(e) => {
+            return Err(e);
+        }
+    };
+    let str = str.trim_matches(char::from(0));
+    Ok(str.to_string())
+}
 
 /// Sends a transaction
 #[inline(always)]

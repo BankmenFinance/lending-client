@@ -4,11 +4,7 @@ use anchor_lang::{
     system_program, InstructionData, ToAccountMetas,
 };
 use anchor_spl::{associated_token, token};
-
-use crate::{
-    accounts::{CreateCollectionLendingProfile, OfferLoan, RepayLoan, TakeLoan},
-    CreateCollectionLendingProfileArgs, OfferLoanArgs,
-};
+use lending::{CreateCollectionLendingProfileArgs, OfferLoanArgs};
 
 #[allow(clippy::too_many_arguments)]
 pub fn create_lending_profile(
@@ -21,7 +17,7 @@ pub fn create_lending_profile(
     payer: &Pubkey,
     args: &CreateCollectionLendingProfileArgs,
 ) -> Instruction {
-    let accounts = CreateCollectionLendingProfile {
+    let accounts = lending::accounts::CreateCollectionLendingProfile {
         profile: *profile,
         collection: *collection,
         token_mint: *token_mint,
@@ -33,9 +29,9 @@ pub fn create_lending_profile(
         token_program: token::ID,
         rent: rent::ID,
     };
-    let ix_data = crate::instruction::CreateCollectionLendingProfile { _args: *args };
+    let ix_data = lending::instruction::CreateCollectionLendingProfile { args: *args };
     Instruction {
-        program_id: crate::id(),
+        program_id: lending::id(),
         accounts: accounts.to_account_metas(Some(false)),
         data: ix_data.data(),
     }
@@ -53,7 +49,7 @@ pub fn offer_loan(
     lender: &Pubkey,
     args: &OfferLoanArgs,
 ) -> Instruction {
-    let accounts = OfferLoan {
+    let accounts = lending::accounts::OfferLoan {
         profile: *profile,
         loan: *loan,
         loan_mint: *loan_mint,
@@ -67,9 +63,9 @@ pub fn offer_loan(
         token_program: token::ID,
         rent: rent::ID,
     };
-    let ix_data = crate::instruction::OfferLoan { _args: *args };
+    let ix_data = lending::instruction::OfferLoan { args: *args };
     Instruction {
-        program_id: crate::id(),
+        program_id: lending::id(),
         accounts: accounts.to_account_metas(Some(false)),
         data: ix_data.data(),
     }
@@ -90,7 +86,7 @@ pub fn take_loan(
     borrower_collateral_account: &Pubkey,
     borrower: &Pubkey,
 ) -> Instruction {
-    let accounts = TakeLoan {
+    let accounts = lending::accounts::TakeLoan {
         profile: *profile,
         loan: *loan,
         loan_mint: *loan_mint,
@@ -108,9 +104,9 @@ pub fn take_loan(
         system_program: system_program::ID,
         rent: rent::ID,
     };
-    let ix_data = crate::instruction::TakeLoan {};
+    let ix_data = lending::instruction::TakeLoan {};
     Instruction {
-        program_id: crate::id(),
+        program_id: lending::id(),
         accounts: accounts.to_account_metas(Some(false)),
         data: ix_data.data(),
     }
@@ -134,7 +130,7 @@ pub fn repay_loan(
     lender_token_account: &Pubkey,
     amount: u64,
 ) -> Instruction {
-    let accounts = RepayLoan {
+    let accounts = lending::accounts::RepayLoan {
         profile: *profile,
         loan: *loan,
         escrow: *escrow,
@@ -152,9 +148,9 @@ pub fn repay_loan(
         token_program: token::ID,
         metadata_program: mpl_token_metadata::ID,
     };
-    let ix_data = crate::instruction::RepayLoan { _amount: amount };
+    let ix_data = lending::instruction::RepayLoan { amount: amount };
     Instruction {
-        program_id: crate::id(),
+        program_id: lending::id(),
         accounts: accounts.to_account_metas(Some(false)),
         data: ix_data.data(),
     }

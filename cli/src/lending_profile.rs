@@ -1,12 +1,11 @@
 use clap::{App, Arg, SubCommand};
 use gbg_lending_client::{
+    instructions::create_lending_profile as create_lending_profile_ix,
     prelude::LendingClient,
+    utils::encode_string,
     utils::{create_transaction, send_transaction},
 };
-use gbg_lending_sdk::{
-    instructions::create_lending_profile as create_lending_profile_ix, utils::encode_string,
-    CollectionLendingProfile, CreateCollectionLendingProfileArgs,
-};
+use lending::{CollectionLendingProfile, CreateCollectionLendingProfileArgs};
 use solana_sdk::{pubkey::Pubkey, signer::Signer};
 
 use crate::CliConfig;
@@ -41,7 +40,6 @@ impl LendingProfileSubCommands for App<'_, '_> {
                 )
                 .arg(
                     Arg::with_name("collection-mint")
-                        .short("c")
                         .takes_value(true)
                         .long("collection-mint")
                         .help("The Collection Mint, value should be a pubkey."),

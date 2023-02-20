@@ -13,8 +13,13 @@ keywords = ["solana", "anchor", "gbg lending", "cli"]
 
 [features]
 default = [ "devnet" ]
-devnet = [ "anchor-spl/devnet", ]
-mainnet-beta = [ ]
+devnet = [
+    "anchor-spl/devnet",
+    "lending/devnet"
+]
+mainnet-beta = [
+    "lending/mainnet-beta"
+]
 
 [dependencies]
 anchor-lang = "0.26.0"
@@ -22,8 +27,8 @@ anchor-spl = { version = "0.26.0", features = [ "token", "associated_token", ] }
 bytemuck = "1.4.0"
 clap = { version = "2.33.1"}
 chrono = "0.4.19"
-gbg-lending-sdk = { path = "../rust/sdk" }
 gbg-lending-client = { path = "../rust/client" }
+lending = { path = "../../lending/programs/lending/", features = [ "client" ] }
 log = "0.4.17"
 mpl-token-metadata = { version = "1.8.1", features = [ "no-entrypoint" ] }
 serde = "1.0.137"
