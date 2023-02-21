@@ -28,7 +28,7 @@ anchor-spl = { version = "0.26.0", features = [
     "token",
     "associated_token",
 ]}
-lending = { path = "../../../lending/programs/lending/", features = [ "client" ] }
+lending = { path = "../../../gbg-lending/programs/lending/", features = [ "client" ] }
 log = "0.4.17"
 mpl-token-metadata = { version = "1.8.1", features = [ "no-entrypoint" ] }
 solana-account-decoder = "~1.14.12"
