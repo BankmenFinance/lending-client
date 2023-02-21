@@ -85,7 +85,7 @@ export class Loan {
   static async loadAll(
     client: LendingClient,
     collectionLendingProfile?: PublicKey,
-    _onStateUpdate?: StateUpdateHandler<LoanState>
+    onStateUpdateHandler?: StateUpdateHandler<LoanState>
   ): Promise<Loan[]> {
     const filters = [];
     if (collectionLendingProfile) {
@@ -102,7 +102,8 @@ export class Loan {
         new Loan(
           client,
           loanAccount.publicKey,
-          loanAccount.account as LoanState
+          loanAccount.account as LoanState,
+          onStateUpdateHandler
         )
       );
     }

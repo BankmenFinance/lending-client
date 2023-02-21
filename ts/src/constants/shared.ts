@@ -12,16 +12,16 @@ export const B_USER = 'USER_ACCOUNT';
 export const CONFIGS: { [key in Cluster]: Config } = {
   localnet: {
     RPC_ENDPOINT: 'http://127.0.0.1:8899',
-    PROGRAM_ID: new PublicKey('6prLRRLSvwWLkCBc7V2B3FWi716AssNyPfp1NH88751v')
+    PROGRAM_ID: new PublicKey('2Kdt8uMA6m5stQqaTxVPac45j6uKbwCg5vaPtyqwLk5C')
   },
   devnet: {
     RPC_ENDPOINT:
       'https://light-weathered-diagram.solana-devnet.discover.quiknode.pro/47012912d873fd5d66210ca13d41a2a01d520fbc/',
-    PROGRAM_ID: new PublicKey('6prLRRLSvwWLkCBc7V2B3FWi716AssNyPfp1NH88751v')
+    PROGRAM_ID: new PublicKey('2Kdt8uMA6m5stQqaTxVPac45j6uKbwCg5vaPtyqwLk5C')
   },
   'mainnet-beta': {
     RPC_ENDPOINT:
       'https://spring-capable-arrow.solana-mainnet.discover.quiknode.pro/35397e1b1848110883f7bc034a20286efb77639f/',
-    PROGRAM_ID: new PublicKey('CYPH3o83JX6jY6NkbproSpdmQ5VWJtxjfJ5P8veyYVu3')
+    PROGRAM_ID: new PublicKey('2Kdt8uMA6m5stQqaTxVPac45j6uKbwCg5vaPtyqwLk5C')
   }
 };
