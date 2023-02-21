@@ -68,7 +68,7 @@ where
     let file_string = &mut String::new();
     let file_read_res = file.read_to_string(file_string);
 
-    let _ = if let Err(e) = file_read_res {
+    if let Err(e) = file_read_res {
         return Err(KeypairError::FileRead(e));
     };
 

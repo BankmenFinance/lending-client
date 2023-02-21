@@ -148,7 +148,7 @@ pub fn repay_loan(
         token_program: token::ID,
         metadata_program: mpl_token_metadata::ID,
     };
-    let ix_data = lending::instruction::RepayLoan { amount: amount };
+    let ix_data = lending::instruction::RepayLoan { amount };
     Instruction {
         program_id: lending::id(),
         accounts: accounts.to_account_metas(Some(false)),
