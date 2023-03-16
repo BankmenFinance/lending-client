@@ -51,8 +51,12 @@ export const main = async () => {
         collectionLendingProfile.state.tokenMint +
         '\n\tToken Vault: ' +
         collectionLendingProfile.state.tokenVault +
+        '\n\tInterest Rate: ' +
+        collectionLendingProfile.state.interestRate +
         '\n\tFees Accumulated: ' +
         collectionLendingProfile.state.feesAccumulated +
+        '\n\tFee Rate: ' +
+        collectionLendingProfile.state.feeRate +
         '\n\tLoan Amount Originated: ' +
         collectionLendingProfile.state.loanAmountOriginated +
         '\n\tLoan Amount Repaid: ' +

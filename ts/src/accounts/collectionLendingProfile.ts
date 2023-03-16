@@ -137,6 +137,80 @@ export class CollectionLendingProfile {
   }
 
   /**
+   * Sweeps the accumulated native fees from this Collection Lending Profile.
+   * @param client The Lending Client instance.
+   * @param feesDestination The destination of the fees accumulated.
+   * @param authority The authority of the Collection Lending Profile.
+   * @returns The accounts, instructions and signers, if necessary.
+   */
+  async sweepNativeFees(
+    client: LendingClient,
+    feesDestination: PublicKey,
+    authority: PublicKey
+  ) {
+    const [vault, vaultBump] = deriveProfileVaultAddress(
+      this.address,
+      client.programId
+    );
+    const ix = await client.methods
+      .sweepNativeFees()
+      .accountsStrict({
+        profile: this.address,
+        vault,
+        feesDestination,
+        authority,
+        systemProgram: SystemProgram.programId
+      })
+      .instruction();
+
+    return {
+      accounts: [],
+      ixs: [ix],
+      signers: []
+    };
+  }
+
+  /**
+   * Sweeps the accumulated token fees from this Collection Lending Profile.
+   * @param client The Lending Client instance.
+   * @param feesDestination The destination of the fees accumulated.
+   * @param authority The authority of the Collection Lending Profile.
+   * @returns The accounts, instructions and signers, if necessary.
+   */
+  async sweepTokenFees(
+    client: LendingClient,
+    feesDestination: PublicKey,
+    authority: PublicKey
+  ) {
+    const [vault, vaultBump] = deriveProfileVaultAddress(
+      this.address,
+      client.programId
+    );
+    const destinationAssociatedTokenAccount = await getAssociatedTokenAddress(
+      feesDestination,
+      this.state.tokenMint
+    );
+    const ix = await client.methods
+      .sweepTokenFees()
+      .accountsStrict({
+        profile: this.address,
+        tokenMint: this.state.tokenMint,
+        tokenVault: this.state.tokenVault,
+        vault,
+        feesDestination: destinationAssociatedTokenAccount,
+        authority,
+        tokenProgram: TOKEN_PROGRAM_ID
+      })
+      .instruction();
+
+    return {
+      accounts: [],
+      ixs: [ix],
+      signers: []
+    };
+  }
+
+  /**
    * Gets the SPL Token Mint associated with this Collection Lending Profile.
    * @returns The Public Key of the SPL Token Mint.
    */
