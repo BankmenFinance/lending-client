@@ -1,7 +1,7 @@
 use anchor_spl::{associated_token::get_associated_token_address, token};
 use clap::{App, Arg, SubCommand};
 use gbg_lending_client::{
-    instructions::{offer_loan as offer_loan_ix, take_loan as take_loan_ix},
+    instructions::{offer_loan as offer_loan_ix, rescind_loan, take_loan as take_loan_ix},
     prelude::LendingClient,
     utils::{create_transaction, get_program_account, send_transaction},
 };
@@ -49,6 +49,17 @@ impl LoanSubCommands for App<'_, '_> {
                 ),
         )
         .subcommand(
+            SubCommand::with_name("cancel-loan")
+                .about("Creates a Loan.")
+                .arg(
+                    Arg::with_name("loan")
+                        .short("l")
+                        .takes_value(true)
+                        .long("loan")
+                        .help("The Loan, value should be a pubkey."),
+                ),
+        )
+        .subcommand(
             SubCommand::with_name("take-loan")
                 .about("Takes a Loan.")
                 .arg(
@@ -83,6 +94,8 @@ pub async fn list_loans(
             return Err(Box::new(e));
         }
     };
+
+    println!("Fetched {} loan offers.", loans.len());
 
     for loan in loans.iter() {
         println!(
@@ -158,8 +171,13 @@ pub async fn create_loan(
                 ))
             }
         }
-        Err(e) => {
-            return Err(Box::new(e));
+        Err(_) => {
+            ixs.push(create_associated_token_account(
+                &keypair.pubkey(),
+                &keypair.pubkey(),
+                &profile_account.token_mint,
+                &token::ID,
+            ));
         }
     }
 
@@ -174,6 +192,8 @@ pub async fn create_loan(
         &keypair.pubkey(),
         &args,
     ));
+
+    println!("{:?}", ixs);
 
     let blockhash = match rpc_client.get_latest_blockhash().await {
         Ok(bh) => bh,
@@ -193,6 +213,60 @@ pub async fn create_loan(
 
     println!("Successfully offered loan. Transaction signature: {}", sig);
 
+    Ok(())
+}
+
+pub async fn cancel_loan(
+    cli_config: &CliConfig,
+    loan: &Pubkey,
+) -> Result<(), Box<dyn std::error::Error>> {
+    let rpc_client = cli_config.rpc_client.as_ref().unwrap();
+    let keypair = cli_config.keypair.as_ref().unwrap();
+
+    let (user, _) = User::derive_address(&keypair.pubkey());
+
+    let loan_account = match get_program_account::<Loan>(rpc_client, &loan).await {
+        Ok(a) => a,
+        Err(e) => return Err(e),
+    };
+
+    let (escrow, _) = Loan::derive_escrow_address(&loan);
+    let (escrow_token_account, _) = Loan::derive_escrow_token_account_address(&escrow);
+
+    // we have to check if the account exists or not, if not, then we have to create it before calling `OfferLoan`
+    let lender_token_account =
+        get_associated_token_address(&keypair.pubkey(), &loan_account.loan_mint);
+
+    let ixs = vec![rescind_loan(
+        &loan_account.profile,
+        loan,
+        &loan_account.loan_mint,
+        &escrow,
+        &escrow_token_account,
+        &lender_token_account,
+        &user,
+        &keypair.pubkey(),
+    )];
+
+    println!("{:?}", ixs);
+
+    let blockhash = match rpc_client.get_latest_blockhash().await {
+        Ok(bh) => bh,
+        Err(e) => {
+            return Err(Box::new(e));
+        }
+    };
+
+    let tx = create_transaction(blockhash, &ixs, keypair, None);
+
+    let sig = match send_transaction(rpc_client, &tx, true).await {
+        Ok(s) => s,
+        Err(e) => {
+            return Err(Box::new(e));
+        }
+    };
+
+    println!("Successfully canceled loan. Transaction signature: {}", sig);
     Ok(())
 }
 

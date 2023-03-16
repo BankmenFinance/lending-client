@@ -8,8 +8,8 @@ use std::{fs::File, io::Read, str::FromStr, sync::Arc};
 use thiserror::Error;
 
 use crate::{
-    create_collection, create_lending_profile, create_loan, create_token, list_lending_profiles,
-    list_loans, list_tokens, send_token, take_loan,
+    cancel_loan, create_collection, create_lending_profile, create_loan, create_token,
+    list_lending_profiles, list_loans, list_tokens, send_token, take_loan,
 };
 
 pub enum CliCommand {
@@ -37,6 +37,9 @@ pub enum CliCommand {
     CreateLoan {
         lending_profile: Pubkey,
         amount: u64,
+    },
+    CancelLoan {
+        loan: Pubkey,
     },
     TakeLoan {
         loan: Pubkey,
@@ -168,6 +171,10 @@ pub async fn process_command(config: &CliConfig) -> Result<String, Box<dyn std::
             Ok(_) => Ok("Successfully offered loan.".to_string()),
             Err(e) => Err(e),
         },
+        CliCommand::CancelLoan { loan } => match cancel_loan(config, &loan).await {
+            Ok(_) => Ok("Successfully canceled loan.".to_string()),
+            Err(e) => Err(e),
+        },
         CliCommand::TakeLoan {
             loan,
             collateral_mint,
@@ -235,6 +242,12 @@ pub fn parse_command(matches: &ArgMatches) -> Result<CliCommandInfo, Box<dyn std
                     loan,
                     collateral_mint,
                 },
+            })
+        }
+        ("cancel-loan", Some(matches)) => {
+            let loan = Pubkey::from_str(matches.value_of("loan").unwrap()).unwrap();
+            Ok(CliCommandInfo {
+                command: CliCommand::CancelLoan { loan },
             })
         }
         ("list-loans", Some(matches)) => {

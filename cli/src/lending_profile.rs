@@ -143,9 +143,8 @@ pub async fn create_lending_profile(
     let keypair = cli_config.keypair.as_ref().unwrap();
 
     let (profile, _) = CollectionLendingProfile::derive_address(collection_mint, token_mint, id);
-    let (profile_vault, _) = CollectionLendingProfile::derive_vault_address(&profile);
-    let (profile_vault_signer, _) =
-        CollectionLendingProfile::derive_vault_authority_address(&profile);
+    let (profile_vault, _) = CollectionLendingProfile::derive_token_vault_address(&profile);
+    let (profile_vault_signer, _) = CollectionLendingProfile::derive_vault_address(&profile);
 
     let encoded_name = encode_string(collection_name);
 
