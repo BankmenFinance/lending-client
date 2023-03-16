@@ -23,7 +23,7 @@ export const deriveCollectionLendingProfileAddress = (
       seed,
       collectionMint.toBuffer(),
       tokenMint.toBuffer(),
-      Buffer.from([collectionId])
+      Buffer.alloc(8, collectionId)
     ],
     programId
   );

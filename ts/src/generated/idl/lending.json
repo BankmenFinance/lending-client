@@ -1595,8 +1595,5 @@
       "name": "LoanOfferNotFound",
       "msg": "The given Loan offer could not be found."
     }
-  ],
-  "metadata": {
-    "address": "2Kdt8uMA6m5stQqaTxVPac45j6uKbwCg5vaPtyqwLk5C"
-  }
+  ]
 }
