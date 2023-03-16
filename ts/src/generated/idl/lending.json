@@ -1575,8 +1575,5 @@
       "name": "CollectionLendingProfileSuspended",
       "msg": "The given Collection Lending Profile has been suspended."
     }
-  ],
-  "metadata": {
-    "address": "2Kdt8uMA6m5stQqaTxVPac45j6uKbwCg5vaPtyqwLk5C"
-  }
+  ]
 }
