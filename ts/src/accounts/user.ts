@@ -5,7 +5,7 @@ import { UserAccountState } from '../types/on-chain';
 import { StateUpdateHandler } from '../types';
 
 /**
- * Represents a Loan.
+ * Represents a User.
  *
  * This class exposes utility methods related to this on-chain account.
  */
