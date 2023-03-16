@@ -59,7 +59,7 @@ export const main = async () => {
   if (userAccount == null) {
     loanId = new BN(0);
   } else {
-    loanId = new BN(2);
+    loanId = userAccount.state.loansOffered;
   }
 
   // We need to make sure that the lender and the borrower have a token account
