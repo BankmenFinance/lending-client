@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-var-requires */
 import { loadWallet } from 'utils';
-import { Cluster } from '@gbg-lending-client/types';
+import { Cluster, Status } from '@gbg-lending-client/types';
 import { LendingClient } from '@gbg-lending-client/client/lending';
 import { PublicKey, Transaction } from '@solana/web3.js';
 import NodeWallet from '@project-serum/anchor/dist/cjs/nodewallet';
@@ -38,9 +38,9 @@ export const main = async () => {
     collectionLendingProfileAddress
   );
 
-  const { ixs } = await collectionLendingProfile.sweepNativeFees(
+  const { ixs } = await collectionLendingProfile.setStatus(
     lendingClient,
-    lendingClient.walletPubkey // this is the wallet
+    Status.Active
   );
 
   const tx = new Transaction();

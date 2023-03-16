@@ -21,7 +21,7 @@ const CLUSTER = process.env.CLUSTER as Cluster;
 const KP_PATH = process.env.KEYPAIR_PATH;
 
 export const main = async () => {
-  console.log('Running testSweepNativeFees.');
+  console.log('Running testSweepTokenFees.');
 
   const wallet = loadWallet(KP_PATH);
   console.log('Wallet Public Key: ' + wallet.publicKey.toString());
@@ -38,9 +38,9 @@ export const main = async () => {
     collectionLendingProfileAddress
   );
 
-  const { ixs } = await collectionLendingProfile.sweepNativeFees(
+  const { ixs } = await collectionLendingProfile.sweepTokenFees(
     lendingClient,
-    lendingClient.walletPubkey // this is the wallet
+    lendingClient.walletPubkey // this is the wallet, not the associated token account!!!
   );
 
   const tx = new Transaction();

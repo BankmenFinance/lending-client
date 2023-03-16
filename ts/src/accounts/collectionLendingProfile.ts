@@ -4,7 +4,8 @@ import { LendingClient } from '../client';
 import { deriveCollectionLendingProfileAddress } from '../utils';
 import {
   CollectionLendingProfileState,
-  CreateCollectionLendingProfileArgs
+  CreateCollectionLendingProfileArgs,
+  Status
 } from '../types/on-chain';
 import { StateUpdateHandler } from '../types';
 import {
@@ -140,14 +141,9 @@ export class CollectionLendingProfile {
    * Sweeps the accumulated native fees from this Collection Lending Profile.
    * @param client The Lending Client instance.
    * @param feesDestination The destination of the fees accumulated.
-   * @param authority The authority of the Collection Lending Profile.
    * @returns The accounts, instructions and signers, if necessary.
    */
-  async sweepNativeFees(
-    client: LendingClient,
-    feesDestination: PublicKey,
-    authority: PublicKey
-  ) {
+  async sweepNativeFees(client: LendingClient, feesDestination: PublicKey) {
     const [vault, vaultBump] = deriveProfileVaultAddress(
       this.address,
       client.programId
@@ -158,7 +154,7 @@ export class CollectionLendingProfile {
         profile: this.address,
         vault,
         feesDestination,
-        authority,
+        authority: this.state.authority,
         systemProgram: SystemProgram.programId
       })
       .instruction();
@@ -174,14 +170,9 @@ export class CollectionLendingProfile {
    * Sweeps the accumulated token fees from this Collection Lending Profile.
    * @param client The Lending Client instance.
    * @param feesDestination The destination of the fees accumulated.
-   * @param authority The authority of the Collection Lending Profile.
    * @returns The accounts, instructions and signers, if necessary.
    */
-  async sweepTokenFees(
-    client: LendingClient,
-    feesDestination: PublicKey,
-    authority: PublicKey
-  ) {
+  async sweepTokenFees(client: LendingClient, feesDestination: PublicKey) {
     const [vault, vaultBump] = deriveProfileVaultAddress(
       this.address,
       client.programId
@@ -198,8 +189,35 @@ export class CollectionLendingProfile {
         tokenVault: this.state.tokenVault,
         vault,
         feesDestination: destinationAssociatedTokenAccount,
-        authority,
+        authority: this.state.authority,
         tokenProgram: TOKEN_PROGRAM_ID
+      })
+      .instruction();
+
+    return {
+      accounts: [],
+      ixs: [ix],
+      signers: []
+    };
+  }
+
+  /**
+   * Sets the status on this Collection Lending Profile.
+   * @param client The Lending Client instance.
+   * @param status The new status.
+   * @returns The accounts, instructions and signers, if necessary.
+   */
+  async setStatus(client: LendingClient, status: Status) {
+    const [vault, vaultBump] = deriveProfileVaultAddress(
+      this.address,
+      client.programId
+    );
+    console.log(status);
+    const ix = await client.methods
+      .setCollectionLendingProfileStatus(status as never)
+      .accountsStrict({
+        profile: this.address,
+        authority: this.state.authority
       })
       .instruction();
 

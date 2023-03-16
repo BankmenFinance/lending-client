@@ -11,7 +11,7 @@ export type CreateCollectionLendingProfileArgs = TypeDef<
   Lending
 >;
 export type OfferLoanArgs = TypeDef<Lending['types'][1], Lending>;
-export type Status = TypeDef<Lending['types'][2], Lending>;
+export type StatusType = TypeDef<Lending['types'][2], Lending>;
 
 export type CollectionLendingProfileCreated = Event<
   Lending['events'][0],
@@ -30,4 +30,9 @@ export type LoanForeclosed = Event<Lending['events'][6], Lending>;
 export interface CollectionLendingProfileState
   extends _CollectionLendingProfile {
   status: Status;
+}
+
+export class Status {
+  static readonly Active = { active: {} };
+  static readonly Suspended = { suspended: {} };
 }

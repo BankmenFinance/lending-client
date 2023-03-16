@@ -1508,7 +1508,7 @@
     {
       "code": 6004,
       "name": "InvalidUserAccount",
-      "msg": "Invalid user account"
+      "msg": "Invalid User Account"
     },
     {
       "code": 6005,
@@ -1523,7 +1523,7 @@
     {
       "code": 6007,
       "name": "InvalidCollectionLendingProfile",
-      "msg": "Invalid Loan Book provided."
+      "msg": "Invalid Collection Lending Profila provided."
     },
     {
       "code": 6008,
@@ -1552,48 +1552,31 @@
     },
     {
       "code": 6013,
-      "name": "CollectionMetaWithOutstandingLoans",
-      "msg": "The given collection meta has outstanding Loans."
-    },
-    {
-      "code": 6014,
-      "name": "CollectionMetaWithLoanOffers",
-      "msg": "The given collection meta has existing Loan offers."
-    },
-    {
-      "code": 6015,
       "name": "LoanAlreadyOriginated",
       "msg": "The given Loan has already been originated."
     },
     {
+      "code": 6014,
+      "name": "CollectionLendingProfileWithLoanOffers",
+      "msg": "The given Collection Lending Profile has existing Loan offers."
+    },
+    {
+      "code": 6015,
+      "name": "CollectionLendingProfileWithAccumulatedFees",
+      "msg": "The given Collection Lending Profile has accumulated fees."
+    },
+    {
       "code": 6016,
-      "name": "CollectionLendingProfileWithOutstandingLoans",
-      "msg": "The given Loan Book has outstanding Loans."
+      "name": "CollectionLendingProfileWithoutAccumulatedFees",
+      "msg": "The given Collection Lending Profile does not have accumulated fees."
     },
     {
       "code": 6017,
-      "name": "CollectionLendingProfileWithLoanOffers",
-      "msg": "The given Loan Book has existing Loan offers."
-    },
-    {
-      "code": 6018,
-      "name": "CollectionLendingProfileWithAccumulatedFees",
-      "msg": "The given Loan Book has accumulated fees."
-    },
-    {
-      "code": 6019,
-      "name": "CollectionLendingProfileWithoutAccumulatedFees",
-      "msg": "The given Loan Book does not have accumulated fees."
-    },
-    {
-      "code": 6020,
-      "name": "CollectionLendingProfileFull",
-      "msg": "The given Loan Book is full."
-    },
-    {
-      "code": 6021,
-      "name": "LoanOfferNotFound",
-      "msg": "The given Loan offer could not be found."
+      "name": "CollectionLendingProfileSuspended",
+      "msg": "The given Collection Lending Profile has been suspended."
     }
-  ]
+  ],
+  "metadata": {
+    "address": "2Kdt8uMA6m5stQqaTxVPac45j6uKbwCg5vaPtyqwLk5C"
+  }
 }
