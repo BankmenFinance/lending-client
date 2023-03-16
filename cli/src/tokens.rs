@@ -1,7 +1,7 @@
 use anchor_lang::prelude::Pubkey;
 use anchor_spl::token::{
     self,
-    spl_token::instruction::{initialize_mint, mint_to},
+    spl_token::instruction::{initialize_mint, mint_to, transfer},
     Mint,
 };
 use clap::{App, Arg, SubCommand};
@@ -174,13 +174,19 @@ pub async fn create_token(
     let rpc_client = cli_config.rpc_client.as_ref().unwrap();
     let keypair = cli_config.keypair.as_ref().unwrap();
 
-    let mint = Keypair::new();
     // collection accounts
     let collection_metadata = find_metadata_account(collection_mint).0;
+    println!("Collection Metadata: {}", collection_metadata);
     let collection_master_edition = find_master_edition_account(collection_mint).0;
+    println!("Collection Master Edition: {}", collection_master_edition);
+
+    let mint = Keypair::new();
+    println!("NFT Mint: {}", mint.pubkey());
     // nft accouts
     let metadata = find_metadata_account(&mint.pubkey()).0;
+    println!("NFT Metadata: {}", metadata);
     let edition = find_master_edition_account(&mint.pubkey()).0;
+    println!("NFT Master Edition: {}", edition);
 
     let ata = get_associated_token_address(&keypair.pubkey(), &mint.pubkey());
 
@@ -344,10 +350,46 @@ pub async fn list_tokens(cli_config: &CliConfig) -> Result<(), Box<dyn std::erro
 
 pub async fn send_token(
     cli_config: &CliConfig,
-    _token_mint: &Pubkey,
-    _destination: &Pubkey,
+    token_mint: &Pubkey,
+    destination: &Pubkey,
 ) -> Result<(), Box<dyn std::error::Error>> {
-    let _rpc_client = cli_config.rpc_client.as_ref().unwrap();
+    let rpc_client = cli_config.rpc_client.as_ref().unwrap();
+    let keypair = cli_config.keypair.as_ref().unwrap();
+
+    let source_ata = get_associated_token_address(&keypair.pubkey(), &token_mint);
+    println!("Source ATA: {}", source_ata);
+    let destination_ata = get_associated_token_address(destination, &token_mint);
+    println!("Destination ATA: {}", destination_ata);
+
+    let ixs = vec![
+        create_associated_token_account(&keypair.pubkey(), &destination, &token_mint, &token::ID),
+        transfer(
+            &token::ID,
+            &source_ata,
+            &destination_ata,
+            &keypair.pubkey(),
+            &[],
+            1,
+        )?,
+    ];
+
+    let blockhash = match rpc_client.get_latest_blockhash().await {
+        Ok(bh) => bh,
+        Err(e) => {
+            return Err(Box::new(e));
+        }
+    };
+
+    let tx = create_transaction(blockhash, &ixs, keypair, None);
+
+    let sig = match send_transaction(rpc_client, &tx, true).await {
+        Ok(s) => s,
+        Err(e) => {
+            return Err(Box::new(e));
+        }
+    };
+
+    println!("Successfully created token. Transaction signature: {}", sig);
 
     Ok(())
 }
