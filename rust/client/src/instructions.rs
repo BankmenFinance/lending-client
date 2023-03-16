@@ -12,7 +12,7 @@ pub fn create_lending_profile(
     collection: &Pubkey,
     token_mint: &Pubkey,
     token_vault: &Pubkey,
-    vault_signer: &Pubkey,
+    vault: &Pubkey,
     authority: &Pubkey,
     payer: &Pubkey,
     args: &CreateCollectionLendingProfileArgs,
@@ -22,7 +22,7 @@ pub fn create_lending_profile(
         collection: *collection,
         token_mint: *token_mint,
         token_vault: *token_vault,
-        vault_signer: *vault_signer,
+        vault: *vault,
         authority: *authority,
         payer: *payer,
         system_program: system_program::ID,
@@ -64,6 +64,36 @@ pub fn offer_loan(
         rent: rent::ID,
     };
     let ix_data = lending::instruction::OfferLoan { args: *args };
+    Instruction {
+        program_id: lending::id(),
+        accounts: accounts.to_account_metas(Some(false)),
+        data: ix_data.data(),
+    }
+}
+
+#[allow(clippy::too_many_arguments)]
+pub fn rescind_loan(
+    profile: &Pubkey,
+    loan: &Pubkey,
+    loan_mint: &Pubkey,
+    escrow: &Pubkey,
+    escrow_token_account: &Pubkey,
+    lender_token_account: &Pubkey,
+    lender_account: &Pubkey,
+    lender: &Pubkey,
+) -> Instruction {
+    let accounts = lending::accounts::RescindLoan {
+        profile: *profile,
+        loan: *loan,
+        loan_mint: *loan_mint,
+        escrow: *escrow,
+        escrow_token_account: *escrow_token_account,
+        lender_token_account: *lender_token_account,
+        lender_account: *lender_account,
+        lender: *lender,
+        token_program: token::ID,
+    };
+    let ix_data = lending::instruction::RescindLoan {};
     Instruction {
         program_id: lending::id(),
         accounts: accounts.to_account_metas(Some(false)),
@@ -118,7 +148,7 @@ pub fn repay_loan(
     loan: &Pubkey,
     loan_mint: &Pubkey,
     token_vault: &Pubkey,
-    vault_signer: &Pubkey,
+    vault: &Pubkey,
     collateral_mint: &Pubkey,
     collateral_edition: &Pubkey,
     escrow: &Pubkey,
@@ -134,7 +164,7 @@ pub fn repay_loan(
         profile: *profile,
         loan: *loan,
         escrow: *escrow,
-        vault_signer: *vault_signer,
+        vault: *vault,
         loan_mint: *loan_mint,
         collateral_mint: *collateral_mint,
         collateral_edition: *collateral_edition,
@@ -147,6 +177,7 @@ pub fn repay_loan(
         borrower: *borrower,
         token_program: token::ID,
         metadata_program: mpl_token_metadata::ID,
+        system_program: system_program::ID,
     };
     let ix_data = lending::instruction::RepayLoan { amount };
     Instruction {

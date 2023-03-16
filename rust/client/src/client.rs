@@ -29,9 +29,9 @@ impl LendingClient {
     pub async fn get_lending_profiles(
         &self,
     ) -> Result<Vec<CollectionLendingProfileAccount>, LendingClientError> {
-        let filters: Vec<RpcFilterType> = vec![RpcFilterType::DataSize(std::mem::size_of::<
-            CollectionLendingProfile,
-        >() as u64)];
+        let filters: Vec<RpcFilterType> = vec![RpcFilterType::DataSize(
+            CollectionLendingProfile::LEN as u64 + 8,
+        )];
 
         let accounts = match get_program_accounts(&self.rpc_client, filters, &lending::id()).await {
             Ok(a) => a,
@@ -76,14 +76,13 @@ impl LendingClient {
         &self,
         lending_profile: Option<&Pubkey>,
     ) -> Result<Vec<LoanAccount>, LendingClientError> {
-        let mut filters: Vec<RpcFilterType> =
-            vec![RpcFilterType::DataSize(std::mem::size_of::<Loan>() as u64)];
+        let mut filters: Vec<RpcFilterType> = vec![RpcFilterType::DataSize(Loan::LEN as u64 + 8)];
 
         // if the lending profile gets passed in, let's add it as a filter
         if lending_profile.is_some() {
             let lending_profile = lending_profile.unwrap();
             filters.push(RpcFilterType::Memcmp(Memcmp {
-                offset: 24,
+                offset: 8 + 16,
                 bytes: MemcmpEncodedBytes::Base58(lending_profile.to_string()),
                 encoding: Some(MemcmpEncoding::Binary),
             }));
@@ -95,6 +94,8 @@ impl LendingClient {
                 return Err(LendingClientError::ClientError(e));
             }
         };
+
+        println!("Fetched {} program accounts.", accounts.len());
 
         let mut loans = Vec::new();
 
