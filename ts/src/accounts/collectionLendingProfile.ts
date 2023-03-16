@@ -43,13 +43,12 @@ export class CollectionLendingProfile {
     collectionMint: PublicKey,
     tokenMint: PublicKey,
     profileAuthority: PublicKey,
-    args: CreateCollectionLendingProfileArgs,
-    profileId = 0
+    args: CreateCollectionLendingProfileArgs
   ) {
     const [profile, profileBump] = deriveCollectionLendingProfileAddress(
       collectionMint,
       tokenMint,
-      profileId,
+      args.id.toNumber(),
       client.programId
     );
     const [profileVault, profileVaultBump] = deriveProfileTokenVaultAddress(

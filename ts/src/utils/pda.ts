@@ -18,13 +18,11 @@ export const deriveCollectionLendingProfileAddress = (
 ) => {
   const seed = utils.bytes.utf8.encode(B_COLLECTION_LENDING_PROFILE);
 
+  const buffer = Buffer.alloc(8);
+  buffer.writeUInt32LE(collectionId, 0);
+
   return utils.publicKey.findProgramAddressSync(
-    [
-      seed,
-      collectionMint.toBuffer(),
-      tokenMint.toBuffer(),
-      Buffer.alloc(8, collectionId)
-    ],
+    [seed, collectionMint.toBuffer(), tokenMint.toBuffer(), buffer],
     programId
   );
 };
@@ -73,13 +71,11 @@ export const deriveLoanAddress = (
 ) => {
   const seed = utils.bytes.utf8.encode(B_LOAN);
 
+  const buffer = Buffer.alloc(8);
+  buffer.writeUInt32LE(loanId, 0);
+
   return utils.publicKey.findProgramAddressSync(
-    [
-      seed,
-      collectionLendingProfile.toBuffer(),
-      lender.toBuffer(),
-      Buffer.from([loanId])
-    ],
+    [seed, collectionLendingProfile.toBuffer(), lender.toBuffer(), buffer],
     programId
   );
 };

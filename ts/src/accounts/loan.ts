@@ -16,12 +16,7 @@ import {
 } from '../utils/pda';
 import { CollectionLendingProfile } from './collectionLendingProfile';
 import { getAssociatedTokenAddress } from '@project-serum/associated-token';
-import {
-  findMasterEditionV2Pda,
-  findMetadataPda,
-  Metaplex,
-  TransactionBuilderOptions
-} from '@metaplex-foundation/js';
+import { Metaplex } from '@metaplex-foundation/js';
 
 /**
  * Represents a Loan.
@@ -49,13 +44,12 @@ export class Loan {
   static async create(
     client: LendingClient,
     collectionLendingProfile: CollectionLendingProfile,
-    args: OfferLoanArgs,
-    loanId = 0
+    args: OfferLoanArgs
   ) {
     const [loan, loanBump] = deriveLoanAddress(
       collectionLendingProfile.address,
       client.walletPubkey,
-      loanId,
+      args.id.toNumber(),
       client.programId
     );
     const [escrow, escrowBump] = deriveLoanEscrowAddress(
@@ -108,10 +102,13 @@ export class Loan {
     onStateUpdateHandler?: StateUpdateHandler<LoanState>
   ): Promise<Loan[]> {
     const filters = [];
+
     if (collectionLendingProfile) {
       filters.push({
-        offset: 16,
-        bytes: collectionLendingProfile.toString()
+        memcmp: {
+          offset: 24,
+          bytes: collectionLendingProfile.toString()
+        }
       });
     }
     const loanAccounts = await client.accounts.loan.all(filters);
@@ -153,21 +150,16 @@ export class Loan {
   /**
    * Derives program addresses and generates necessary intructions to take an existing Loan Offer.
    * @param metaplex The Metaplex Client.
-   * @param transactionBuilderOptions The Transaction Build Options from the Metaplex Client.
    * @param collectionLendingProfile The Collection Lending Profile.
    * @param collateralMint The SPL Token Mint of the Collateral NFT of the borrower.
    * @returns The accounts, instructions and signers, if necessary.
    */
   async takeLoan(
     metaplex: Metaplex,
-    transactionBuilderOptions: TransactionBuilderOptions,
     collectionLendingProfile: CollectionLendingProfile,
     collateralMint: PublicKey
   ) {
-    const { programs } = transactionBuilderOptions;
-    const metadataProgramId = metaplex
-      .programs()
-      .getTokenMetadata(programs).address;
+    const metadataProgramId = metaplex.programs().getTokenMetadata().address;
     const [escrow, escrowBump] = deriveLoanEscrowAddress(
       this.address,
       this.client.programId
@@ -178,14 +170,14 @@ export class Loan {
       this.client.walletPubkey,
       this.client.programId
     );
-    const collateralMetadata = findMetadataPda(
-      collateralMint,
-      metadataProgramId
-    );
-    const collateralEdition = findMasterEditionV2Pda(
-      collateralMint,
-      metadataProgramId
-    );
+    const collateralMetadata = metaplex
+      .nfts()
+      .pdas()
+      .metadata({ mint: collateralMint });
+    const collateralEdition = metaplex
+      .nfts()
+      .pdas()
+      .masterEdition({ mint: collateralMint });
     const borrowerCollateralAccount = await getAssociatedTokenAddress(
       this.client.walletPubkey,
       collateralMint
@@ -224,21 +216,16 @@ export class Loan {
   /**
    * Derives program addresses and generates necessary intructions to repay an existing Loan.
    * @param metaplex The Metaplex Client.
-   * @param transactionBuilderOptions The Transaction Build Options from the Metaplex Client.
    * @param collectionLendingProfile The Collection Lending Profile.
    * @param collateralMint The SPL Token Mint of the Collateral NFT of the borrower.
    * @returns The accounts, instructions and signers, if necessary.
    */
   async repayLoan(
     metaplex: Metaplex,
-    transactionBuilderOptions: TransactionBuilderOptions,
     collectionLendingProfile: CollectionLendingProfile,
     collateralMint: PublicKey
   ) {
-    const { programs } = transactionBuilderOptions;
-    const metadataProgramId = metaplex
-      .programs()
-      .getTokenMetadata(programs).address;
+    const metadataProgramId = metaplex.programs().getTokenMetadata().address;
     const [escrow, escrowBump] = deriveLoanEscrowAddress(
       this.address,
       this.client.programId
@@ -251,10 +238,10 @@ export class Loan {
       this.client.walletPubkey,
       this.client.programId
     );
-    const collateralEdition = findMasterEditionV2Pda(
-      collateralMint,
-      metadataProgramId
-    );
+    const collateralEdition = metaplex
+      .nfts()
+      .pdas()
+      .masterEdition({ mint: collateralMint });
     const borrowerCollateralAccount = await getAssociatedTokenAddress(
       this.client.walletPubkey,
       collateralMint
@@ -298,21 +285,16 @@ export class Loan {
   /**
    * Derives program addresses and generates necessary intructions to foreclose an existing Loan.
    * @param metaplex The Metaplex Client.
-   * @param transactionBuilderOptions The Transaction Build Options from the Metaplex Client.
    * @param collectionLendingProfile The Collection Lending Profile.
    * @param collateralMint The SPL Token Mint of the Collateral NFT of the borrower.
    * @returns The accounts, instructions and signers, if necessary.
    */
   async forecloseLoan(
     metaplex: Metaplex,
-    transactionBuilderOptions: TransactionBuilderOptions,
     collectionLendingProfile: CollectionLendingProfile,
     collateralMint: PublicKey
   ) {
-    const { programs } = transactionBuilderOptions;
-    const metadataProgramId = metaplex
-      .programs()
-      .getTokenMetadata(programs).address;
+    const metadataProgramId = metaplex.programs().getTokenMetadata().address;
     const [escrow, escrowBump] = deriveLoanEscrowAddress(
       this.address,
       this.client.programId
@@ -321,10 +303,10 @@ export class Loan {
       this.client.walletPubkey,
       this.client.programId
     );
-    const collateralEdition = findMasterEditionV2Pda(
-      collateralMint,
-      metadataProgramId
-    );
+    const collateralEdition = metaplex
+      .nfts()
+      .pdas()
+      .masterEdition({ mint: collateralMint });
     const lenderCollateralAccount = await getAssociatedTokenAddress(
       this.client.walletPubkey,
       collateralMint

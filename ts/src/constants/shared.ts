@@ -5,8 +5,8 @@ export const B_COLLECTION_LENDING_PROFILE = 'COLLECTION_LENDING_PROFILE';
 export const B_PROFILE_VAULT = 'PROFILE_VAULT';
 export const B_VAULT = 'VAULT';
 export const B_LOAN = 'LOAN';
-export const B_ESCROW = 'LOAN_ESCROW';
-export const B_ESCROW_TOKEN_ACCOUNT = 'LOAN_ESCROW_TOKEN_ACCOUNT';
+export const B_ESCROW = 'ESCROW';
+export const B_ESCROW_TOKEN_ACCOUNT = 'ESCROW_TOKEN_ACCOUNT';
 export const B_USER = 'USER_ACCOUNT';
 
 export const CONFIGS: { [key in Cluster]: Config } = {

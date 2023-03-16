@@ -24,7 +24,6 @@ require('dotenv').config({
 
 // Constants
 const CLUSTER = process.env.CLUSTER as Cluster;
-const RPC_ENDPOINT = process.env.RPC_ENDPOINT;
 const KP_PATH = process.env.KEYPAIR_PATH;
 
 export const main = async () => {
@@ -48,23 +47,34 @@ export const main = async () => {
     'FVPw1R7kG4iB25BpzpRFAuGxc17Xs2QAvU4yqmA1zQmG'
   );
 
+  const profileId = 1;
+
   const args = {
     collectionName: encodeStrToUint8Array('Test Collection'),
     loanDuration: new BN(loanDuration),
     interestRate: new BN(interestRateBps),
-    // let's specify 10 bps as the fee we take from every collection
-    feeRate: new BN(10),
+    // let's specify 25 bps as the fee we take from every collection
+    feeRate: new BN(25),
     // this is the lending profile id, we can create more than one for the same collection and token mint based on this
-    id: new BN(0)
+    id: new BN(profileId)
   };
-  console.log(args);
+  console.log(JSON.stringify(args));
 
-  const { accounts, ixs, signers } = await CollectionLendingProfile.create(
+  const { accounts, ixs } = await CollectionLendingProfile.create(
     lendingClient,
     collectionMint,
     WRAPPED_SOL_MINT,
     wallet.publicKey,
     args
+  );
+
+  console.log(
+    'Lending Profile: ' +
+      accounts[0] +
+      '\nProfile Vault (SPL): ' +
+      accounts[1] +
+      '\nVault (Native)/Authority: ' +
+      accounts[2]
   );
 
   const tx = new Transaction();
