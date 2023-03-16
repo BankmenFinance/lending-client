@@ -253,7 +253,7 @@ export class Loan {
       collectionLendingProfile.tokenMint
     );
     const ix = await this.client.methods
-      .repayLoan(this.state.repaymentAmount)
+      .repayLoan(this.state.repaymentAmount.sub(this.state.paidAmount))
       .accountsStrict({
         profile: collectionLendingProfile.address,
         loan: this.address,
@@ -299,6 +299,8 @@ export class Loan {
       this.address,
       this.client.programId
     );
+    const [escrowTokenAccount, escrowTokenAccountbump] =
+      deriveEscrowTokenAccount(escrow, this.client.programId);
     const [userAccount, userAccountBump] = deriveUserAccountAddress(
       this.client.walletPubkey,
       this.client.programId
@@ -322,6 +324,7 @@ export class Loan {
         loan: this.address,
         collateralMint,
         escrow,
+        escrowTokenAccount,
         lenderCollateralAccount,
         collateralEdition,
         borrowerCollateralAccount,

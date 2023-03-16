@@ -314,7 +314,7 @@ export type Lending = {
           name: 'vault';
           isMut: true;
           isSigner: false;
-          docs: ['The escrow.'];
+          docs: ['The native fee vault.'];
         },
         {
           name: 'loanMint';
@@ -530,6 +530,11 @@ export type Lending = {
           isMut: false;
           isSigner: false;
           docs: ['The escrow.'];
+        },
+        {
+          name: 'escrowTokenAccount';
+          isMut: true;
+          isSigner: false;
         },
         {
           name: 'lenderCollateralAccount';
@@ -1640,7 +1645,7 @@ export const IDL: Lending = {
           name: 'vault',
           isMut: true,
           isSigner: false,
-          docs: ['The escrow.']
+          docs: ['The native fee vault.']
         },
         {
           name: 'loanMint',
@@ -1856,6 +1861,11 @@ export const IDL: Lending = {
           isMut: false,
           isSigner: false,
           docs: ['The escrow.']
+        },
+        {
+          name: 'escrowTokenAccount',
+          isMut: true,
+          isSigner: false
         },
         {
           name: 'lenderCollateralAccount',

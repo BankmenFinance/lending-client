@@ -385,7 +385,7 @@
           "isMut": true,
           "isSigner": false,
           "docs": [
-            "The escrow."
+            "The native fee vault."
           ]
         },
         {
@@ -662,6 +662,11 @@
           "docs": [
             "The escrow."
           ]
+        },
+        {
+          "name": "escrowTokenAccount",
+          "isMut": true,
+          "isSigner": false
         },
         {
           "name": "lenderCollateralAccount",

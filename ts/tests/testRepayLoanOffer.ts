@@ -57,13 +57,30 @@ export const main = async () => {
     console.log('No loans to repay for this collection..');
     return;
   }
+  console.log(
+    'Found ' + filteredLoans.length + ' loans to repay for this CLP.'
+  );
 
   // Here we have to fetch an NFT from the user that actually belongs to this collection
   const collateralMint = new PublicKey(
     '3mVY7PUCBo9WMakr4XqjYYaC2irDUEHn6fGbcR6y4wXg'
   );
 
-  const { accounts, ixs } = await filteredLoans[0].repayLoan(
+  // The keypair
+  const loanToRepay = filteredLoans[0];
+
+  console.log(
+    'Loan Principal: ' +
+      loanToRepay.state.principalAmount +
+      '\nRepayment Amount: ' +
+      loanToRepay.state.repaymentAmount +
+      '\nPaid Amount: ' +
+      loanToRepay.state.paidAmount +
+      '\nAmount Left: ' +
+      loanToRepay.state.repaymentAmount.sub(loanToRepay.state.paidAmount)
+  );
+
+  const { accounts, ixs } = await loanToRepay.repayLoan(
     metaplex,
     collectionLendingProfile,
     collateralMint
