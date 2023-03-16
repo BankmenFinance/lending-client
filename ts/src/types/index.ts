@@ -5,6 +5,8 @@ export type Cluster = 'localnet' | 'devnet' | 'mainnet-beta';
 export interface Config {
   RPC_ENDPOINT: string;
   PROGRAM_ID: PublicKey;
+  HISTORY_API_GRAPHQL: string;
+  HISTORY_API_REST: string;
 }
 
 export type StateUpdateHandler<T> = (state: T) => void;

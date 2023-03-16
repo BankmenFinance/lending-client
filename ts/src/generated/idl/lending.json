@@ -35,11 +35,11 @@
           "isSigner": false
         },
         {
-          "name": "vaultSigner",
+          "name": "vault",
           "isMut": false,
           "isSigner": false,
           "docs": [
-            "The token vault signer."
+            "The native vault or token vault signer."
           ]
         },
         {
@@ -109,7 +109,7 @@
           "isSigner": false
         },
         {
-          "name": "vaultSigner",
+          "name": "vault",
           "isMut": false,
           "isSigner": false
         },
@@ -195,7 +195,7 @@
         },
         {
           "name": "escrow",
-          "isMut": false,
+          "isMut": true,
           "isSigner": false,
           "docs": [
             "The escrow."
@@ -381,8 +381,8 @@
           ]
         },
         {
-          "name": "vaultSigner",
-          "isMut": false,
+          "name": "vault",
+          "isMut": true,
           "isSigner": false,
           "docs": [
             "The escrow."
@@ -477,6 +477,11 @@
           "docs": [
             "The Metaplex Token Metadata Program."
           ]
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
         }
       ],
       "args": [
@@ -542,7 +547,7 @@
         },
         {
           "name": "escrow",
-          "isMut": false,
+          "isMut": true,
           "isSigner": false,
           "docs": [
             "The escrow."
@@ -747,7 +752,7 @@
           ]
         },
         {
-          "name": "vaultSigner",
+          "name": "vault",
           "isMut": false,
           "isSigner": false,
           "docs": [
@@ -798,12 +803,25 @@
           "isSigner": false
         },
         {
+          "name": "vault",
+          "isMut": true,
+          "isSigner": false,
+          "docs": [
+            "The token vault signer."
+          ]
+        },
+        {
           "name": "authority",
           "isMut": false,
           "isSigner": true,
           "docs": [
             "The authority of the [`CollectionLendingProfile`]."
           ]
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
         }
       ],
       "args": []
@@ -870,7 +888,7 @@
             "type": "publicKey"
           },
           {
-            "name": "vaultSigner",
+            "name": "vault",
             "docs": [
               "The vault's signer."
             ],
@@ -1058,6 +1076,9 @@
           },
           {
             "name": "id",
+            "docs": [
+              "The id of the loan."
+            ],
             "type": "u64"
           }
         ]
@@ -1070,26 +1091,44 @@
         "fields": [
           {
             "name": "authority",
+            "docs": [
+              "The authority of this user account."
+            ],
             "type": "publicKey"
           },
           {
             "name": "loansOffered",
+            "docs": [
+              "The amount of loans offered by this user."
+            ],
             "type": "u64"
           },
           {
             "name": "loansTaken",
+            "docs": [
+              "The amount of loans taken by this user."
+            ],
             "type": "u64"
           },
           {
             "name": "loansRescinded",
+            "docs": [
+              "The amount of loans rescinded by this user."
+            ],
             "type": "u64"
           },
           {
             "name": "loansForeclosed",
+            "docs": [
+              "The amount of loans foreclosed by this user."
+            ],
             "type": "u64"
           },
           {
             "name": "loansRepaid",
+            "docs": [
+              "The amount of loans repaid by this user."
+            ],
             "type": "u64"
           },
           {
@@ -1139,10 +1178,16 @@
           },
           {
             "name": "id",
+            "docs": [
+              "The id of the collection lending profile."
+            ],
             "type": "u64"
           },
           {
             "name": "loanDuration",
+            "docs": [
+              "The duration of loans issued through the collection lending profile."
+            ],
             "type": "u64"
           }
         ]
@@ -1155,10 +1200,16 @@
         "fields": [
           {
             "name": "amount",
+            "docs": [
+              "The amount to lend."
+            ],
             "type": "u64"
           },
           {
             "name": "id",
+            "docs": [
+              "The id of the loan."
+            ],
             "type": "u64"
           }
         ]
@@ -1194,8 +1245,28 @@
           "index": false
         },
         {
+          "name": "collectionName",
+          "type": {
+            "array": [
+              "u8",
+              32
+            ]
+          },
+          "index": false
+        },
+        {
           "name": "loanTokenMint",
           "type": "publicKey",
+          "index": false
+        },
+        {
+          "name": "id",
+          "type": "u64",
+          "index": false
+        },
+        {
+          "name": "loanDuration",
+          "type": "u64",
           "index": false
         },
         {
@@ -1226,6 +1297,23 @@
       ]
     },
     {
+      "name": "CollectionLendingProfileStatusChange",
+      "fields": [
+        {
+          "name": "profile",
+          "type": "publicKey",
+          "index": false
+        },
+        {
+          "name": "status",
+          "type": {
+            "defined": "Status"
+          },
+          "index": false
+        }
+      ]
+    },
+    {
       "name": "LoanOfferCreated",
       "fields": [
         {
@@ -1245,6 +1333,11 @@
         },
         {
           "name": "lender",
+          "type": "publicKey",
+          "index": false
+        },
+        {
+          "name": "lenderAccount",
           "type": "publicKey",
           "index": false
         },
@@ -1296,6 +1389,21 @@
         {
           "name": "borrower",
           "type": "publicKey",
+          "index": false
+        },
+        {
+          "name": "borrowerAccount",
+          "type": "publicKey",
+          "index": false
+        },
+        {
+          "name": "dueTimestamp",
+          "type": "u64",
+          "index": false
+        },
+        {
+          "name": "repaymentAmount",
+          "type": "u64",
           "index": false
         }
       ]
@@ -1487,5 +1595,8 @@
       "name": "LoanOfferNotFound",
       "msg": "The given Loan offer could not be found."
     }
-  ]
+  ],
+  "metadata": {
+    "address": "2Kdt8uMA6m5stQqaTxVPac45j6uKbwCg5vaPtyqwLk5C"
+  }
 }

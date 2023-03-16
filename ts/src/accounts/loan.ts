@@ -11,7 +11,7 @@ import {
   deriveEscrowTokenAccount,
   deriveLoanAddress,
   deriveLoanEscrowAddress,
-  deriveProfileVaultSignerAddress,
+  deriveProfileVaultAddress,
   deriveUserAccountAddress
 } from '../utils/pda';
 import { CollectionLendingProfile } from './collectionLendingProfile';
@@ -23,6 +23,11 @@ import {
   TransactionBuilderOptions
 } from '@metaplex-foundation/js';
 
+/**
+ * Represents a Loan.
+ *
+ * This class exposes utility methods related to this on-chain account.
+ */
 export class Loan {
   constructor(
     readonly client: LendingClient,
@@ -33,6 +38,14 @@ export class Loan {
     this.subscribe();
   }
 
+  /**
+   * Derives program addresses and generates necessary intructions to foreclose an existing Loan.
+   * @param client The Lending Client.
+   * @param collectionLendingProfile The Collection Lending Profile.
+   * @param args The arguments to create the Loan Offer.
+   * @param loanId The loan ID.
+   * @returns The accounts, instructions and signers, if necessary.
+   */
   static async create(
     client: LendingClient,
     collectionLendingProfile: CollectionLendingProfile,
@@ -82,6 +95,13 @@ export class Loan {
     };
   }
 
+  /**
+   * Loads all existing Loans, if a Collection Lending Profile is specified, only Loans associated to it will be loaded.
+   * @param client The Lending Client instance.
+   * @param collectionLendingProfile The associated Collection Lending Profile, this is used as a filter.
+   * @param onStateUpdateHandler A state update handler.
+   * @returns A promise which may resolve an array of Loans.
+   */
   static async loadAll(
     client: LendingClient,
     collectionLendingProfile?: PublicKey,
@@ -111,20 +131,33 @@ export class Loan {
     return loans;
   }
 
+  /**
+   * Loads all existing Loans, if a Collection Lending Profile is specified, only Loans associated to it will be loaded.
+   * @param client The Lending Client instance.
+   * @param address The address of the Loan to load.
+   * @param onStateUpdateHandler A state update handler.
+   * @returns A promise which may resolve a Loan.
+   */
   static async load(
     client: LendingClient,
     address: PublicKey,
     onStateUpdateHandler?: StateUpdateHandler<LoanState>
-  ) {
-    const state = await client.accounts.collectionLendingProfile.fetchNullable(
-      address
-    );
+  ): Promise<Loan> {
+    const state = await client.accounts.loan.fetchNullable(address);
 
     if (state === null) return null;
 
     return new Loan(client, address, state as LoanState, onStateUpdateHandler);
   }
 
+  /**
+   * Derives program addresses and generates necessary intructions to take an existing Loan Offer.
+   * @param metaplex The Metaplex Client.
+   * @param transactionBuilderOptions The Transaction Build Options from the Metaplex Client.
+   * @param collectionLendingProfile The Collection Lending Profile.
+   * @param collateralMint The SPL Token Mint of the Collateral NFT of the borrower.
+   * @returns The accounts, instructions and signers, if necessary.
+   */
   async takeLoan(
     metaplex: Metaplex,
     transactionBuilderOptions: TransactionBuilderOptions,
@@ -188,6 +221,14 @@ export class Loan {
     };
   }
 
+  /**
+   * Derives program addresses and generates necessary intructions to repay an existing Loan.
+   * @param metaplex The Metaplex Client.
+   * @param transactionBuilderOptions The Transaction Build Options from the Metaplex Client.
+   * @param collectionLendingProfile The Collection Lending Profile.
+   * @param collateralMint The SPL Token Mint of the Collateral NFT of the borrower.
+   * @returns The accounts, instructions and signers, if necessary.
+   */
   async repayLoan(
     metaplex: Metaplex,
     transactionBuilderOptions: TransactionBuilderOptions,
@@ -202,7 +243,7 @@ export class Loan {
       this.address,
       this.client.programId
     );
-    const [vaultSigner, vaultSignerBump] = deriveProfileVaultSignerAddress(
+    const [vault, vaultBump] = deriveProfileVaultAddress(
       collectionLendingProfile.address,
       this.client.programId
     );
@@ -230,7 +271,7 @@ export class Loan {
         profile: collectionLendingProfile.address,
         loan: this.address,
         escrow,
-        vaultSigner,
+        vault,
         loanMint: collectionLendingProfile.tokenMint,
         collateralMint,
         collateralEdition,
@@ -242,7 +283,8 @@ export class Loan {
         borrowerAccount: userAccount,
         borrower: this.client.walletPubkey,
         tokenProgram: TOKEN_PROGRAM_ID,
-        metadataProgram: metadataProgramId
+        metadataProgram: metadataProgramId,
+        systemProgram: SystemProgram.programId
       })
       .instruction();
 
@@ -253,6 +295,14 @@ export class Loan {
     };
   }
 
+  /**
+   * Derives program addresses and generates necessary intructions to foreclose an existing Loan.
+   * @param metaplex The Metaplex Client.
+   * @param transactionBuilderOptions The Transaction Build Options from the Metaplex Client.
+   * @param collectionLendingProfile The Collection Lending Profile.
+   * @param collateralMint The SPL Token Mint of the Collateral NFT of the borrower.
+   * @returns The accounts, instructions and signers, if necessary.
+   */
   async forecloseLoan(
     metaplex: Metaplex,
     transactionBuilderOptions: TransactionBuilderOptions,
@@ -308,6 +358,11 @@ export class Loan {
     };
   }
 
+  /**
+   * Derives program addresses and generates necessary intructions to rescind an existing Loan.
+   * @param collectionLendingProfile The Collection Lending Profile.
+   * @returns The accounts, instructions and signers, if necessary.
+   */
   async rescindLoan(collectionLendingProfile: CollectionLendingProfile) {
     const [escrow, escrowBump] = deriveLoanEscrowAddress(
       this.address,
@@ -343,6 +398,9 @@ export class Loan {
     };
   }
 
+  /**
+   * Subscribes to state changes of this account.
+   */
   subscribe() {
     this.client.accounts.collectionLendingProfile
       .subscribe(this.address)
@@ -355,6 +413,9 @@ export class Loan {
       });
   }
 
+  /**
+   * Unsubscribes to state changes of this account.
+   */
   async unsubscribe() {
     await this.client.accounts.collectionLendingProfile.unsubscribe(
       this.address

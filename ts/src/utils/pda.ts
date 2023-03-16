@@ -5,7 +5,7 @@ import {
   B_ESCROW_TOKEN_ACCOUNT,
   B_LOAN,
   B_PROFILE_VAULT,
-  B_VAULT_AUTHORITY,
+  B_VAULT,
   B_USER
 } from '../constants/shared';
 import { utils } from '@project-serum/anchor';
@@ -29,7 +29,7 @@ export const deriveCollectionLendingProfileAddress = (
   );
 };
 
-export const deriveProfileVaultAddress = (
+export const deriveProfileTokenVaultAddress = (
   collectionLendingProfile: PublicKey,
   programId: PublicKey
 ) => {
@@ -41,11 +41,11 @@ export const deriveProfileVaultAddress = (
   );
 };
 
-export const deriveProfileVaultSignerAddress = (
+export const deriveProfileVaultAddress = (
   collectionLendingProfile: PublicKey,
   programId: PublicKey
 ) => {
-  const seed = utils.bytes.utf8.encode(B_VAULT_AUTHORITY);
+  const seed = utils.bytes.utf8.encode(B_VAULT);
 
   return utils.publicKey.findProgramAddressSync(
     [seed, collectionLendingProfile.toBuffer()],
@@ -57,7 +57,7 @@ export const deriveUserAccountAddress = (
   wallet: PublicKey,
   programId: PublicKey
 ) => {
-  const seed = utils.bytes.utf8.encode(B_VAULT_AUTHORITY);
+  const seed = utils.bytes.utf8.encode(B_USER);
 
   return utils.publicKey.findProgramAddressSync(
     [seed, wallet.toBuffer()],

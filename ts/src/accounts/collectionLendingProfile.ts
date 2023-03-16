@@ -8,12 +8,17 @@ import {
 } from '../types/on-chain';
 import { StateUpdateHandler } from '../types';
 import {
-  deriveProfileVaultAddress,
-  deriveProfileVaultSignerAddress
+  deriveProfileTokenVaultAddress,
+  deriveProfileVaultAddress
 } from '../utils/pda';
 import { TOKEN_PROGRAM_ID } from '@project-serum/anchor/dist/cjs/utils/token';
 import { getAssociatedTokenAddress } from '@project-serum/associated-token';
 
+/**
+ * Represents a Collection Lending Profile.
+ *
+ * This class exposes utility methods related to this on-chain account.
+ */
 export class CollectionLendingProfile {
   constructor(
     readonly client: LendingClient,
@@ -24,6 +29,15 @@ export class CollectionLendingProfile {
     this.subscribe();
   }
 
+  /**
+   * Derives program addresses and generates necessary intructions to create a new Collection Lending Profile.
+   * @param client The Lending Client instance.
+   * @param collectionMint The SPL Token Mint of the NFT Collection associated.
+   * @param tokenMint The SPL Token Mint of the SPL Token used to issue loans.
+   * @param profileAuthority The authority of the Collection Lending Profile.
+   * @param args The arguments to create a Collection Lending Profile.
+   * @returns The accounts, instructions and signers, if necessary.
+   */
   static async create(
     client: LendingClient,
     collectionMint: PublicKey,
@@ -38,11 +52,11 @@ export class CollectionLendingProfile {
       profileId,
       client.programId
     );
-    const [profileVault, profileVaultBump] = deriveProfileVaultAddress(
+    const [profileVault, profileVaultBump] = deriveProfileTokenVaultAddress(
       profile,
       client.programId
     );
-    const [vaultSigner, vaultSignerBump] = deriveProfileVaultSignerAddress(
+    const [vault, vaultBump] = deriveProfileVaultAddress(
       profile,
       client.programId
     );
@@ -53,7 +67,7 @@ export class CollectionLendingProfile {
         collection: collectionMint,
         tokenMint,
         tokenVault: profileVault,
-        vaultSigner,
+        vault,
         authority: profileAuthority,
         payer: client.walletPubkey,
         systemProgram: SystemProgram.programId,
@@ -63,15 +77,21 @@ export class CollectionLendingProfile {
       .instruction();
 
     return {
-      accounts: [profile, profileVault, vaultSigner],
+      accounts: [profile, profileVault, vault],
       ixs: [ix],
       signers: []
     };
   }
 
+  /**
+   * Loads all existing Collection Lending Profiles.
+   * @param client The Lending Client instance.
+   * @param onStateUpdateHandler A state update handler.
+   * @returns A promise which may resolve an array of Collection Lending Profiles.
+   */
   static async loadAll(
     client: LendingClient,
-    _onStateUpdate?: StateUpdateHandler<CollectionLendingProfileState>
+    onStateUpdateHandler?: StateUpdateHandler<CollectionLendingProfileState>
   ): Promise<CollectionLendingProfile[]> {
     const lendingProfileAccounts =
       await client.accounts.collectionLendingProfile.all();
@@ -83,7 +103,7 @@ export class CollectionLendingProfile {
           client,
           lendingProfileAccount.publicKey,
           lendingProfileAccount.account as CollectionLendingProfileState,
-          _onStateUpdate
+          onStateUpdateHandler
         )
       );
     }
@@ -91,11 +111,18 @@ export class CollectionLendingProfile {
     return loans;
   }
 
+  /**
+   * Loads the Collection Lending Profile with the given address.
+   * @param client The Lending Client instance.
+   * @param address The Collection Lending Profile address.
+   * @param onStateUpdateHandler A state update handler.
+   * @returns A promise which may resolve an array of Collection Lending Profiles.
+   */
   static async load(
     client: LendingClient,
     address: PublicKey,
     onStateUpdateHandler?: StateUpdateHandler<CollectionLendingProfileState>
-  ) {
+  ): Promise<CollectionLendingProfile> {
     const state = await client.accounts.collectionLendingProfile.fetchNullable(
       address
     );
@@ -110,18 +137,33 @@ export class CollectionLendingProfile {
     );
   }
 
+  /**
+   * Gets the SPL Token Mint associated with this Collection Lending Profile.
+   * @returns The Public Key of the SPL Token Mint.
+   */
   get tokenMint() {
     return this.state.tokenMint;
   }
 
+  /**
+   * Gets the SPL Token Vault associated with this Collection Lending Profile.
+   * @returns The Public Key of the SPL Token Account.
+   */
   get tokenVault() {
     return this.state.tokenVault;
   }
 
+  /**
+   * Gets the Associated Token Address for the SPL Token Mint of this Collection Lending Profile.
+   * @returns The Public Key of the SPL Token Account.
+   */
   async getAssociatedTokenAddress(): Promise<PublicKey> {
     return getAssociatedTokenAddress(this.client.walletPubkey, this.tokenMint);
   }
 
+  /**
+   * Subscribes to state changes of this account.
+   */
   subscribe() {
     this.client.accounts.collectionLendingProfile
       .subscribe(this.address)
@@ -134,6 +176,9 @@ export class CollectionLendingProfile {
       });
   }
 
+  /**
+   * Unsubscribes to state changes of this account.
+   */
   async unsubscribe() {
     await this.client.accounts.collectionLendingProfile.unsubscribe(
       this.address

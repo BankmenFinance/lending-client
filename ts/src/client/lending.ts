@@ -11,6 +11,9 @@ import lendingIdl from '../generated/idl/lending.json';
 import type { Lending } from '../generated/types/lending';
 import type { Cluster, Wallet } from '../types';
 
+/**
+ * This Lending Client exposes utility methods to facilitate transaction submission.
+ */
 export class LendingClient {
   private _program: Program<Lending>;
 

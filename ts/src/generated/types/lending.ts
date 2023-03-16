@@ -29,10 +29,10 @@ export type Lending = {
           isSigner: false;
         },
         {
-          name: 'vaultSigner';
+          name: 'vault';
           isMut: false;
           isSigner: false;
-          docs: ['The token vault signer.'];
+          docs: ['The native vault or token vault signer.'];
         },
         {
           name: 'authority';
@@ -91,7 +91,7 @@ export type Lending = {
           isSigner: false;
         },
         {
-          name: 'vaultSigner';
+          name: 'vault';
           isMut: false;
           isSigner: false;
         },
@@ -165,7 +165,7 @@ export type Lending = {
         },
         {
           name: 'escrow';
-          isMut: false;
+          isMut: true;
           isSigner: false;
           docs: ['The escrow.'];
         },
@@ -311,8 +311,8 @@ export type Lending = {
           docs: ['The escrow.'];
         },
         {
-          name: 'vaultSigner';
-          isMut: false;
+          name: 'vault';
+          isMut: true;
           isSigner: false;
           docs: ['The escrow.'];
         },
@@ -385,6 +385,11 @@ export type Lending = {
           isMut: false;
           isSigner: false;
           docs: ['The Metaplex Token Metadata Program.'];
+        },
+        {
+          name: 'systemProgram';
+          isMut: false;
+          isSigner: false;
         }
       ];
       args: [
@@ -438,7 +443,7 @@ export type Lending = {
         },
         {
           name: 'escrow';
-          isMut: false;
+          isMut: true;
           isSigner: false;
           docs: ['The escrow.'];
         },
@@ -599,7 +604,7 @@ export type Lending = {
           docs: ['The fee token vault.'];
         },
         {
-          name: 'vaultSigner';
+          name: 'vault';
           isMut: false;
           isSigner: false;
           docs: ['The vault signer PDA for the fee token vault.'];
@@ -640,10 +645,21 @@ export type Lending = {
           isSigner: false;
         },
         {
+          name: 'vault';
+          isMut: true;
+          isSigner: false;
+          docs: ['The token vault signer.'];
+        },
+        {
           name: 'authority';
           isMut: false;
           isSigner: true;
           docs: ['The authority of the [`CollectionLendingProfile`].'];
+        },
+        {
+          name: 'systemProgram';
+          isMut: false;
+          isSigner: false;
         }
       ];
       args: [];
@@ -699,7 +715,7 @@ export type Lending = {
             type: 'publicKey';
           },
           {
-            name: 'vaultSigner';
+            name: 'vault';
             docs: ["The vault's signer."];
             type: 'publicKey';
           },
@@ -837,6 +853,7 @@ export type Lending = {
           },
           {
             name: 'id';
+            docs: ['The id of the loan.'];
             type: 'u64';
           }
         ];
@@ -849,26 +866,32 @@ export type Lending = {
         fields: [
           {
             name: 'authority';
+            docs: ['The authority of this user account.'];
             type: 'publicKey';
           },
           {
             name: 'loansOffered';
+            docs: ['The amount of loans offered by this user.'];
             type: 'u64';
           },
           {
             name: 'loansTaken';
+            docs: ['The amount of loans taken by this user.'];
             type: 'u64';
           },
           {
             name: 'loansRescinded';
+            docs: ['The amount of loans rescinded by this user.'];
             type: 'u64';
           },
           {
             name: 'loansForeclosed';
+            docs: ['The amount of loans foreclosed by this user.'];
             type: 'u64';
           },
           {
             name: 'loansRepaid';
+            docs: ['The amount of loans repaid by this user.'];
             type: 'u64';
           },
           {
@@ -910,10 +933,14 @@ export type Lending = {
           },
           {
             name: 'id';
+            docs: ['The id of the collection lending profile.'];
             type: 'u64';
           },
           {
             name: 'loanDuration';
+            docs: [
+              'The duration of loans issued through the collection lending profile.'
+            ];
             type: 'u64';
           }
         ];
@@ -926,10 +953,12 @@ export type Lending = {
         fields: [
           {
             name: 'amount';
+            docs: ['The amount to lend.'];
             type: 'u64';
           },
           {
             name: 'id';
+            docs: ['The id of the loan.'];
             type: 'u64';
           }
         ];
@@ -965,8 +994,25 @@ export type Lending = {
           index: false;
         },
         {
+          name: 'collectionName';
+          type: {
+            array: ['u8', 32];
+          };
+          index: false;
+        },
+        {
           name: 'loanTokenMint';
           type: 'publicKey';
+          index: false;
+        },
+        {
+          name: 'id';
+          type: 'u64';
+          index: false;
+        },
+        {
+          name: 'loanDuration';
+          type: 'u64';
           index: false;
         },
         {
@@ -997,6 +1043,23 @@ export type Lending = {
       ];
     },
     {
+      name: 'CollectionLendingProfileStatusChange';
+      fields: [
+        {
+          name: 'profile';
+          type: 'publicKey';
+          index: false;
+        },
+        {
+          name: 'status';
+          type: {
+            defined: 'Status';
+          };
+          index: false;
+        }
+      ];
+    },
+    {
       name: 'LoanOfferCreated';
       fields: [
         {
@@ -1016,6 +1079,11 @@ export type Lending = {
         },
         {
           name: 'lender';
+          type: 'publicKey';
+          index: false;
+        },
+        {
+          name: 'lenderAccount';
           type: 'publicKey';
           index: false;
         },
@@ -1067,6 +1135,21 @@ export type Lending = {
         {
           name: 'borrower';
           type: 'publicKey';
+          index: false;
+        },
+        {
+          name: 'borrowerAccount';
+          type: 'publicKey';
+          index: false;
+        },
+        {
+          name: 'dueTimestamp';
+          type: 'u64';
+          index: false;
+        },
+        {
+          name: 'repaymentAmount';
+          type: 'u64';
           index: false;
         }
       ];
@@ -1292,10 +1375,10 @@ export const IDL: Lending = {
           isSigner: false
         },
         {
-          name: 'vaultSigner',
+          name: 'vault',
           isMut: false,
           isSigner: false,
-          docs: ['The token vault signer.']
+          docs: ['The native vault or token vault signer.']
         },
         {
           name: 'authority',
@@ -1354,7 +1437,7 @@ export const IDL: Lending = {
           isSigner: false
         },
         {
-          name: 'vaultSigner',
+          name: 'vault',
           isMut: false,
           isSigner: false
         },
@@ -1428,7 +1511,7 @@ export const IDL: Lending = {
         },
         {
           name: 'escrow',
-          isMut: false,
+          isMut: true,
           isSigner: false,
           docs: ['The escrow.']
         },
@@ -1574,8 +1657,8 @@ export const IDL: Lending = {
           docs: ['The escrow.']
         },
         {
-          name: 'vaultSigner',
-          isMut: false,
+          name: 'vault',
+          isMut: true,
           isSigner: false,
           docs: ['The escrow.']
         },
@@ -1648,6 +1731,11 @@ export const IDL: Lending = {
           isMut: false,
           isSigner: false,
           docs: ['The Metaplex Token Metadata Program.']
+        },
+        {
+          name: 'systemProgram',
+          isMut: false,
+          isSigner: false
         }
       ],
       args: [
@@ -1701,7 +1789,7 @@ export const IDL: Lending = {
         },
         {
           name: 'escrow',
-          isMut: false,
+          isMut: true,
           isSigner: false,
           docs: ['The escrow.']
         },
@@ -1862,7 +1950,7 @@ export const IDL: Lending = {
           docs: ['The fee token vault.']
         },
         {
-          name: 'vaultSigner',
+          name: 'vault',
           isMut: false,
           isSigner: false,
           docs: ['The vault signer PDA for the fee token vault.']
@@ -1903,10 +1991,21 @@ export const IDL: Lending = {
           isSigner: false
         },
         {
+          name: 'vault',
+          isMut: true,
+          isSigner: false,
+          docs: ['The token vault signer.']
+        },
+        {
           name: 'authority',
           isMut: false,
           isSigner: true,
           docs: ['The authority of the [`CollectionLendingProfile`].']
+        },
+        {
+          name: 'systemProgram',
+          isMut: false,
+          isSigner: false
         }
       ],
       args: []
@@ -1962,7 +2061,7 @@ export const IDL: Lending = {
             type: 'publicKey'
           },
           {
-            name: 'vaultSigner',
+            name: 'vault',
             docs: ["The vault's signer."],
             type: 'publicKey'
           },
@@ -2100,6 +2199,7 @@ export const IDL: Lending = {
           },
           {
             name: 'id',
+            docs: ['The id of the loan.'],
             type: 'u64'
           }
         ]
@@ -2112,26 +2212,32 @@ export const IDL: Lending = {
         fields: [
           {
             name: 'authority',
+            docs: ['The authority of this user account.'],
             type: 'publicKey'
           },
           {
             name: 'loansOffered',
+            docs: ['The amount of loans offered by this user.'],
             type: 'u64'
           },
           {
             name: 'loansTaken',
+            docs: ['The amount of loans taken by this user.'],
             type: 'u64'
           },
           {
             name: 'loansRescinded',
+            docs: ['The amount of loans rescinded by this user.'],
             type: 'u64'
           },
           {
             name: 'loansForeclosed',
+            docs: ['The amount of loans foreclosed by this user.'],
             type: 'u64'
           },
           {
             name: 'loansRepaid',
+            docs: ['The amount of loans repaid by this user.'],
             type: 'u64'
           },
           {
@@ -2173,10 +2279,14 @@ export const IDL: Lending = {
           },
           {
             name: 'id',
+            docs: ['The id of the collection lending profile.'],
             type: 'u64'
           },
           {
             name: 'loanDuration',
+            docs: [
+              'The duration of loans issued through the collection lending profile.'
+            ],
             type: 'u64'
           }
         ]
@@ -2189,10 +2299,12 @@ export const IDL: Lending = {
         fields: [
           {
             name: 'amount',
+            docs: ['The amount to lend.'],
             type: 'u64'
           },
           {
             name: 'id',
+            docs: ['The id of the loan.'],
             type: 'u64'
           }
         ]
@@ -2228,8 +2340,25 @@ export const IDL: Lending = {
           index: false
         },
         {
+          name: 'collectionName',
+          type: {
+            array: ['u8', 32]
+          },
+          index: false
+        },
+        {
           name: 'loanTokenMint',
           type: 'publicKey',
+          index: false
+        },
+        {
+          name: 'id',
+          type: 'u64',
+          index: false
+        },
+        {
+          name: 'loanDuration',
+          type: 'u64',
           index: false
         },
         {
@@ -2260,6 +2389,23 @@ export const IDL: Lending = {
       ]
     },
     {
+      name: 'CollectionLendingProfileStatusChange',
+      fields: [
+        {
+          name: 'profile',
+          type: 'publicKey',
+          index: false
+        },
+        {
+          name: 'status',
+          type: {
+            defined: 'Status'
+          },
+          index: false
+        }
+      ]
+    },
+    {
       name: 'LoanOfferCreated',
       fields: [
         {
@@ -2279,6 +2425,11 @@ export const IDL: Lending = {
         },
         {
           name: 'lender',
+          type: 'publicKey',
+          index: false
+        },
+        {
+          name: 'lenderAccount',
           type: 'publicKey',
           index: false
         },
@@ -2330,6 +2481,21 @@ export const IDL: Lending = {
         {
           name: 'borrower',
           type: 'publicKey',
+          index: false
+        },
+        {
+          name: 'borrowerAccount',
+          type: 'publicKey',
+          index: false
+        },
+        {
+          name: 'dueTimestamp',
+          type: 'u64',
+          index: false
+        },
+        {
+          name: 'repaymentAmount',
+          type: 'u64',
           index: false
         }
       ]
