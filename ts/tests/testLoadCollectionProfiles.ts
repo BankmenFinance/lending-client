@@ -29,18 +29,12 @@ export const main = async () => {
 
   const lendingClient = new LendingClient(CLUSTER, new NodeWallet(wallet));
 
-  // Specify a collection lending profile here
-  const collectionLendingProfileAddress = new PublicKey(
-    '2JjjU5n7TkWJ3QmQfeu3t3KSksUy2ssxQhvqvZDdyWi9'
-  );
   // Load the collection lending profile
   const collectionLendingProfiles = await CollectionLendingProfile.loadAll(
     lendingClient
   );
 
-  console.log(
-    'Found ' + collectionLendingProfiles.length + ' loan offers for this CLP.'
-  );
+  console.log('Found ' + collectionLendingProfiles.length + ' CLPs.');
   for (const collectionLendingProfile of collectionLendingProfiles) {
     console.log(
       'Loan: ' +
