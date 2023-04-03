@@ -304,7 +304,7 @@
         },
         {
           "name": "escrow",
-          "isMut": false,
+          "isMut": true,
           "isSigner": false,
           "docs": [
             "The escrow."
@@ -333,7 +333,7 @@
         },
         {
           "name": "lender",
-          "isMut": false,
+          "isMut": true,
           "isSigner": true,
           "docs": [
             "The lender's wallet."
@@ -345,6 +345,14 @@
           "isSigner": false,
           "docs": [
             "The Token Program."
+          ]
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false,
+          "docs": [
+            "The System Program."
           ]
         }
       ],
@@ -378,6 +386,14 @@
           "isSigner": false,
           "docs": [
             "The escrow."
+          ]
+        },
+        {
+          "name": "escrowTokenAccount",
+          "isMut": true,
+          "isSigner": false,
+          "docs": [
+            "The escrow's token account."
           ]
         },
         {
@@ -657,7 +673,7 @@
         },
         {
           "name": "escrow",
-          "isMut": false,
+          "isMut": true,
           "isSigner": false,
           "docs": [
             "The escrow."

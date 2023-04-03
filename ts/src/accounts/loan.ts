@@ -230,6 +230,8 @@ export class Loan {
       this.address,
       this.client.programId
     );
+    const [escrowTokenAccount, escrowTokenAccountbump] =
+      deriveEscrowTokenAccount(escrow, this.client.programId);
     const [vault, vaultBump] = deriveProfileVaultAddress(
       collectionLendingProfile.address,
       this.client.programId
@@ -258,6 +260,7 @@ export class Loan {
         profile: collectionLendingProfile.address,
         loan: this.address,
         escrow,
+        escrowTokenAccount,
         vault,
         loanMint: collectionLendingProfile.tokenMint,
         collateralMint,
@@ -372,7 +375,8 @@ export class Loan {
         lenderTokenAccount,
         lenderAccount,
         lender: this.state.lender,
-        tokenProgram: TOKEN_PROGRAM_ID
+        tokenProgram: TOKEN_PROGRAM_ID,
+        systemProgram: SystemProgram.programId
       })
       .instruction();
 

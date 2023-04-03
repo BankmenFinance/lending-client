@@ -94,11 +94,14 @@ export function convertTimeToSeconds(duration: string): number {
 export function aprToBasisPoints(
   apr: number,
   duration: number,
-  durationUnit: 'days' | 'weeks' | 'months' | 'years'
+  durationUnit: 'hours' | 'days' | 'weeks' | 'months' | 'years'
 ): number {
   // Define the number of compounding periods per year based on the duration unit
   let periodsPerYear: number;
   switch (durationUnit) {
+    case 'hours':
+      periodsPerYear = 8694 / duration;
+      break;
     case 'days':
       periodsPerYear = 365.25 / duration;
       break;

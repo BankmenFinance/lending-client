@@ -35,11 +35,11 @@ export const main = async () => {
   const lendingClient = new LendingClient(CLUSTER, new NodeWallet(wallet));
 
   // Calculate interest rate in bps, 0.15 means 15% APR
-  const interestRateBps = aprToBasisPoints(0.15, 7, 'days');
+  const interestRateBps = aprToBasisPoints(1.5, 1, 'hours');
   console.log('Interest Rate (bps): ' + interestRateBps);
 
   // Calculate loan duration in seconds
-  const loanDuration = convertTimeToSeconds('7:0:0:0');
+  const loanDuration = convertTimeToSeconds('0:1:0:0');
   console.log('Loan Duration: ' + loanDuration);
 
   // Specify a collection mint here
@@ -47,10 +47,10 @@ export const main = async () => {
     'FVPw1R7kG4iB25BpzpRFAuGxc17Xs2QAvU4yqmA1zQmG'
   );
 
-  const profileId = 1;
+  const profileId = 6;
 
   const args = {
-    collectionName: encodeStrToUint8Array('Test Collection'),
+    collectionName: encodeStrToUint8Array('Short Term Collection'),
     loanDuration: new BN(loanDuration),
     interestRate: new BN(interestRateBps),
     // let's specify 25 bps as the fee we take from every collection

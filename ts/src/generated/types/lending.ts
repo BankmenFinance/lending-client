@@ -252,7 +252,7 @@ export type Lending = {
         },
         {
           name: 'escrow';
-          isMut: false;
+          isMut: true;
           isSigner: false;
           docs: ['The escrow.'];
         },
@@ -275,7 +275,7 @@ export type Lending = {
         },
         {
           name: 'lender';
-          isMut: false;
+          isMut: true;
           isSigner: true;
           docs: ["The lender's wallet."];
         },
@@ -284,6 +284,12 @@ export type Lending = {
           isMut: false;
           isSigner: false;
           docs: ['The Token Program.'];
+        },
+        {
+          name: 'systemProgram';
+          isMut: false;
+          isSigner: false;
+          docs: ['The System Program.'];
         }
       ];
       args: [];
@@ -309,6 +315,12 @@ export type Lending = {
           isMut: false;
           isSigner: false;
           docs: ['The escrow.'];
+        },
+        {
+          name: 'escrowTokenAccount';
+          isMut: true;
+          isSigner: false;
+          docs: ["The escrow's token account."];
         },
         {
           name: 'vault';
@@ -527,7 +539,7 @@ export type Lending = {
         },
         {
           name: 'escrow';
-          isMut: false;
+          isMut: true;
           isSigner: false;
           docs: ['The escrow.'];
         },
@@ -1583,7 +1595,7 @@ export const IDL: Lending = {
         },
         {
           name: 'escrow',
-          isMut: false,
+          isMut: true,
           isSigner: false,
           docs: ['The escrow.']
         },
@@ -1606,7 +1618,7 @@ export const IDL: Lending = {
         },
         {
           name: 'lender',
-          isMut: false,
+          isMut: true,
           isSigner: true,
           docs: ["The lender's wallet."]
         },
@@ -1615,6 +1627,12 @@ export const IDL: Lending = {
           isMut: false,
           isSigner: false,
           docs: ['The Token Program.']
+        },
+        {
+          name: 'systemProgram',
+          isMut: false,
+          isSigner: false,
+          docs: ['The System Program.']
         }
       ],
       args: []
@@ -1640,6 +1658,12 @@ export const IDL: Lending = {
           isMut: false,
           isSigner: false,
           docs: ['The escrow.']
+        },
+        {
+          name: 'escrowTokenAccount',
+          isMut: true,
+          isSigner: false,
+          docs: ["The escrow's token account."]
         },
         {
           name: 'vault',
@@ -1858,7 +1882,7 @@ export const IDL: Lending = {
         },
         {
           name: 'escrow',
-          isMut: false,
+          isMut: true,
           isSigner: false,
           docs: ['The escrow.']
         },
