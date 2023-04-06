@@ -92,6 +92,7 @@ pub fn rescind_loan(
         lender_account: *lender_account,
         lender: *lender,
         token_program: token::ID,
+        system_program: system_program::ID,
     };
     let ix_data = lending::instruction::RescindLoan {};
     Instruction {
@@ -152,6 +153,7 @@ pub fn repay_loan(
     collateral_mint: &Pubkey,
     collateral_edition: &Pubkey,
     escrow: &Pubkey,
+    escrow_token_account: &Pubkey,
     borrower_account: &Pubkey,
     borrower_token_account: &Pubkey,
     borrower_collateral_account: &Pubkey,
@@ -164,6 +166,7 @@ pub fn repay_loan(
         profile: *profile,
         loan: *loan,
         escrow: *escrow,
+        escrow_token_account: *escrow_token_account,
         vault: *vault,
         loan_mint: *loan_mint,
         collateral_mint: *collateral_mint,
