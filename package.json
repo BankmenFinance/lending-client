@@ -1,14 +1,14 @@
 {
-  "name": "@bmresearch/gbg-lending-client",
-  "version": "1.6.0",
-  "description": "TypeScript SDK for GBG Lending",
+  "name": "@bankmenfi/lending-client",
+  "version": "1.0.0",
+  "description": "TypeScript SDK for Bankmen Finance NFT backed Lending",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
   "files": [
     "lib/**/*"
   ],
-  "repository": "https://github.com/bmresearch/gbg-lending",
-  "author": "Blockmountain",
+  "repository": "https://github.com/BankmenFinance/lending-client",
+  "author": "Bankmen Finance",
   "license": "Apache 2.0",
   "scripts": {
     "build": "npx tsc",
