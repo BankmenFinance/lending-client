@@ -23,7 +23,7 @@ export const CONFIGS: { [key in Cluster]: Config } = {
   },
   'mainnet-beta': {
     RPC_ENDPOINT:
-      'https://spring-capable-arrow.solana-mainnet.discover.quiknode.pro/35397e1b1848110883f7bc034a20286efb77639f/',
+      'https://cypher-main-0965.mainnet.rpcpool.com/df807581-f194-4ddd-9959-855c396814ad',
     PROGRAM_ID: new PublicKey('BMfi6hbCSpTS962EZjwaa6bRvy2izUCmZrpBMuhJ1BUW'),
     HISTORY_API_GRAPHQL: 'https://gbg-lending.hasura.app/v1/graphql'
   }
