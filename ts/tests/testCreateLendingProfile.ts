@@ -4,6 +4,7 @@ import { Cluster } from '@gbg-lending-client/types';
 import { LendingClient } from '@gbg-lending-client/client/lending';
 import {
   aprToBasisPoints,
+  basisPointsToApr,
   convertTimeToSeconds,
   encodeStrToUint8Array
 } from '@gbg-lending-client/utils/shared';
@@ -37,6 +38,9 @@ export const main = async () => {
   // Calculate interest rate in bps, 0.15 means 15% APR
   const interestRateBps = aprToBasisPoints(1.5, 1, 'hours');
   console.log('Interest Rate (bps): ' + interestRateBps);
+
+  const interestRateApr = basisPointsToApr(interestRateBps, 1, 'hours');
+  console.log('Interest Rate (APR): ' + interestRateApr);
 
   // Calculate loan duration in seconds
   const loanDuration = convertTimeToSeconds('0:1:0:0');

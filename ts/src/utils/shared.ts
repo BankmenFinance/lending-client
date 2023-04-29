@@ -127,6 +127,45 @@ export function aprToBasisPoints(
   return basisPoints;
 }
 
+/**
+ * Converts a given basis points into APR accoriding to the duration.
+ * @param bps The basis points.
+ * @param duration The amount of periods in the duration unit.
+ * @param durationUnit The duration unit, e.g 'days' or 'weeks'.
+ * @returns The response JSON.
+ */
+export function basisPointsToApr(
+  bps: number,
+  duration: number,
+  durationUnit: 'hours' | 'days' | 'weeks' | 'months' | 'years'
+): number {
+  // Define the number of compounding periods per year based on the duration unit
+  let periodsPerYear: number;
+  switch (durationUnit) {
+    case 'hours':
+      periodsPerYear = 8694 / duration;
+      break;
+    case 'days':
+      periodsPerYear = 365.25 / duration;
+      break;
+    case 'weeks':
+      periodsPerYear = 52 / duration;
+      break;
+    case 'months':
+      periodsPerYear = 12 / duration;
+      break;
+    case 'years':
+      periodsPerYear = 1 / duration;
+      break;
+    default:
+      throw new Error(`Invalid duration unit: ${durationUnit}`);
+  }
+  const totalBasisPoints = periodsPerYear * bps;
+  const apr = totalBasisPoints / 10000;
+
+  return apr;
+}
+
 export function bnToDate(bn: BN): Date {
   return new Date(bn.toNumber() * 1000);
 }
