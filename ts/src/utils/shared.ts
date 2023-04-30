@@ -160,8 +160,9 @@ export function basisPointsToApr(
     default:
       throw new Error(`Invalid duration unit: ${durationUnit}`);
   }
-  const totalBasisPoints = periodsPerYear * bps;
-  const apr = totalBasisPoints / 10000;
+  const totalInterestRate = bps / 10000;
+  const periodicInterestRate = totalInterestRate / duration;
+  const apr = periodicInterestRate * periodsPerYear;
 
   return apr;
 }
