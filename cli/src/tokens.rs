@@ -5,7 +5,7 @@ use anchor_spl::token::{
     Mint,
 };
 use clap::{App, Arg, SubCommand};
-use gbg_lending_client::utils::{create_transaction, send_transaction};
+use lending_client::utils::{create_transaction, send_transaction};
 use mpl_token_metadata::{
     instruction::{create_master_edition_v3, create_metadata_accounts_v3, verify_collection},
     pda::{find_master_edition_account, find_metadata_account},

@@ -3,7 +3,7 @@ authors = [
     "Hugo <hugo@blockmountain.io",
     "Tiago <tiago@blockmountain.io>"
 ]
-name = "gbg-lending-client"
+name = "lending-client"
 description = "Client utilities for the GBG Lending Program."
 version = "1.0.0"
 edition = "2021"
@@ -28,7 +28,7 @@ anchor-spl = { version = "0.26.0", features = [
     "token",
     "associated_token",
 ]}
-lending = { path = "../../../gbg-lending/programs/lending/", features = [ "client" ] }
+lending = { path = "../../../lending/programs/lending/", features = [ "client" ] }
 log = "0.4.17"
 mpl-token-metadata = { version = "1.8.1", features = [ "no-entrypoint" ] }
 solana-account-decoder = "~1.14.12"

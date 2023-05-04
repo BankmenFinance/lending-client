@@ -1,11 +1,11 @@
 use clap::{App, Arg, SubCommand};
-use gbg_lending_client::{
+use lending::{CollectionLendingProfile, CreateCollectionLendingProfileArgs};
+use lending_client::{
     instructions::create_lending_profile as create_lending_profile_ix,
     prelude::LendingClient,
     utils::encode_string,
     utils::{create_transaction, send_transaction},
 };
-use lending::{CollectionLendingProfile, CreateCollectionLendingProfileArgs};
 use solana_sdk::{pubkey::Pubkey, signer::Signer};
 
 use crate::CliConfig;

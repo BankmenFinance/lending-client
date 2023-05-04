@@ -1323,52 +1323,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "gbg-lending-cli"
-version = "1.0.0"
-dependencies = [
- "anchor-lang",
- "anchor-spl",
- "bytemuck",
- "chrono",
- "clap 2.34.0",
- "futures",
- "futures-util",
- "gbg-lending-client",
- "lending",
- "log",
- "mpl-token-metadata",
- "rand 0.8.5",
- "serde",
- "serde_json",
- "solana-account-decoder",
- "solana-clap-utils",
- "solana-cli-config",
- "solana-client",
- "solana-logger",
- "solana-sdk",
- "spl-associated-token-account",
- "thiserror",
- "tokio",
-]
-
-[[package]]
-name = "gbg-lending-client"
-version = "1.0.0"
-dependencies = [
- "anchor-client",
- "anchor-lang",
- "anchor-spl",
- "lending",
- "log",
- "mpl-token-metadata",
- "solana-account-decoder",
- "solana-client",
- "solana-sdk",
- "thiserror",
- "tokio",
-]
-
-[[package]]
 name = "generic-array"
 version = "0.14.6"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1771,6 +1725,52 @@ dependencies = [
  "jet-proto-proc-macros",
  "mpl-token-metadata",
  "static_assertions",
+]
+
+[[package]]
+name = "lending-cli"
+version = "1.0.0"
+dependencies = [
+ "anchor-lang",
+ "anchor-spl",
+ "bytemuck",
+ "chrono",
+ "clap 2.34.0",
+ "futures",
+ "futures-util",
+ "lending",
+ "lending-client",
+ "log",
+ "mpl-token-metadata",
+ "rand 0.8.5",
+ "serde",
+ "serde_json",
+ "solana-account-decoder",
+ "solana-clap-utils",
+ "solana-cli-config",
+ "solana-client",
+ "solana-logger",
+ "solana-sdk",
+ "spl-associated-token-account",
+ "thiserror",
+ "tokio",
+]
+
+[[package]]
+name = "lending-client"
+version = "1.0.0"
+dependencies = [
+ "anchor-client",
+ "anchor-lang",
+ "anchor-spl",
+ "lending",
+ "log",
+ "mpl-token-metadata",
+ "solana-account-decoder",
+ "solana-client",
+ "solana-sdk",
+ "thiserror",
+ "tokio",
 ]
 
 [[package]]

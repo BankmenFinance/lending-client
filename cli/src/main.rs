@@ -1,5 +1,5 @@
 use clap::{crate_description, crate_name, ArgMatches};
-use gbg_lending_cli::{
+use lending_cli::{
     cli::{parse_args, process_command},
     get_clap_app,
 };
