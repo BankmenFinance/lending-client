@@ -1,6 +1,6 @@
 {
   "name": "@bankmenfi/lending-client",
-  "version": "1.0.3",
+  "version": "1.1.0",
   "description": "TypeScript SDK for Bankmen Finance NFT backed Lending",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
