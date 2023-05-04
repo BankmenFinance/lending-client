@@ -14,6 +14,7 @@ import {
 } from '../utils/pda';
 import { TOKEN_PROGRAM_ID } from '@project-serum/anchor/dist/cjs/utils/token';
 import { getAssociatedTokenAddress } from '@project-serum/associated-token';
+import BN from 'bn.js';
 
 /**
  * Represents a Collection Lending Profile.
@@ -208,13 +209,38 @@ export class CollectionLendingProfile {
    * @returns The accounts, instructions and signers, if necessary.
    */
   async setStatus(client: LendingClient, status: Status) {
-    const [vault, vaultBump] = deriveProfileVaultAddress(
-      this.address,
-      client.programId
-    );
     console.log(status);
     const ix = await client.methods
       .setCollectionLendingProfileStatus(status as never)
+      .accountsStrict({
+        profile: this.address,
+        authority: this.state.authority
+      })
+      .instruction();
+
+    return {
+      accounts: [],
+      ixs: [ix],
+      signers: []
+    };
+  }
+
+  /**
+   * Sets the status on this Collection Lending Profile.
+   * @param client The Lending Client instance.
+   * @param loanDuration The new loan duration.
+   * @param interestRate The new interest rate, in basis points.
+   * @param feeRate The new fee rate, in basis points.
+   * @returns The accounts, instructions and signers, if necessary.
+   */
+  async setParams(
+    client: LendingClient,
+    loanDuration?: BN,
+    interestRate?: BN,
+    feeRate?: BN
+  ) {
+    const ix = await client.methods
+      .setCollectionLendingProfileParams(loanDuration, interestRate, feeRate)
       .accountsStrict({
         profile: this.address,
         authority: this.state.authority

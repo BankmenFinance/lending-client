@@ -1,5 +1,5 @@
 export type Lending = {
-  version: '0.1.0';
+  version: '0.1.2';
   name: 'lending';
   instructions: [
     {
@@ -135,6 +135,44 @@ export type Lending = {
           name: 'status';
           type: {
             defined: 'Status';
+          };
+        }
+      ];
+    },
+    {
+      name: 'setCollectionLendingProfileParams';
+      docs: ['Sets the parameters of a [`CollectionLendingProfile`]'];
+      accounts: [
+        {
+          name: 'profile';
+          isMut: true;
+          isSigner: false;
+          docs: ['The book of loans for a given collection.'];
+        },
+        {
+          name: 'authority';
+          isMut: false;
+          isSigner: true;
+          docs: ['The authority of the [`CollectionLendingProfile`].'];
+        }
+      ];
+      args: [
+        {
+          name: 'duration';
+          type: {
+            option: 'u64';
+          };
+        },
+        {
+          name: 'interestRate';
+          type: {
+            option: 'u64';
+          };
+        },
+        {
+          name: 'feeRate';
+          type: {
+            option: 'u64';
           };
         }
       ];
@@ -1077,6 +1115,31 @@ export type Lending = {
       ];
     },
     {
+      name: 'CollectionLendingProfileParamsChange';
+      fields: [
+        {
+          name: 'profile';
+          type: 'publicKey';
+          index: false;
+        },
+        {
+          name: 'loanDuration';
+          type: 'u64';
+          index: false;
+        },
+        {
+          name: 'interestRate';
+          type: 'u64';
+          index: false;
+        },
+        {
+          name: 'feeRate';
+          type: 'u64';
+          index: false;
+        }
+      ];
+    },
+    {
       name: 'LoanOfferCreated';
       fields: [
         {
@@ -1320,21 +1383,26 @@ export type Lending = {
     },
     {
       code: 6014;
+      name: 'LoanAlreadyDefaulted';
+      msg: 'The given Loan has already defaulted.';
+    },
+    {
+      code: 6015;
       name: 'CollectionLendingProfileWithLoanOffers';
       msg: 'The given Collection Lending Profile has existing Loan offers.';
     },
     {
-      code: 6015;
+      code: 6016;
       name: 'CollectionLendingProfileWithAccumulatedFees';
       msg: 'The given Collection Lending Profile has accumulated fees.';
     },
     {
-      code: 6016;
+      code: 6017;
       name: 'CollectionLendingProfileWithoutAccumulatedFees';
       msg: 'The given Collection Lending Profile does not have accumulated fees.';
     },
     {
-      code: 6017;
+      code: 6018;
       name: 'CollectionLendingProfileSuspended';
       msg: 'The given Collection Lending Profile has been suspended.';
     }
@@ -1342,7 +1410,7 @@ export type Lending = {
 };
 
 export const IDL: Lending = {
-  version: '0.1.0',
+  version: '0.1.2',
   name: 'lending',
   instructions: [
     {
@@ -1478,6 +1546,44 @@ export const IDL: Lending = {
           name: 'status',
           type: {
             defined: 'Status'
+          }
+        }
+      ]
+    },
+    {
+      name: 'setCollectionLendingProfileParams',
+      docs: ['Sets the parameters of a [`CollectionLendingProfile`]'],
+      accounts: [
+        {
+          name: 'profile',
+          isMut: true,
+          isSigner: false,
+          docs: ['The book of loans for a given collection.']
+        },
+        {
+          name: 'authority',
+          isMut: false,
+          isSigner: true,
+          docs: ['The authority of the [`CollectionLendingProfile`].']
+        }
+      ],
+      args: [
+        {
+          name: 'duration',
+          type: {
+            option: 'u64'
+          }
+        },
+        {
+          name: 'interestRate',
+          type: {
+            option: 'u64'
+          }
+        },
+        {
+          name: 'feeRate',
+          type: {
+            option: 'u64'
           }
         }
       ]
@@ -2420,6 +2526,31 @@ export const IDL: Lending = {
       ]
     },
     {
+      name: 'CollectionLendingProfileParamsChange',
+      fields: [
+        {
+          name: 'profile',
+          type: 'publicKey',
+          index: false
+        },
+        {
+          name: 'loanDuration',
+          type: 'u64',
+          index: false
+        },
+        {
+          name: 'interestRate',
+          type: 'u64',
+          index: false
+        },
+        {
+          name: 'feeRate',
+          type: 'u64',
+          index: false
+        }
+      ]
+    },
+    {
       name: 'LoanOfferCreated',
       fields: [
         {
@@ -2663,21 +2794,26 @@ export const IDL: Lending = {
     },
     {
       code: 6014,
+      name: 'LoanAlreadyDefaulted',
+      msg: 'The given Loan has already defaulted.'
+    },
+    {
+      code: 6015,
       name: 'CollectionLendingProfileWithLoanOffers',
       msg: 'The given Collection Lending Profile has existing Loan offers.'
     },
     {
-      code: 6015,
+      code: 6016,
       name: 'CollectionLendingProfileWithAccumulatedFees',
       msg: 'The given Collection Lending Profile has accumulated fees.'
     },
     {
-      code: 6016,
+      code: 6017,
       name: 'CollectionLendingProfileWithoutAccumulatedFees',
       msg: 'The given Collection Lending Profile does not have accumulated fees.'
     },
     {
-      code: 6017,
+      code: 6018,
       name: 'CollectionLendingProfileSuspended',
       msg: 'The given Collection Lending Profile has been suspended.'
     }
