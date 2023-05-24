@@ -96,27 +96,7 @@ export function aprToBasisPoints(
   duration: number,
   durationUnit: 'hours' | 'days' | 'weeks' | 'months' | 'years'
 ): number {
-  // Define the number of compounding periods per year based on the duration unit
-  let periodsPerYear: number;
-  switch (durationUnit) {
-    case 'hours':
-      periodsPerYear = 8694 / duration;
-      break;
-    case 'days':
-      periodsPerYear = 365.25 / duration;
-      break;
-    case 'weeks':
-      periodsPerYear = 52 / duration;
-      break;
-    case 'months':
-      periodsPerYear = 12 / duration;
-      break;
-    case 'years':
-      periodsPerYear = 1 / duration;
-      break;
-    default:
-      throw new Error(`Invalid duration unit: ${durationUnit}`);
-  }
+  const periodsPerYear = getPeriodsPerYear(duration, durationUnit);
 
   // Calculate the periodic interest rate and total interest rate
   const periodicInterestRate = apr / periodsPerYear;
@@ -125,6 +105,71 @@ export function aprToBasisPoints(
   // Convert the total interest rate to basis points and return the result
   const basisPoints = totalInterestRate * 10000;
   return basisPoints;
+}
+
+/**
+ * Converts a given APY into APR for the term and duration unit.
+ * @param apr The APR as percentage, e.g 15 for 15% APR.
+ * @param duration The amount of periods in the duration unit.
+ * @param durationUnit The duration unit, e.g 'days' or 'weeks'.
+ * @returns The response JSON.
+ */
+export function convertApyToApr(
+  apy: number,
+  duration: number,
+  durationUnit: 'hours' | 'days' | 'weeks' | 'months' | 'years'
+): number {
+  const decimalApy = apy / 100;
+  const periodsPerYear = getPeriodsPerYear(duration, durationUnit);
+  const periodicRate = Math.pow(1 + decimalApy, 1 / periodsPerYear) - 1;
+  const apr = periodicRate * periodsPerYear;
+
+  return apr * 100;
+}
+
+/**
+ * Converts a given APR into APY for the term and duration unit.
+ * @param apr The APR as percentage, e.g 15 for 15% APR.
+ * @param duration The amount of periods in the duration unit.
+ * @param durationUnit The duration unit, e.g 'days' or 'weeks'.
+ * @returns The response JSON.
+ */
+export function convertAprToApy(
+  apr: number,
+  duration: number,
+  durationUnit: 'hours' | 'days' | 'weeks' | 'months' | 'years'
+): number {
+  const decimalApr = apr / 100;
+  const periodsPerYear = getPeriodsPerYear(duration, durationUnit);
+  const periodicRate = decimalApr / periodsPerYear;
+  const apy = Math.pow(1 + periodicRate, periodsPerYear) - 1;
+
+  return apy * 100;
+}
+
+function getPeriodsPerYear(
+  duration: number,
+  durationUnit: 'hours' | 'days' | 'weeks' | 'months' | 'years'
+): number {
+  switch (durationUnit) {
+    case 'hours':
+      return 8694 / duration;
+      break;
+    case 'days':
+      return 365.25 / duration;
+      break;
+    case 'weeks':
+      return 52 / duration;
+      break;
+    case 'months':
+      return 12 / duration;
+      break;
+    case 'years':
+      return 1 / duration;
+      break;
+    default:
+      throw new Error(`Invalid duration unit: ${durationUnit}`);
+  }
 }
 
 /**
@@ -139,27 +184,7 @@ export function basisPointsToApr(
   duration: number,
   durationUnit: 'hours' | 'days' | 'weeks' | 'months' | 'years'
 ): number {
-  // Define the number of compounding periods per year based on the duration unit
-  let periodsPerYear: number;
-  switch (durationUnit) {
-    case 'hours':
-      periodsPerYear = 8694 / duration;
-      break;
-    case 'days':
-      periodsPerYear = 365.25 / duration;
-      break;
-    case 'weeks':
-      periodsPerYear = 52 / duration;
-      break;
-    case 'months':
-      periodsPerYear = 12 / duration;
-      break;
-    case 'years':
-      periodsPerYear = 1 / duration;
-      break;
-    default:
-      throw new Error(`Invalid duration unit: ${durationUnit}`);
-  }
+  const periodsPerYear = getPeriodsPerYear(duration, durationUnit);
   const totalInterestRate = bps / 10000;
   const periodicInterestRate = totalInterestRate / duration;
   const apr = periodicInterestRate * periodsPerYear;
