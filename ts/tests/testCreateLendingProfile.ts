@@ -5,6 +5,8 @@ import { LendingClient } from '@gbg-lending-client/client/lending';
 import {
   aprToBasisPoints,
   basisPointsToApr,
+  convertAprToApy,
+  convertApyToApr,
   convertTimeToSeconds,
   encodeStrToUint8Array
 } from '@gbg-lending-client/utils/shared';
@@ -35,12 +37,18 @@ export const main = async () => {
 
   const lendingClient = new LendingClient(CLUSTER, new NodeWallet(wallet));
 
-  // Calculate interest rate in bps, 0.15 means 15% APR
-  const interestRateBps = aprToBasisPoints(1.5, 1, 'hours');
+  // calculate desired APR for 150% APY
+  const apr = convertApyToApr(150, 1, 'days');
+  console.log('APR: ' + apr);
+
+  const interestRateBps = aprToBasisPoints(apr, 1, 'days');
   console.log('Interest Rate (bps): ' + interestRateBps);
 
-  const interestRateApr = basisPointsToApr(interestRateBps, 1, 'hours');
+  const interestRateApr = basisPointsToApr(interestRateBps, 1, 'days');
   console.log('Interest Rate (APR): ' + interestRateApr);
+
+  const apy = convertAprToApy(interestRateApr, 1, 'days');
+  console.log('APY Converted Back: ' + apy);
 
   // Calculate loan duration in seconds
   const loanDuration = convertTimeToSeconds('0:1:0:0');
