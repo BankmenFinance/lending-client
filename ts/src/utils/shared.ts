@@ -98,13 +98,12 @@ export function aprToBasisPoints(
 ): number {
   const periodsPerYear = getPeriodsPerYear(duration, durationUnit);
 
-  // Calculate the periodic interest rate and total interest rate
+  // Calculate the periodic interest rate
   const periodicInterestRate = apr / periodsPerYear;
-  const totalInterestRate = periodicInterestRate * duration;
 
   // Convert the total interest rate to basis points and return the result
-  const basisPoints = totalInterestRate * 10000;
-  return basisPoints;
+  const periodicBps = periodicInterestRate * 100;
+  return periodicBps;
 }
 
 /**
@@ -185,8 +184,7 @@ export function basisPointsToApr(
   durationUnit: 'hours' | 'days' | 'weeks' | 'months' | 'years'
 ): number {
   const periodsPerYear = getPeriodsPerYear(duration, durationUnit);
-  const totalInterestRate = bps / 10000;
-  const periodicInterestRate = totalInterestRate / duration;
+  const periodicInterestRate = bps / 100;
   const apr = periodicInterestRate * periodsPerYear;
 
   return apr;
