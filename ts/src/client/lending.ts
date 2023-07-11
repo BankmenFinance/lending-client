@@ -19,14 +19,12 @@ export class LendingClient {
 
   constructor(
     readonly cluster: Cluster,
+    rpcEndpoint: string,
     wallet?: Wallet,
     confirmOpts = AnchorProvider.defaultOptions()
   ) {
     const provider = {
-      connection: new Connection(
-        CONFIGS[cluster].RPC_ENDPOINT,
-        confirmOpts.commitment
-      )
+      connection: new Connection(rpcEndpoint, confirmOpts.commitment)
     };
     this._program = new Program<Lending>(
       lendingIdl as Lending,
