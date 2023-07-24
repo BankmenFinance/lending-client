@@ -255,6 +255,55 @@ export class CollectionLendingProfile {
   }
 
   /**
+   * Enables LTV based loans on this Collection Lending Profile.
+   * @param client The Lending Client instance.
+   * @param floorPriceOracle The Floor Price Oracle
+   * @returns The accounts, instructions and signers, if necessary.
+   */
+  async enableLtv(client: LendingClient, floorPriceOracle: PublicKey) {
+    const ix = await client.methods
+      .enableLtv()
+      .accountsStrict({
+        profile: this.address,
+        authority: this.state.authority
+      })
+      .instruction();
+
+    ix.keys.push({
+      pubkey: floorPriceOracle,
+      isSigner: false,
+      isWritable: false
+    });
+
+    return {
+      accounts: [],
+      ixs: [ix],
+      signers: []
+    };
+  }
+
+  /**
+   * Disables LTV based loans on this Collection Lending Profile.
+   * @param client The Lending Client instance.
+   * @returns The accounts, instructions and signers, if necessary.
+   */
+  async disableLtv(client: LendingClient) {
+    const ix = await client.methods
+      .disableLtv()
+      .accountsStrict({
+        profile: this.address,
+        authority: this.state.authority
+      })
+      .instruction();
+
+    return {
+      accounts: [],
+      ixs: [ix],
+      signers: []
+    };
+  }
+
+  /**
    * Gets the SPL Token Mint associated with this Collection Lending Profile.
    * @returns The Public Key of the SPL Token Mint.
    */
