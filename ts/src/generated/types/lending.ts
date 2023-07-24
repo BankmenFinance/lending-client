@@ -1,5 +1,5 @@
 export type Lending = {
-  version: '0.1.2';
+  version: '0.1.3';
   name: 'lending';
   instructions: [
     {
@@ -75,6 +75,38 @@ export type Lending = {
           };
         }
       ];
+    },
+    {
+      name: 'enableLtv';
+      accounts: [
+        {
+          name: 'profile';
+          isMut: true;
+          isSigner: false;
+        },
+        {
+          name: 'authority';
+          isMut: false;
+          isSigner: true;
+        }
+      ];
+      args: [];
+    },
+    {
+      name: 'disableLtv';
+      accounts: [
+        {
+          name: 'profile';
+          isMut: true;
+          isSigner: false;
+        },
+        {
+          name: 'authority';
+          isMut: false;
+          isSigner: true;
+        }
+      ];
+      args: [];
     },
     {
       name: 'closeCollectionLendingProfile';
@@ -739,9 +771,21 @@ export type Lending = {
             type: 'u8';
           },
           {
+            name: 'accountVersion';
+            docs: ['The account version.'];
+            type: {
+              defined: 'AccountVersion';
+            };
+          },
+          {
+            name: 'isLtvEnabled';
+            docs: ['Whether this lending profile has'];
+            type: 'bool';
+          },
+          {
             name: 'padding';
             type: {
-              array: ['u8', 14];
+              array: ['u8', 12];
             };
           },
           {
@@ -844,6 +888,11 @@ export type Lending = {
             name: 'id';
             docs: ['the id of this profile //'];
             type: 'u64';
+          },
+          {
+            name: 'floorPriceOracle';
+            docs: ['The floor price oracle.'];
+            type: 'publicKey';
           }
         ];
       };
@@ -859,9 +908,23 @@ export type Lending = {
             type: 'u8';
           },
           {
+            name: 'loanType';
+            docs: ['The type of loan.'];
+            type: {
+              defined: 'LoanType';
+            };
+          },
+          {
+            name: 'accountVersion';
+            docs: ['The account version.'];
+            type: {
+              defined: 'AccountVersion';
+            };
+          },
+          {
             name: 'padding';
             type: {
-              array: ['u8', 15];
+              array: ['u8', 13];
             };
           },
           {
@@ -871,13 +934,13 @@ export type Lending = {
           },
           {
             name: 'lender';
-            docs: ['The lender of this [`CollectionLendingProfile`].'];
+            docs: ['The lender of this [`Loan`].'];
             type: 'publicKey';
           },
           {
             name: 'loanMint';
             docs: [
-              'The mint of the token used to provide loans associated with this [`CollectionLendingProfile`].'
+              'The mint of the token used to provide loans associated with this [`Loan`].'
             ];
             type: 'publicKey';
           },
@@ -910,6 +973,22 @@ export type Lending = {
             name: 'id';
             docs: ['The id of the loan.'];
             type: 'u64';
+          },
+          {
+            name: 'ltvAmount';
+            docs: ['The maximum LTV amount, denominated in basis points.'];
+            type: 'u64';
+          },
+          {
+            name: 'maxLtvAmount';
+            docs: ['The maximum loan amount.'];
+            type: 'u64';
+          },
+          {
+            name: 'padding2';
+            type: {
+              array: ['u64', 2];
+            };
           }
         ];
       };
@@ -1015,6 +1094,21 @@ export type Lending = {
             name: 'id';
             docs: ['The id of the loan.'];
             type: 'u64';
+          },
+          {
+            name: 'isLtv';
+            docs: ['Whether this loan is to be LTV based.'];
+            type: 'bool';
+          },
+          {
+            name: 'maxLtvAmount';
+            docs: ['The maximum amount to loan out under LTV.'];
+            type: 'u64';
+          },
+          {
+            name: 'ltvAmount';
+            docs: ['The LTV amount, denominated in basis points.'];
+            type: 'u16';
           }
         ];
       };
@@ -1029,6 +1123,31 @@ export type Lending = {
           },
           {
             name: 'Suspended';
+          }
+        ];
+      };
+    },
+    {
+      name: 'LoanType';
+      type: {
+        kind: 'enum';
+        variants: [
+          {
+            name: 'Simple';
+          },
+          {
+            name: 'LoanToValue';
+          }
+        ];
+      };
+    },
+    {
+      name: 'AccountVersion';
+      type: {
+        kind: 'enum';
+        variants: [
+          {
+            name: 'Base';
           }
         ];
       };
@@ -1092,6 +1211,31 @@ export type Lending = {
         },
         {
           name: 'collection';
+          type: 'publicKey';
+          index: false;
+        }
+      ];
+    },
+    {
+      name: 'CollectionLendingProfileLtvEnabled';
+      fields: [
+        {
+          name: 'profile';
+          type: 'publicKey';
+          index: false;
+        },
+        {
+          name: 'oracle';
+          type: 'publicKey';
+          index: false;
+        }
+      ];
+    },
+    {
+      name: 'CollectionLendingProfileLtvDisabled';
+      fields: [
+        {
+          name: 'profile';
           type: 'publicKey';
           index: false;
         }
@@ -1405,12 +1549,42 @@ export type Lending = {
       code: 6018;
       name: 'CollectionLendingProfileSuspended';
       msg: 'The given Collection Lending Profile has been suspended.';
+    },
+    {
+      code: 6019;
+      name: 'RemainingAccountsMissing';
+      msg: 'Remaining accounts expected by this instruction are missing.';
+    },
+    {
+      code: 6020;
+      name: 'MissingOracleFloorPriceAccount';
+      msg: 'Oracle Floor Price Feed account is missing.';
+    },
+    {
+      code: 6021;
+      name: 'InvalidOracleFloorPriceAccount';
+      msg: 'Invalid Floor Price Feed account.';
+    },
+    {
+      code: 6022;
+      name: 'StaleOracleFeed';
+      msg: 'The Oracle Floor Price Feed for this Collection Lending Profile is stale.';
+    },
+    {
+      code: 6023;
+      name: 'LoanTypeDisabled';
+      msg: 'This loan type is disabled.';
+    },
+    {
+      code: 6024;
+      name: 'LoanAmountExceedsMaxLtvAmount';
+      msg: 'The loan amount for the current Floor Price exceeds the maximum LTV loan amount for this loan.';
     }
   ];
 };
 
 export const IDL: Lending = {
-  version: '0.1.2',
+  version: '0.1.3',
   name: 'lending',
   instructions: [
     {
@@ -1486,6 +1660,38 @@ export const IDL: Lending = {
           }
         }
       ]
+    },
+    {
+      name: 'enableLtv',
+      accounts: [
+        {
+          name: 'profile',
+          isMut: true,
+          isSigner: false
+        },
+        {
+          name: 'authority',
+          isMut: false,
+          isSigner: true
+        }
+      ],
+      args: []
+    },
+    {
+      name: 'disableLtv',
+      accounts: [
+        {
+          name: 'profile',
+          isMut: true,
+          isSigner: false
+        },
+        {
+          name: 'authority',
+          isMut: false,
+          isSigner: true
+        }
+      ],
+      args: []
     },
     {
       name: 'closeCollectionLendingProfile',
@@ -2150,9 +2356,21 @@ export const IDL: Lending = {
             type: 'u8'
           },
           {
+            name: 'accountVersion',
+            docs: ['The account version.'],
+            type: {
+              defined: 'AccountVersion'
+            }
+          },
+          {
+            name: 'isLtvEnabled',
+            docs: ['Whether this lending profile has'],
+            type: 'bool'
+          },
+          {
             name: 'padding',
             type: {
-              array: ['u8', 14]
+              array: ['u8', 12]
             }
           },
           {
@@ -2255,6 +2473,11 @@ export const IDL: Lending = {
             name: 'id',
             docs: ['the id of this profile //'],
             type: 'u64'
+          },
+          {
+            name: 'floorPriceOracle',
+            docs: ['The floor price oracle.'],
+            type: 'publicKey'
           }
         ]
       }
@@ -2270,9 +2493,23 @@ export const IDL: Lending = {
             type: 'u8'
           },
           {
+            name: 'loanType',
+            docs: ['The type of loan.'],
+            type: {
+              defined: 'LoanType'
+            }
+          },
+          {
+            name: 'accountVersion',
+            docs: ['The account version.'],
+            type: {
+              defined: 'AccountVersion'
+            }
+          },
+          {
             name: 'padding',
             type: {
-              array: ['u8', 15]
+              array: ['u8', 13]
             }
           },
           {
@@ -2282,13 +2519,13 @@ export const IDL: Lending = {
           },
           {
             name: 'lender',
-            docs: ['The lender of this [`CollectionLendingProfile`].'],
+            docs: ['The lender of this [`Loan`].'],
             type: 'publicKey'
           },
           {
             name: 'loanMint',
             docs: [
-              'The mint of the token used to provide loans associated with this [`CollectionLendingProfile`].'
+              'The mint of the token used to provide loans associated with this [`Loan`].'
             ],
             type: 'publicKey'
           },
@@ -2321,6 +2558,22 @@ export const IDL: Lending = {
             name: 'id',
             docs: ['The id of the loan.'],
             type: 'u64'
+          },
+          {
+            name: 'ltvAmount',
+            docs: ['The maximum LTV amount, denominated in basis points.'],
+            type: 'u64'
+          },
+          {
+            name: 'maxLtvAmount',
+            docs: ['The maximum loan amount.'],
+            type: 'u64'
+          },
+          {
+            name: 'padding2',
+            type: {
+              array: ['u64', 2]
+            }
           }
         ]
       }
@@ -2426,6 +2679,21 @@ export const IDL: Lending = {
             name: 'id',
             docs: ['The id of the loan.'],
             type: 'u64'
+          },
+          {
+            name: 'isLtv',
+            docs: ['Whether this loan is to be LTV based.'],
+            type: 'bool'
+          },
+          {
+            name: 'maxLtvAmount',
+            docs: ['The maximum amount to loan out under LTV.'],
+            type: 'u64'
+          },
+          {
+            name: 'ltvAmount',
+            docs: ['The LTV amount, denominated in basis points.'],
+            type: 'u16'
           }
         ]
       }
@@ -2440,6 +2708,31 @@ export const IDL: Lending = {
           },
           {
             name: 'Suspended'
+          }
+        ]
+      }
+    },
+    {
+      name: 'LoanType',
+      type: {
+        kind: 'enum',
+        variants: [
+          {
+            name: 'Simple'
+          },
+          {
+            name: 'LoanToValue'
+          }
+        ]
+      }
+    },
+    {
+      name: 'AccountVersion',
+      type: {
+        kind: 'enum',
+        variants: [
+          {
+            name: 'Base'
           }
         ]
       }
@@ -2503,6 +2796,31 @@ export const IDL: Lending = {
         },
         {
           name: 'collection',
+          type: 'publicKey',
+          index: false
+        }
+      ]
+    },
+    {
+      name: 'CollectionLendingProfileLtvEnabled',
+      fields: [
+        {
+          name: 'profile',
+          type: 'publicKey',
+          index: false
+        },
+        {
+          name: 'oracle',
+          type: 'publicKey',
+          index: false
+        }
+      ]
+    },
+    {
+      name: 'CollectionLendingProfileLtvDisabled',
+      fields: [
+        {
+          name: 'profile',
           type: 'publicKey',
           index: false
         }
@@ -2816,6 +3134,36 @@ export const IDL: Lending = {
       code: 6018,
       name: 'CollectionLendingProfileSuspended',
       msg: 'The given Collection Lending Profile has been suspended.'
+    },
+    {
+      code: 6019,
+      name: 'RemainingAccountsMissing',
+      msg: 'Remaining accounts expected by this instruction are missing.'
+    },
+    {
+      code: 6020,
+      name: 'MissingOracleFloorPriceAccount',
+      msg: 'Oracle Floor Price Feed account is missing.'
+    },
+    {
+      code: 6021,
+      name: 'InvalidOracleFloorPriceAccount',
+      msg: 'Invalid Floor Price Feed account.'
+    },
+    {
+      code: 6022,
+      name: 'StaleOracleFeed',
+      msg: 'The Oracle Floor Price Feed for this Collection Lending Profile is stale.'
+    },
+    {
+      code: 6023,
+      name: 'LoanTypeDisabled',
+      msg: 'This loan type is disabled.'
+    },
+    {
+      code: 6024,
+      name: 'LoanAmountExceedsMaxLtvAmount',
+      msg: 'The loan amount for the current Floor Price exceeds the maximum LTV loan amount for this loan.'
     }
   ]
 };

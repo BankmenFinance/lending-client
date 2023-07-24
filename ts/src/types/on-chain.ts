@@ -3,7 +3,7 @@ import { TypeDef } from '@project-serum/anchor/dist/cjs/program/namespace/types'
 import type { Lending } from '../generated/types/lending';
 
 type _CollectionLendingProfile = TypeDef<Lending['accounts'][0], Lending>;
-export type LoanState = TypeDef<Lending['accounts'][1], Lending>;
+type _LoanState = TypeDef<Lending['accounts'][1], Lending>;
 export type UserAccountState = TypeDef<Lending['accounts'][2], Lending>;
 
 export type CreateCollectionLendingProfileArgs = TypeDef<
@@ -40,7 +40,19 @@ export interface CollectionLendingProfileState
   status: Status;
 }
 
+export interface LoanState extends _LoanState {
+  loanType: LoanType;
+}
+
 export class Status {
   static readonly Active = { active: {} };
   static readonly Suspended = { suspended: {} };
+}
+
+export class LoanType {
+  static readonly Simple = { simple: {} };
+  static readonly LoanToValue = { loanToValue: {} };
+}
+export class AccountVersion {
+  static readonly Base = { base: {} };
 }

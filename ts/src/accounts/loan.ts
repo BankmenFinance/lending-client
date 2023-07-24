@@ -152,12 +152,14 @@ export class Loan {
    * @param metaplex The Metaplex Client.
    * @param collectionLendingProfile The Collection Lending Profile.
    * @param collateralMint The SPL Token Mint of the Collateral NFT of the borrower.
+   * @param floorPriceOracle The Floor Pprice Oracle in case this is an LTV based Loan, this can be found in the Collection Lending Profile.
    * @returns The accounts, instructions and signers, if necessary.
    */
   async takeLoan(
     metaplex: Metaplex,
     collectionLendingProfile: CollectionLendingProfile,
-    collateralMint: PublicKey
+    collateralMint: PublicKey,
+    floorPriceOracle?: PublicKey
   ) {
     const metadataProgramId = metaplex.programs().getTokenMetadata().address;
     const [escrow, escrowBump] = deriveLoanEscrowAddress(
@@ -205,6 +207,20 @@ export class Loan {
         rent: SYSVAR_RENT_PUBKEY
       })
       .instruction();
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    if ((this.state.loanType as any).loanToValue && floorPriceOracle) {
+      ix.keys.push({
+        pubkey: floorPriceOracle,
+        isSigner: false,
+        isWritable: false
+      });
+      ix.keys.push({
+        pubkey: this.state.lender,
+        isSigner: false,
+        isWritable: true
+      });
+    }
 
     return {
       accounts: [],
