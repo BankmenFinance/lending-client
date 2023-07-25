@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { PublicKey, SystemProgram, SYSVAR_RENT_PUBKEY } from '@solana/web3.js';
 import { LendingClient } from '../client';
-import { LoanState, OfferLoanArgs } from '../types/on-chain';
+import { LoanState, LoanType, OfferLoanArgs } from '../types/on-chain';
 import { StateUpdateHandler } from '../types';
 import {
   ASSOCIATED_PROGRAM_ID,
@@ -152,14 +152,12 @@ export class Loan {
    * @param metaplex The Metaplex Client.
    * @param collectionLendingProfile The Collection Lending Profile.
    * @param collateralMint The SPL Token Mint of the Collateral NFT of the borrower.
-   * @param floorPriceOracle The Floor Pprice Oracle in case this is an LTV based Loan, this can be found in the Collection Lending Profile.
    * @returns The accounts, instructions and signers, if necessary.
    */
   async takeLoan(
     metaplex: Metaplex,
     collectionLendingProfile: CollectionLendingProfile,
-    collateralMint: PublicKey,
-    floorPriceOracle?: PublicKey
+    collateralMint: PublicKey
   ) {
     const metadataProgramId = metaplex.programs().getTokenMetadata().address;
     const [escrow, escrowBump] = deriveLoanEscrowAddress(
@@ -208,8 +206,13 @@ export class Loan {
       })
       .instruction();
 
+    const floorPriceOracle = collectionLendingProfile.state.floorPriceOracle;
+
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    if ((this.state.loanType as any).loanToValue && floorPriceOracle) {
+    if (
+      (this.state.loanType as any) &&
+      !PublicKey.default.equals(floorPriceOracle)
+    ) {
       ix.keys.push({
         pubkey: floorPriceOracle,
         isSigner: false,
