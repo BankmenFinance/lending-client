@@ -156,6 +156,9 @@ pub async fn create_loan(
     let args = OfferLoanArgs {
         amount,
         id: loan_id,
+        is_ltv: false,
+        max_ltv_amount: 0,
+        ltv_amount: 0,
     };
 
     let mut ixs = Vec::new();
