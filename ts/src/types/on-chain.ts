@@ -53,6 +53,7 @@ export class LoanType {
   static readonly Simple = { simple: {} };
   static readonly LoanToValue = { loanToValue: {} };
 }
+
 export class AccountVersion {
   static readonly Base = { base: {} };
 }

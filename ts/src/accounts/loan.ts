@@ -210,7 +210,7 @@ export class Loan {
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     if (
-      (this.state.loanType as any) &&
+      (this.state.loanType as any).loanToValue &&
       !PublicKey.default.equals(floorPriceOracle)
     ) {
       ix.keys.push({
