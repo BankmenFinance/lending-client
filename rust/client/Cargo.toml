@@ -5,7 +5,7 @@ authors = [
 ]
 name = "lending-client"
 description = "Client utilities for the GBG Lending Program."
-version = "1.0.0"
+version = "1.1.0"
 edition = "2021"
 keywords = ["solana", "anchor", "gbg lending", "cpi"]
 
@@ -28,7 +28,7 @@ anchor-spl = { version = "0.26.0", features = [
     "token",
     "associated_token",
 ]}
-lending = { path = "../../../lending/programs/lending/", features = [ "client" ] }
+lending = { path = "../../../lending/programs/lending/", version = "0.1.4", features = [ "client" ] }
 log = "0.4.17"
 mpl-token-metadata = { version = "1.8.1", features = [ "no-entrypoint" ] }
 solana-account-decoder = "~1.14.12"
