@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import { PublicKey, SystemProgram, SYSVAR_RENT_PUBKEY } from '@solana/web3.js';
+import { PublicKey, SystemProgram, SYSVAR_RENT_PUBKEY, SYSVAR_INSTRUCTIONS_PUBKEY } from '@solana/web3.js';
 import { LendingClient } from '../client';
 import { LoanState, LoanType, OfferLoanArgs } from '../types/on-chain';
 import { StateUpdateHandler } from '../types';
@@ -16,7 +16,9 @@ import {
 } from '../utils/pda';
 import { CollectionLendingProfile } from './collectionLendingProfile';
 import { getAssociatedTokenAddress } from '@project-serum/associated-token';
-import { Metaplex } from '@metaplex-foundation/js';
+import { Metaplex, getMetadataDelegateRole, MetadataDelegateType, Metadata } from '@metaplex-foundation/js';
+import { TokenStandard } from '@metaplex-foundation/mpl-token-metadata';
+import {  } from '@metaplex-foundation/mpl-token-auth-rules';
 
 /**
  * Represents a Loan.
@@ -157,7 +159,8 @@ export class Loan {
   async takeLoan(
     metaplex: Metaplex,
     collectionLendingProfile: CollectionLendingProfile,
-    collateralMint: PublicKey
+    collateralMint: PublicKey,
+    metadata: Metadata
   ) {
     const metadataProgramId = metaplex.programs().getTokenMetadata().address;
     const [escrow, escrowBump] = deriveLoanEscrowAddress(
@@ -222,6 +225,53 @@ export class Loan {
         pubkey: this.state.lender,
         isSigner: false,
         isWritable: true
+      });
+    }
+
+
+    const delegateRecord = metaplex.nfts().pdas().metadataDelegateRecord({
+      mint: collateralMint,
+      type: 'ProgrammableConfigV1',
+      updateAuthority: this.client.walletPubkey,
+      delegate: this.client.walletPubkey
+    });
+    const tokenRecord = metaplex.nfts().pdas().tokenRecord({
+      mint: collateralMint,
+      token: borrowerCollateralAccount
+    });
+
+    if(metadata.tokenStandard == 4 ) {
+      // this is the token record account
+      ix.keys.push({
+        pubkey: tokenRecord,
+        isSigner: false,
+        isWritable: true
+      });
+      // this is the instructions sysvar
+      ix.keys.push({
+        pubkey: SYSVAR_INSTRUCTIONS_PUBKEY,
+        isSigner: false,
+        isWritable: false,
+      });
+      /*if ( metadata.programmableConfig.ruleSet.toString().length > 0) {
+        // this is the mpl token auth rules program
+        ix.keys.push({
+            pubkey: metadata.collectionDetails.,
+            isSigner: false,
+            isWritable: false,
+        });
+        // this is the mpl token auth rules account
+        ix.keys.push({
+            pubkey: ,
+            isSigner: false,
+            isWritable: false,
+        });
+      }*/
+      //this is the delegate record
+      ix.keys.push({
+          pubkey: delegateRecord,
+          isSigner: false,
+          isWritable: true,
       });
     }
 
