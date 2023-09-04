@@ -16,9 +16,8 @@ import {
 } from '../utils/pda';
 import { CollectionLendingProfile } from './collectionLendingProfile';
 import { getAssociatedTokenAddress } from '@project-serum/associated-token';
-import { Metaplex, getMetadataDelegateRole, MetadataDelegateType, Metadata } from '@metaplex-foundation/js';
-import { TokenStandard } from '@metaplex-foundation/mpl-token-metadata';
-import {  } from '@metaplex-foundation/mpl-token-auth-rules';
+import { Metaplex, Metadata } from '@metaplex-foundation/js';
+import { MPL_TOKEN_AUTH_RULES_PROGRAM_ID } from '@metaplex-foundation/mpl-token-auth-rules';
 
 /**
  * Represents a Loan.
@@ -253,20 +252,20 @@ export class Loan {
         isSigner: false,
         isWritable: false,
       });
-      /*if ( metadata.programmableConfig.ruleSet.toString().length > 0) {
+      if ( metadata.programmableConfig.ruleSet.toString().length > 0) {
         // this is the mpl token auth rules program
         ix.keys.push({
-            pubkey: metadata.collectionDetails.,
+            pubkey: MPL_TOKEN_AUTH_RULES_PROGRAM_ID,
             isSigner: false,
             isWritable: false,
         });
         // this is the mpl token auth rules account
-        ix.keys.push({
+        /*ix.keys.push({
             pubkey: ,
             isSigner: false,
             isWritable: false,
-        });
-      }*/
+        });*/
+      }
       //this is the delegate record
       ix.keys.push({
           pubkey: delegateRecord,
