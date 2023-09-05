@@ -83,7 +83,8 @@ export const main = async () => {
   const { accounts, ixs } = await loanToRepay.repayLoan(
     metaplex,
     collectionLendingProfile,
-    collateralMint
+    collateralMint,
+    //add metadata TBD
   );
 
   const tx = new Transaction();

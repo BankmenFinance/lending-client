@@ -5,9 +5,10 @@ import { Cluster } from '@gbg-lending-client/types';
 import { LendingClient } from '@gbg-lending-client/client/lending';
 import { Loan } from '@gbg-lending-client/accounts';
 import { PublicKey, Transaction } from '@solana/web3.js';
-import { Metaplex } from '@metaplex-foundation/js';
+import { Metaplex, Metadata, toAccountInfo } from '@metaplex-foundation/js';
 import NodeWallet from '@project-serum/anchor/dist/cjs/nodewallet';
 import { CollectionLendingProfile } from '../src/accounts/collectionLendingProfile';
+import { publicKey } from '@project-serum/anchor/dist/cjs/utils';
 
 // Load  Env Variables
 require('dotenv').config({
@@ -69,10 +70,14 @@ export const main = async () => {
     '3mVY7PUCBo9WMakr4XqjYYaC2irDUEHn6fGbcR6y4wXg'
   );
 
+  //const metadata = metaplex.nfts().pdas().metadata({ mint: collateralMint });
+
+
   const { accounts, ixs } = await loans[0].takeLoan(
     metaplex,
     collectionLendingProfile,
-    collateralMint
+    collateralMint,
+    //add metadata TBD
   );
 
   const tx = new Transaction();

@@ -91,7 +91,8 @@ export const main = async () => {
   const { accounts, ixs } = await loanToForeclose.forecloseLoan(
     metaplex,
     collectionLendingProfile,
-    collateralMint
+    collateralMint,
+    //add metadata TBD
   );
 
   const tx = new Transaction();

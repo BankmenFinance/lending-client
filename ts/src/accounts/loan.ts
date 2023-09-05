@@ -17,7 +17,7 @@ import {
 import { CollectionLendingProfile } from './collectionLendingProfile';
 import { getAssociatedTokenAddress } from '@project-serum/associated-token';
 import { Metaplex, Metadata } from '@metaplex-foundation/js';
-import { MPL_TOKEN_AUTH_RULES_PROGRAM_ID } from '@metaplex-foundation/mpl-token-auth-rules';
+import { MPL_TOKEN_AUTH_RULES_PROGRAM_ID as token_auth_rules_program_id } from '@metaplex-foundation/mpl-token-auth-rules';
 
 /**
  * Represents a Loan.
@@ -153,6 +153,7 @@ export class Loan {
    * @param metaplex The Metaplex Client.
    * @param collectionLendingProfile The Collection Lending Profile.
    * @param collateralMint The SPL Token Mint of the Collateral NFT of the borrower.
+   * @param metadata The metadata account.
    * @returns The accounts, instructions and signers, if necessary.
    */
   async takeLoan(
@@ -238,8 +239,9 @@ export class Loan {
       mint: collateralMint,
       token: borrowerCollateralAccount
     });
+    const token_auth_rules_account_id = metadata.programmableConfig.ruleSet;
 
-    if(metadata.tokenStandard == 4 ) {
+    if(metadata.tokenStandard == 4 || metadata.tokenStandard == 5) {
       // this is the token record account
       ix.keys.push({
         pubkey: tokenRecord,
@@ -252,19 +254,19 @@ export class Loan {
         isSigner: false,
         isWritable: false,
       });
-      if ( metadata.programmableConfig.ruleSet.toString().length > 0) {
+      if ( token_auth_rules_account_id.toString().length > 0) {
         // this is the mpl token auth rules program
         ix.keys.push({
-            pubkey: MPL_TOKEN_AUTH_RULES_PROGRAM_ID,
+            pubkey: token_auth_rules_program_id,
             isSigner: false,
             isWritable: false,
         });
         // this is the mpl token auth rules account
-        /*ix.keys.push({
-            pubkey: ,
+        ix.keys.push({
+            pubkey: token_auth_rules_account_id,
             isSigner: false,
             isWritable: false,
-        });*/
+        });
       }
       //this is the delegate record
       ix.keys.push({
@@ -286,12 +288,14 @@ export class Loan {
    * @param metaplex The Metaplex Client.
    * @param collectionLendingProfile The Collection Lending Profile.
    * @param collateralMint The SPL Token Mint of the Collateral NFT of the borrower.
+   * @param metadata The metadata account.
    * @returns The accounts, instructions and signers, if necessary.
    */
   async repayLoan(
     metaplex: Metaplex,
     collectionLendingProfile: CollectionLendingProfile,
-    collateralMint: PublicKey
+    collateralMint: PublicKey,
+    metadata: Metadata
   ) {
     const metadataProgramId = metaplex.programs().getTokenMetadata().address;
     const [escrow, escrowBump] = deriveLoanEscrowAddress(
@@ -346,6 +350,47 @@ export class Loan {
       })
       .instruction();
 
+      const tokenRecord = metaplex.nfts().pdas().tokenRecord({
+        mint: collateralMint,
+        token: borrowerCollateralAccount
+      });
+      const token_auth_rules_account_id = metadata.programmableConfig.ruleSet;
+      
+      if(metadata.tokenStandard == 4 || metadata.tokenStandard == 5) {
+        // this is the metadata account
+        ix.keys.push({
+          pubkey: metadata.address,
+          isSigner: false,
+          isWritable: true
+        });
+        // this is the token record account
+        ix.keys.push({
+          pubkey: tokenRecord,
+          isSigner: false,
+          isWritable: true
+        });
+        // this is the instructions sysvar
+        ix.keys.push({
+          pubkey: SYSVAR_INSTRUCTIONS_PUBKEY,
+          isSigner: false,
+          isWritable: false,
+        });
+        if ( token_auth_rules_account_id.toString().length > 0) {
+          // this is the mpl token auth rules program
+          ix.keys.push({
+              pubkey: token_auth_rules_program_id,
+              isSigner: false,
+              isWritable: false,
+          });
+          // this is the mpl token auth rules account
+          ix.keys.push({
+              pubkey: token_auth_rules_account_id,
+              isSigner: false,
+              isWritable: false,
+          });
+        }
+      }
+
     return {
       accounts: [],
       ixs: [ix],
@@ -358,12 +403,14 @@ export class Loan {
    * @param metaplex The Metaplex Client.
    * @param collectionLendingProfile The Collection Lending Profile.
    * @param collateralMint The SPL Token Mint of the Collateral NFT of the borrower.
+   * @param metadata The metadata account.
    * @returns The accounts, instructions and signers, if necessary.
    */
   async forecloseLoan(
     metaplex: Metaplex,
     collectionLendingProfile: CollectionLendingProfile,
-    collateralMint: PublicKey
+    collateralMint: PublicKey,
+    metadata: Metadata
   ) {
     const metadataProgramId = metaplex.programs().getTokenMetadata().address;
     const [escrow, escrowBump] = deriveLoanEscrowAddress(
@@ -406,6 +453,47 @@ export class Loan {
         metadataProgram: metadataProgramId
       })
       .instruction();
+
+      const tokenRecord = metaplex.nfts().pdas().tokenRecord({
+        mint: collateralMint,
+        token: borrowerCollateralAccount
+      });
+      const token_auth_rules_account_id = metadata.programmableConfig.ruleSet;
+      
+      if(metadata.tokenStandard == 4 || metadata.tokenStandard == 5) {
+        // this is the metadata account
+        ix.keys.push({
+          pubkey: metadata.address,
+          isSigner: false,
+          isWritable: true
+        });
+        // this is the token record account
+        ix.keys.push({
+          pubkey: tokenRecord,
+          isSigner: false,
+          isWritable: true
+        });
+        // this is the instructions sysvar
+        ix.keys.push({
+          pubkey: SYSVAR_INSTRUCTIONS_PUBKEY,
+          isSigner: false,
+          isWritable: false,
+        });
+        if ( token_auth_rules_account_id.toString().length > 0) {
+          // this is the mpl token auth rules program
+          ix.keys.push({
+              pubkey: token_auth_rules_program_id,
+              isSigner: false,
+              isWritable: false,
+          });
+          // this is the mpl token auth rules account
+          ix.keys.push({
+              pubkey: token_auth_rules_account_id,
+              isSigner: false,
+              isWritable: false,
+          });
+        }
+      }
 
     return {
       accounts: [],
