@@ -1,7 +1,12 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import { PublicKey, SystemProgram, SYSVAR_RENT_PUBKEY, SYSVAR_INSTRUCTIONS_PUBKEY } from '@solana/web3.js';
+import {
+  PublicKey,
+  SystemProgram,
+  SYSVAR_RENT_PUBKEY,
+  SYSVAR_INSTRUCTIONS_PUBKEY
+} from '@solana/web3.js';
 import { LendingClient } from '../client';
-import { LoanState, LoanType, OfferLoanArgs } from '../types/on-chain';
+import { LoanState, OfferLoanArgs } from '../types/on-chain';
 import { StateUpdateHandler } from '../types';
 import {
   ASSOCIATED_PROGRAM_ID,
@@ -228,7 +233,6 @@ export class Loan {
       });
     }
 
-
     const delegateRecord = metaplex.nfts().pdas().metadataDelegateRecord({
       mint: collateralMint,
       type: 'ProgrammableConfigV1',
@@ -241,7 +245,7 @@ export class Loan {
     });
     const token_auth_rules_account_id = metadata.programmableConfig.ruleSet;
 
-    if(metadata.tokenStandard == 4 || metadata.tokenStandard == 5) {
+    if (metadata.tokenStandard == 4 || metadata.tokenStandard == 5) {
       // this is the token record account
       ix.keys.push({
         pubkey: tokenRecord,
@@ -252,27 +256,29 @@ export class Loan {
       ix.keys.push({
         pubkey: SYSVAR_INSTRUCTIONS_PUBKEY,
         isSigner: false,
-        isWritable: false,
+        isWritable: false
       });
-      if ( token_auth_rules_account_id.toString().length > 0) {
+      if (
+        token_auth_rules_account_id.toString() != PublicKey.default.toString()
+      ) {
         // this is the mpl token auth rules program
         ix.keys.push({
-            pubkey: token_auth_rules_program_id,
-            isSigner: false,
-            isWritable: false,
+          pubkey: token_auth_rules_program_id,
+          isSigner: false,
+          isWritable: false
         });
         // this is the mpl token auth rules account
         ix.keys.push({
-            pubkey: token_auth_rules_account_id,
-            isSigner: false,
-            isWritable: false,
+          pubkey: token_auth_rules_account_id,
+          isSigner: false,
+          isWritable: false
         });
       }
       //this is the delegate record
       ix.keys.push({
-          pubkey: delegateRecord,
-          isSigner: false,
-          isWritable: true,
+        pubkey: delegateRecord,
+        isSigner: false,
+        isWritable: true
       });
     }
 
@@ -350,46 +356,48 @@ export class Loan {
       })
       .instruction();
 
-      const tokenRecord = metaplex.nfts().pdas().tokenRecord({
-        mint: collateralMint,
-        token: borrowerCollateralAccount
+    const tokenRecord = metaplex.nfts().pdas().tokenRecord({
+      mint: collateralMint,
+      token: borrowerCollateralAccount
+    });
+    const token_auth_rules_account_id = metadata.programmableConfig.ruleSet;
+
+    if (metadata.tokenStandard == 4 || metadata.tokenStandard == 5) {
+      // this is the metadata account
+      ix.keys.push({
+        pubkey: metadata.address,
+        isSigner: false,
+        isWritable: true
       });
-      const token_auth_rules_account_id = metadata.programmableConfig.ruleSet;
-      
-      if(metadata.tokenStandard == 4 || metadata.tokenStandard == 5) {
-        // this is the metadata account
+      // this is the token record account
+      ix.keys.push({
+        pubkey: tokenRecord,
+        isSigner: false,
+        isWritable: true
+      });
+      // this is the instructions sysvar
+      ix.keys.push({
+        pubkey: SYSVAR_INSTRUCTIONS_PUBKEY,
+        isSigner: false,
+        isWritable: false
+      });
+      if (
+        token_auth_rules_account_id.toString() != PublicKey.default.toString()
+      ) {
+        // this is the mpl token auth rules program
         ix.keys.push({
-          pubkey: metadata.address,
+          pubkey: token_auth_rules_program_id,
           isSigner: false,
-          isWritable: true
+          isWritable: false
         });
-        // this is the token record account
+        // this is the mpl token auth rules account
         ix.keys.push({
-          pubkey: tokenRecord,
+          pubkey: token_auth_rules_account_id,
           isSigner: false,
-          isWritable: true
+          isWritable: false
         });
-        // this is the instructions sysvar
-        ix.keys.push({
-          pubkey: SYSVAR_INSTRUCTIONS_PUBKEY,
-          isSigner: false,
-          isWritable: false,
-        });
-        if ( token_auth_rules_account_id.toString().length > 0) {
-          // this is the mpl token auth rules program
-          ix.keys.push({
-              pubkey: token_auth_rules_program_id,
-              isSigner: false,
-              isWritable: false,
-          });
-          // this is the mpl token auth rules account
-          ix.keys.push({
-              pubkey: token_auth_rules_account_id,
-              isSigner: false,
-              isWritable: false,
-          });
-        }
       }
+    }
 
     return {
       accounts: [],
@@ -454,46 +462,48 @@ export class Loan {
       })
       .instruction();
 
-      const tokenRecord = metaplex.nfts().pdas().tokenRecord({
-        mint: collateralMint,
-        token: borrowerCollateralAccount
+    const tokenRecord = metaplex.nfts().pdas().tokenRecord({
+      mint: collateralMint,
+      token: borrowerCollateralAccount
+    });
+    const token_auth_rules_account_id = metadata.programmableConfig.ruleSet;
+
+    if (metadata.tokenStandard == 4 || metadata.tokenStandard == 5) {
+      // this is the metadata account
+      ix.keys.push({
+        pubkey: metadata.address,
+        isSigner: false,
+        isWritable: true
       });
-      const token_auth_rules_account_id = metadata.programmableConfig.ruleSet;
-      
-      if(metadata.tokenStandard == 4 || metadata.tokenStandard == 5) {
-        // this is the metadata account
+      // this is the token record account
+      ix.keys.push({
+        pubkey: tokenRecord,
+        isSigner: false,
+        isWritable: true
+      });
+      // this is the instructions sysvar
+      ix.keys.push({
+        pubkey: SYSVAR_INSTRUCTIONS_PUBKEY,
+        isSigner: false,
+        isWritable: false
+      });
+      if (
+        token_auth_rules_account_id.toString() != PublicKey.default.toString()
+      ) {
+        // this is the mpl token auth rules program
         ix.keys.push({
-          pubkey: metadata.address,
+          pubkey: token_auth_rules_program_id,
           isSigner: false,
-          isWritable: true
+          isWritable: false
         });
-        // this is the token record account
+        // this is the mpl token auth rules account
         ix.keys.push({
-          pubkey: tokenRecord,
+          pubkey: token_auth_rules_account_id,
           isSigner: false,
-          isWritable: true
+          isWritable: false
         });
-        // this is the instructions sysvar
-        ix.keys.push({
-          pubkey: SYSVAR_INSTRUCTIONS_PUBKEY,
-          isSigner: false,
-          isWritable: false,
-        });
-        if ( token_auth_rules_account_id.toString().length > 0) {
-          // this is the mpl token auth rules program
-          ix.keys.push({
-              pubkey: token_auth_rules_program_id,
-              isSigner: false,
-              isWritable: false,
-          });
-          // this is the mpl token auth rules account
-          ix.keys.push({
-              pubkey: token_auth_rules_account_id,
-              isSigner: false,
-              isWritable: false,
-          });
-        }
       }
+    }
 
     return {
       accounts: [],
