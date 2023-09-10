@@ -1,15 +1,16 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-var-requires */
 import { loadWallet } from 'utils';
-import { Cluster } from '@gbg-lending-client/types';
-import { LendingClient } from '@gbg-lending-client/client/lending';
-import { Loan, User } from '@gbg-lending-client/accounts';
+import { Cluster } from '@bankmenfi/lending-client/types';
+import { LendingClient } from '@bankmenfi/lending-client/client/lending';
+import { Loan, User } from '@bankmenfi/lending-client/accounts';
 import { PublicKey, Transaction } from '@solana/web3.js';
 import { BN } from 'bn.js';
-import NodeWallet from '@project-serum/anchor/dist/cjs/nodewallet';
-import { CollectionLendingProfile } from '../src/accounts/collectionLendingProfile';
-import { deriveUserAccountAddress } from '@gbg-lending-client/utils';
+import NodeWallet from '@coral-xyz/anchor/dist/cjs/nodewallet';
+import { CollectionLendingProfile } from '@bankmenfi/lending-client/accounts/collectionLendingProfile';
+import { deriveUserAccountAddress } from '@bankmenfi/lending-client/utils';
 import { getOrCreateAssociatedTokenAccount } from '@solana/spl-token';
+import { CONFIGS } from '@bankmenfi/lending-client/constants';
 
 // Load  Env Variables
 require('dotenv').config({
@@ -21,7 +22,8 @@ require('dotenv').config({
 });
 
 // Constants
-const CLUSTER = process.env.CLUSTER as Cluster;
+const CLUSTER = (process.env.CLUSTER as Cluster) || 'devnet';
+const RPC_ENDPOINT = process.env.RPC_ENDPOINT || CONFIGS[CLUSTER].RPC_ENDPOINT;
 const KP_PATH = process.env.KEYPAIR_PATH;
 
 export const main = async () => {
@@ -30,11 +32,15 @@ export const main = async () => {
   const wallet = loadWallet(KP_PATH);
   console.log('Wallet Public Key: ' + wallet.publicKey.toString());
 
-  const lendingClient = new LendingClient(CLUSTER, new NodeWallet(wallet));
+  const lendingClient = new LendingClient(
+    CLUSTER,
+    RPC_ENDPOINT,
+    new NodeWallet(wallet)
+  );
 
   // Specify a collection lending profile here
   const collectionLendingProfileAddress = new PublicKey(
-    '2JjjU5n7TkWJ3QmQfeu3t3KSksUy2ssxQhvqvZDdyWi9'
+    'DhcBDFaMJrMsMKbqWSb48vaH8wNmDeTe2MGbfmhXkEz8'
   );
   // Load the collection lending profile
   const collectionLendingProfile = await CollectionLendingProfile.load(
@@ -73,9 +79,11 @@ export const main = async () => {
 
   const args = {
     amount: new BN(1_000_000_000), // this is 1 SOL
-    id: loanId
+    id: loanId,
+    isLtv: false,
+    ltvAmount: 0, // 7500 bps = 75%
+    maxLtvAmount: new BN(0) // this is 1 SOL
   };
-  console.log(JSON.stringify(args));
 
   const { accounts, ixs } = await Loan.create(
     lendingClient,

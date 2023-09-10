@@ -5,7 +5,7 @@ import {
   ConfirmOptions,
   Connection
 } from '@solana/web3.js';
-import { AnchorProvider, Program } from '@project-serum/anchor';
+import { AnchorProvider, Program } from '@coral-xyz/anchor';
 import { CONFIGS } from '../constants';
 import lendingIdl from '../generated/idl/lending.json';
 import type { Lending } from '../generated/types/lending';

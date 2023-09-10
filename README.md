@@ -1,4 +1,4 @@
-# GBG Lending Clients
+# Bankmen Finance Lending Client
 
 ## TypeScript
 
