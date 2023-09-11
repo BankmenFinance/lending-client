@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-var-requires */
 import { loadWallet } from 'utils';
-import { Cluster } from '@gbg-lending-client/types';
-import { LendingClient } from '@gbg-lending-client/client/lending';
+import { Cluster } from '@bankmenfi/lending-client/types';
+import { LendingClient } from '@bankmenfi/lending-client/client/lending';
 import {
   aprToBasisPoints,
   basisPointsToApr,
@@ -9,12 +9,13 @@ import {
   convertApyToApr,
   convertTimeToSeconds,
   encodeStrToUint8Array
-} from '@gbg-lending-client/utils/shared';
-import { CollectionLendingProfile } from '@gbg-lending-client/accounts/collectionLendingProfile';
+} from '@bankmenfi/lending-client/utils/shared';
+import { CollectionLendingProfile } from '@bankmenfi/lending-client/accounts/collectionLendingProfile';
 import { PublicKey, Transaction } from '@solana/web3.js';
 import { WRAPPED_SOL_MINT } from '@metaplex-foundation/js';
 import { BN } from 'bn.js';
-import NodeWallet from '@project-serum/anchor/dist/cjs/nodewallet';
+import NodeWallet from '@coral-xyz/anchor/dist/cjs/nodewallet';
+import { CONFIGS } from '@bankmenfi/lending-clientconstants';
 
 // Load  Env Variables
 require('dotenv').config({
@@ -26,7 +27,8 @@ require('dotenv').config({
 });
 
 // Constants
-const CLUSTER = process.env.CLUSTER as Cluster;
+const CLUSTER = (process.env.CLUSTER as Cluster) || 'devnet';
+const RPC_ENDPOINT = process.env.RPC_ENDPOINT || CONFIGS[CLUSTER].RPC_ENDPOINT;
 const KP_PATH = process.env.KEYPAIR_PATH;
 
 export const main = async () => {
@@ -35,7 +37,11 @@ export const main = async () => {
   const wallet = loadWallet(KP_PATH);
   console.log('Wallet Public Key: ' + wallet.publicKey.toString());
 
-  const lendingClient = new LendingClient(CLUSTER, new NodeWallet(wallet));
+  const lendingClient = new LendingClient(
+    CLUSTER,
+    RPC_ENDPOINT,
+    new NodeWallet(wallet)
+  );
 
   // calculate desired APR for 150% APY
   const apr = convertApyToApr(150, 1, 'days');
@@ -56,10 +62,10 @@ export const main = async () => {
 
   // Specify a collection mint here
   const collectionMint = new PublicKey(
-    'FVPw1R7kG4iB25BpzpRFAuGxc17Xs2QAvU4yqmA1zQmG'
+    '7CdaMhWfcR57uFzGUMKyuiqeAqdzdEdF4Y4ghti12p7J'
   );
 
-  const profileId = 6;
+  const profileId = 99;
 
   const args = {
     collectionName: encodeStrToUint8Array('Short Term Collection'),

@@ -1,4 +1,3 @@
-import { PublicKey } from '@solana/web3.js';
 import {
   B_COLLECTION_LENDING_PROFILE,
   B_ESCROW,
@@ -8,7 +7,8 @@ import {
   B_VAULT,
   B_USER
 } from '../constants/shared';
-import { utils } from '@project-serum/anchor';
+import { utils } from '@coral-xyz/anchor';
+import { PublicKey } from '@solana/web3.js';
 
 export const deriveCollectionLendingProfileAddress = (
   collectionMint: PublicKey,
@@ -21,7 +21,7 @@ export const deriveCollectionLendingProfileAddress = (
   const buffer = Buffer.alloc(8);
   buffer.writeUInt32LE(collectionId, 0);
 
-  return utils.publicKey.findProgramAddressSync(
+  return PublicKey.findProgramAddressSync(
     [seed, collectionMint.toBuffer(), tokenMint.toBuffer(), buffer],
     programId
   );
@@ -33,7 +33,7 @@ export const deriveProfileTokenVaultAddress = (
 ) => {
   const seed = utils.bytes.utf8.encode(B_PROFILE_VAULT);
 
-  return utils.publicKey.findProgramAddressSync(
+  return PublicKey.findProgramAddressSync(
     [seed, collectionLendingProfile.toBuffer()],
     programId
   );
@@ -45,7 +45,7 @@ export const deriveProfileVaultAddress = (
 ) => {
   const seed = utils.bytes.utf8.encode(B_VAULT);
 
-  return utils.publicKey.findProgramAddressSync(
+  return PublicKey.findProgramAddressSync(
     [seed, collectionLendingProfile.toBuffer()],
     programId
   );
@@ -57,10 +57,7 @@ export const deriveUserAccountAddress = (
 ) => {
   const seed = utils.bytes.utf8.encode(B_USER);
 
-  return utils.publicKey.findProgramAddressSync(
-    [seed, wallet.toBuffer()],
-    programId
-  );
+  return PublicKey.findProgramAddressSync([seed, wallet.toBuffer()], programId);
 };
 
 export const deriveLoanAddress = (
@@ -74,7 +71,7 @@ export const deriveLoanAddress = (
   const buffer = Buffer.alloc(8);
   buffer.writeUInt32LE(loanId, 0);
 
-  return utils.publicKey.findProgramAddressSync(
+  return PublicKey.findProgramAddressSync(
     [seed, collectionLendingProfile.toBuffer(), lender.toBuffer(), buffer],
     programId
   );
@@ -86,10 +83,7 @@ export const deriveLoanEscrowAddress = (
 ) => {
   const seed = utils.bytes.utf8.encode(B_ESCROW);
 
-  return utils.publicKey.findProgramAddressSync(
-    [seed, loan.toBuffer()],
-    programId
-  );
+  return PublicKey.findProgramAddressSync([seed, loan.toBuffer()], programId);
 };
 
 export const deriveEscrowTokenAccount = (
@@ -98,8 +92,5 @@ export const deriveEscrowTokenAccount = (
 ) => {
   const seed = utils.bytes.utf8.encode(B_ESCROW_TOKEN_ACCOUNT);
 
-  return utils.publicKey.findProgramAddressSync(
-    [seed, escrow.toBuffer()],
-    programId
-  );
+  return PublicKey.findProgramAddressSync([seed, escrow.toBuffer()], programId);
 };

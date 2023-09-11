@@ -12,7 +12,7 @@ import {
   deriveProfileTokenVaultAddress,
   deriveProfileVaultAddress
 } from '../utils/pda';
-import { TOKEN_PROGRAM_ID } from '@project-serum/anchor/dist/cjs/utils/token';
+import { TOKEN_PROGRAM_ID } from '@coral-xyz/anchor/dist/cjs/utils/token';
 import { getAssociatedTokenAddress } from '@project-serum/associated-token';
 import BN from 'bn.js';
 
@@ -317,6 +317,13 @@ export class CollectionLendingProfile {
    */
   get tokenVault() {
     return this.state.tokenVault;
+  }
+  /**
+   * Gets the SPL Token Mint of the Collection NFT associated with this Collection Lending Profile.
+   * @returns The Public Key of the SPL Token Mint of the Collection NFT..
+   */
+  get collectionMint() {
+    return this.state.collection;
   }
 
   /**

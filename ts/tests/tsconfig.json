@@ -11,8 +11,8 @@
       "skipLibCheck": true,
       "baseUrl": ".",
       "paths": {
-        "@gbg-lending-client": ["../src/index.ts"],
-        "@gbg-lending-client/*": ["../src/*"]
+        "@bankmenfi/lending-client": ["../src/index.ts"],
+        "@bankmenfi/lending-client*": ["../src/*"]
       }
     },
     "include": ["**/*"],

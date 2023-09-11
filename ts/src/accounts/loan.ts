@@ -1,12 +1,17 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import { PublicKey, SystemProgram, SYSVAR_RENT_PUBKEY } from '@solana/web3.js';
+import {
+  PublicKey,
+  SystemProgram,
+  SYSVAR_RENT_PUBKEY,
+  SYSVAR_INSTRUCTIONS_PUBKEY
+} from '@solana/web3.js';
 import { LendingClient } from '../client';
-import { LoanState, LoanType, OfferLoanArgs } from '../types/on-chain';
+import { LoanState, OfferLoanArgs } from '../types/on-chain';
 import { StateUpdateHandler } from '../types';
 import {
   ASSOCIATED_PROGRAM_ID,
   TOKEN_PROGRAM_ID
-} from '@project-serum/anchor/dist/cjs/utils/token';
+} from '@coral-xyz/anchor/dist/cjs/utils/token';
 import {
   deriveEscrowTokenAccount,
   deriveLoanAddress,
@@ -16,7 +21,19 @@ import {
 } from '../utils/pda';
 import { CollectionLendingProfile } from './collectionLendingProfile';
 import { getAssociatedTokenAddress } from '@project-serum/associated-token';
-import { Metaplex } from '@metaplex-foundation/js';
+import {
+  Metaplex,
+  Sft,
+  SftWithToken,
+  Nft,
+  NftWithToken
+} from '@metaplex-foundation/js';
+import { MPL_TOKEN_AUTH_RULES_PROGRAM_ID } from '@metaplex-foundation/mpl-token-auth-rules';
+import {
+  MPL_TOKEN_METADATA_PROGRAM_ID,
+  TokenStandard
+} from '@metaplex-foundation/mpl-token-metadata';
+import { ASSOCIATED_TOKEN_PROGRAM_ID } from '@solana/spl-token';
 
 /**
  * Represents a Loan.
@@ -152,14 +169,14 @@ export class Loan {
    * @param metaplex The Metaplex Client.
    * @param collectionLendingProfile The Collection Lending Profile.
    * @param collateralMint The SPL Token Mint of the Collateral NFT of the borrower.
+   * @param metadata The metadata account.
    * @returns The accounts, instructions and signers, if necessary.
    */
   async takeLoan(
     metaplex: Metaplex,
     collectionLendingProfile: CollectionLendingProfile,
-    collateralMint: PublicKey
+    metadata: Sft | SftWithToken | Nft | NftWithToken
   ) {
-    const metadataProgramId = metaplex.programs().getTokenMetadata().address;
     const [escrow, escrowBump] = deriveLoanEscrowAddress(
       this.address,
       this.client.programId
@@ -173,36 +190,52 @@ export class Loan {
     const collateralMetadata = metaplex
       .nfts()
       .pdas()
-      .metadata({ mint: collateralMint });
+      .metadata({ mint: metadata.address });
     const collateralEdition = metaplex
       .nfts()
       .pdas()
-      .masterEdition({ mint: collateralMint });
+      .masterEdition({ mint: metadata.address });
     const borrowerCollateralAccount = await getAssociatedTokenAddress(
       this.client.walletPubkey,
-      collateralMint
+      metadata.address
     );
     const borrowerTokenAccount =
       await collectionLendingProfile.getAssociatedTokenAddress();
+    const collateralTokenRecord = metaplex.nfts().pdas().tokenRecord({
+      mint: metadata.address,
+      token: borrowerCollateralAccount
+    });
+    let collateralTokenAuthRules = null;
+    if (
+      metadata.programmableConfig &&
+      metadata.programmableConfig.ruleSet &&
+      !PublicKey.default.equals(metadata.programmableConfig.ruleSet)
+    ) {
+      collateralTokenAuthRules = metadata.programmableConfig.ruleSet;
+    }
     const ix = await this.client.methods
       .takeLoan()
       .accountsStrict({
         profile: collectionLendingProfile.address,
         loan: this.address,
         loanMint: collectionLendingProfile.tokenMint,
-        collateralMint,
+        collateralMint: metadata.address,
         collateralMetadata,
         collateralEdition,
+        collateralTokenRecord,
+        collateralTokenAuthRules,
         escrow,
         escrowTokenAccount,
         borrowerTokenAccount,
         borrowerCollateralAccount,
         borrowerAccount: userAccount,
         borrower: this.client.walletPubkey,
-        tokenProgram: TOKEN_PROGRAM_ID,
-        metadataProgram: metadataProgramId,
         systemProgram: SystemProgram.programId,
-        rent: SYSVAR_RENT_PUBKEY
+        tokenProgram: TOKEN_PROGRAM_ID,
+        metadataProgram: MPL_TOKEN_METADATA_PROGRAM_ID,
+        authRulesProgram: MPL_TOKEN_AUTH_RULES_PROGRAM_ID,
+        rent: SYSVAR_RENT_PUBKEY,
+        instructions: SYSVAR_INSTRUCTIONS_PUBKEY
       })
       .instruction();
 
@@ -237,14 +270,14 @@ export class Loan {
    * @param metaplex The Metaplex Client.
    * @param collectionLendingProfile The Collection Lending Profile.
    * @param collateralMint The SPL Token Mint of the Collateral NFT of the borrower.
+   * @param metadata The metadata account.
    * @returns The accounts, instructions and signers, if necessary.
    */
   async repayLoan(
     metaplex: Metaplex,
     collectionLendingProfile: CollectionLendingProfile,
-    collateralMint: PublicKey
+    metadata: Sft | SftWithToken | Nft | NftWithToken
   ) {
-    const metadataProgramId = metaplex.programs().getTokenMetadata().address;
     const [escrow, escrowBump] = deriveLoanEscrowAddress(
       this.address,
       this.client.programId
@@ -259,20 +292,36 @@ export class Loan {
       this.client.walletPubkey,
       this.client.programId
     );
+    const collateralMetadata = metaplex
+      .nfts()
+      .pdas()
+      .metadata({ mint: metadata.address });
     const collateralEdition = metaplex
       .nfts()
       .pdas()
-      .masterEdition({ mint: collateralMint });
+      .masterEdition({ mint: metadata.address });
     const borrowerCollateralAccount = await getAssociatedTokenAddress(
       this.client.walletPubkey,
-      collateralMint
+      metadata.address
     );
+    const collateralTokenRecord = metaplex.nfts().pdas().tokenRecord({
+      mint: metadata.address,
+      token: borrowerCollateralAccount
+    });
     const borrowerTokenAccount =
       await collectionLendingProfile.getAssociatedTokenAddress();
     const lenderTokenAccount = await getAssociatedTokenAddress(
       this.state.lender,
       collectionLendingProfile.tokenMint
     );
+    let collateralTokenAuthRules = null;
+    if (
+      metadata.programmableConfig &&
+      metadata.programmableConfig.ruleSet &&
+      !PublicKey.default.equals(metadata.programmableConfig.ruleSet)
+    ) {
+      collateralTokenAuthRules = metadata.programmableConfig.ruleSet;
+    }
     const ix = await this.client.methods
       .repayLoan(this.state.repaymentAmount.sub(this.state.paidAmount))
       .accountsStrict({
@@ -282,8 +331,11 @@ export class Loan {
         escrowTokenAccount,
         vault,
         loanMint: collectionLendingProfile.tokenMint,
-        collateralMint,
+        collateralMint: metadata.address,
         collateralEdition,
+        collateralMetadata,
+        collateralTokenRecord,
+        collateralTokenAuthRules,
         tokenVault: collectionLendingProfile.tokenVault,
         borrowerTokenAccount,
         borrowerCollateralAccount,
@@ -291,9 +343,11 @@ export class Loan {
         lenderTokenAccount: lenderTokenAccount,
         borrowerAccount: userAccount,
         borrower: this.client.walletPubkey,
+        systemProgram: SystemProgram.programId,
         tokenProgram: TOKEN_PROGRAM_ID,
-        metadataProgram: metadataProgramId,
-        systemProgram: SystemProgram.programId
+        metadataProgram: MPL_TOKEN_METADATA_PROGRAM_ID,
+        authRulesProgram: MPL_TOKEN_AUTH_RULES_PROGRAM_ID,
+        instructions: SYSVAR_INSTRUCTIONS_PUBKEY
       })
       .instruction();
 
@@ -309,14 +363,14 @@ export class Loan {
    * @param metaplex The Metaplex Client.
    * @param collectionLendingProfile The Collection Lending Profile.
    * @param collateralMint The SPL Token Mint of the Collateral NFT of the borrower.
+   * @param metadata The metadata account.
    * @returns The accounts, instructions and signers, if necessary.
    */
   async forecloseLoan(
     metaplex: Metaplex,
     collectionLendingProfile: CollectionLendingProfile,
-    collateralMint: PublicKey
+    metadata: Sft | SftWithToken | Nft | NftWithToken
   ) {
-    const metadataProgramId = metaplex.programs().getTokenMetadata().address;
     const [escrow, escrowBump] = deriveLoanEscrowAddress(
       this.address,
       this.client.programId
@@ -327,34 +381,62 @@ export class Loan {
       this.client.walletPubkey,
       this.client.programId
     );
+    const collateralMetadata = metaplex
+      .nfts()
+      .pdas()
+      .metadata({ mint: metadata.address });
     const collateralEdition = metaplex
       .nfts()
       .pdas()
-      .masterEdition({ mint: collateralMint });
-    const lenderCollateralAccount = await getAssociatedTokenAddress(
-      this.client.walletPubkey,
-      collateralMint
-    );
+      .masterEdition({ mint: metadata.address });
     const borrowerCollateralAccount = await getAssociatedTokenAddress(
       this.state.borrower,
-      collateralMint
+      metadata.address
     );
+    const borrowerCollateralTokenRecord = metaplex.nfts().pdas().tokenRecord({
+      mint: metadata.address,
+      token: borrowerCollateralAccount
+    });
+    const lenderCollateralAccount = await getAssociatedTokenAddress(
+      this.client.walletPubkey,
+      metadata.address
+    );
+    const lenderCollateralTokenRecord = metaplex.nfts().pdas().tokenRecord({
+      mint: metadata.address,
+      token: lenderCollateralAccount
+    });
+    let collateralTokenAuthRules = null;
+    if (
+      metadata.programmableConfig &&
+      metadata.programmableConfig.ruleSet &&
+      !PublicKey.default.equals(metadata.programmableConfig.ruleSet)
+    ) {
+      collateralTokenAuthRules = metadata.programmableConfig.ruleSet;
+    }
     const ix = await this.client.methods
       .forecloseLoan()
       .accountsStrict({
         profile: collectionLendingProfile.address,
         loan: this.address,
-        collateralMint,
         escrow,
         escrowTokenAccount,
         lenderCollateralAccount,
+        lenderCollateralTokenRecord,
+        collateralMint: metadata.address,
         collateralEdition,
+        collateralMetadata,
+        collateralTokenAuthRules,
         borrowerCollateralAccount,
+        borrowerCollateralTokenRecord,
         borrower: this.state.borrower,
         lenderAccount: userAccount,
         lender: this.client.walletPubkey,
+        systemProgram: SystemProgram.programId,
         tokenProgram: TOKEN_PROGRAM_ID,
-        metadataProgram: metadataProgramId
+        associatedTokenProgram: ASSOCIATED_TOKEN_PROGRAM_ID,
+        metadataProgram: MPL_TOKEN_METADATA_PROGRAM_ID,
+        authRulesProgram: MPL_TOKEN_AUTH_RULES_PROGRAM_ID,
+        instructions: SYSVAR_INSTRUCTIONS_PUBKEY
       })
       .instruction();
 

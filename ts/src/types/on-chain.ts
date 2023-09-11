@@ -1,5 +1,5 @@
-import { Event } from '@project-serum/anchor';
-import { TypeDef } from '@project-serum/anchor/dist/cjs/program/namespace/types';
+import { Event } from '@coral-xyz/anchor';
+import { TypeDef } from '@coral-xyz/anchor/dist/cjs/program/namespace/types';
 import type { Lending } from '../generated/types/lending';
 
 type _CollectionLendingProfile = TypeDef<Lending['accounts'][0], Lending>;

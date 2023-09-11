@@ -1,14 +1,16 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-var-requires */
 import { loadWallet } from 'utils';
-import { Cluster } from '@gbg-lending-client/types';
-import { LendingClient } from '@gbg-lending-client/client/lending';
-import { Loan } from '@gbg-lending-client/accounts';
-import { PublicKey, Transaction } from '@solana/web3.js';
+import { Cluster } from '@bankmenfi/lending-client/types';
+import { LendingClient } from '@bankmenfi/lending-client/client/lending';
+import { Loan } from '@bankmenfi/lending-client/accounts';
+import { ComputeBudgetProgram, PublicKey, Transaction } from '@solana/web3.js';
 import { Metaplex } from '@metaplex-foundation/js';
-import NodeWallet from '@project-serum/anchor/dist/cjs/nodewallet';
+import NodeWallet from '@coral-xyz/anchor/dist/cjs/nodewallet';
 import { CollectionLendingProfile } from '../src/accounts/collectionLendingProfile';
 import BN from 'bn.js';
+import { CONFIGS } from '@bankmenfi/lending-client/constants';
+import { getOrCreateAssociatedTokenAccount } from '@solana/spl-token';
 
 // Load  Env Variables
 require('dotenv').config({
@@ -20,7 +22,8 @@ require('dotenv').config({
 });
 
 // Constants
-const CLUSTER = process.env.CLUSTER as Cluster;
+const CLUSTER = (process.env.CLUSTER as Cluster) || 'devnet';
+const RPC_ENDPOINT = process.env.RPC_ENDPOINT || CONFIGS[CLUSTER].RPC_ENDPOINT;
 const KP_PATH = process.env.KEYPAIR_PATH;
 
 export const main = async () => {
@@ -29,13 +32,17 @@ export const main = async () => {
   const wallet = loadWallet(KP_PATH);
   console.log('Wallet Public Key: ' + wallet.publicKey.toString());
 
-  const lendingClient = new LendingClient(CLUSTER, new NodeWallet(wallet));
+  const lendingClient = new LendingClient(
+    CLUSTER,
+    RPC_ENDPOINT,
+    new NodeWallet(wallet)
+  );
 
   const metaplex = new Metaplex(lendingClient.connection, { cluster: CLUSTER });
 
   // Specify a collection lending profile here
   const collectionLendingProfileAddress = new PublicKey(
-    '2JjjU5n7TkWJ3QmQfeu3t3KSksUy2ssxQhvqvZDdyWi9'
+    'DhcBDFaMJrMsMKbqWSb48vaH8wNmDeTe2MGbfmhXkEz8'
   );
   // Load the collection lending profile
   const collectionLendingProfile = await CollectionLendingProfile.load(
@@ -67,31 +74,45 @@ export const main = async () => {
     'Found ' + filteredLoans.length + ' loans to foreclose for this CLP.'
   );
 
-  // Here we have to fetch an NFT from the borrower that actually belongs to this collection
+  // Here we have to fetch an NFT from the user that actually belongs to this collection
   const collateralMint = new PublicKey(
-    '3mVY7PUCBo9WMakr4XqjYYaC2irDUEHn6fGbcR6y4wXg'
+    'ASTsdGqvmi18VkLStbyx99bpsQ914iP5PxLvTSkm5q97'
   );
+
+  const metadata = await metaplex
+    .nfts()
+    .findByMint({ mintAddress: collateralMint });
 
   // The keypair
   const loanToForeclose = filteredLoans[0];
 
   console.log(
-    'Loan Principal: ' +
+    'Loan: ' +
+      loanToForeclose.address +
+      '\n\tLoan Principal: ' +
       loanToForeclose.state.principalAmount +
-      '\nRepayment Amount: ' +
+      '\n\tRepayment Amount: ' +
       loanToForeclose.state.repaymentAmount +
-      '\nPaid Amount: ' +
+      '\n\tPaid Amount: ' +
       loanToForeclose.state.paidAmount +
-      '\nAmount Left: ' +
+      '\n\tAmount Left: ' +
       loanToForeclose.state.repaymentAmount.sub(
         loanToForeclose.state.paidAmount
       )
   );
 
+  // We need to make sure that the lender has a token account for the collateral
+  const lenderTokenAccount = await getOrCreateAssociatedTokenAccount(
+    lendingClient.connection,
+    wallet,
+    collateralMint,
+    lendingClient.walletPubkey
+  );
+
   const { accounts, ixs } = await loanToForeclose.forecloseLoan(
     metaplex,
     collectionLendingProfile,
-    collateralMint
+    metadata
   );
 
   const tx = new Transaction();

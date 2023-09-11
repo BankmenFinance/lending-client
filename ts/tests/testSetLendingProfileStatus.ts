@@ -1,11 +1,12 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-var-requires */
 import { loadWallet } from 'utils';
-import { Cluster, Status } from '@gbg-lending-client/types';
-import { LendingClient } from '@gbg-lending-client/client/lending';
+import { Cluster, Status } from '@bankmenfi/lending-client/types';
+import { LendingClient } from '@bankmenfi/lending-client/client/lending';
 import { PublicKey, Transaction } from '@solana/web3.js';
-import NodeWallet from '@project-serum/anchor/dist/cjs/nodewallet';
+import NodeWallet from '@coral-xyz/anchor/dist/cjs/nodewallet';
 import { CollectionLendingProfile } from '../src/accounts/collectionLendingProfile';
+import { CONFIGS } from '@bankmenfi/lending-client/constants';
 
 // Load  Env Variables
 require('dotenv').config({
@@ -17,7 +18,8 @@ require('dotenv').config({
 });
 
 // Constants
-const CLUSTER = process.env.CLUSTER as Cluster;
+const CLUSTER = (process.env.CLUSTER as Cluster) || 'devnet';
+const RPC_ENDPOINT = process.env.RPC_ENDPOINT || CONFIGS[CLUSTER].RPC_ENDPOINT;
 const KP_PATH = process.env.KEYPAIR_PATH;
 
 export const main = async () => {
@@ -26,7 +28,11 @@ export const main = async () => {
   const wallet = loadWallet(KP_PATH);
   console.log('Wallet Public Key: ' + wallet.publicKey.toString());
 
-  const lendingClient = new LendingClient(CLUSTER, new NodeWallet(wallet));
+  const lendingClient = new LendingClient(
+    CLUSTER,
+    RPC_ENDPOINT,
+    new NodeWallet(wallet)
+  );
 
   // Specify a collection lending profile here
   const collectionLendingProfileAddress = new PublicKey(

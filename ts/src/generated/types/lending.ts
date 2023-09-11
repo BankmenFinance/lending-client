@@ -1,5 +1,5 @@
 export type Lending = {
-  version: '0.1.3';
+  version: '0.1.7';
   name: 'lending';
   instructions: [
     {
@@ -411,10 +411,30 @@ export type Lending = {
           docs: ['The collateral token mint.'];
         },
         {
+          name: 'collateralMetadata';
+          isMut: true;
+          isSigner: false;
+          docs: ['The collateral metadata account.'];
+        },
+        {
           name: 'collateralEdition';
           isMut: false;
           isSigner: false;
           docs: ['The collateral metadata account.'];
+        },
+        {
+          name: 'collateralTokenRecord';
+          isMut: true;
+          isSigner: false;
+          isOptional: true;
+          docs: ['The collateral token record account.'];
+        },
+        {
+          name: 'collateralTokenAuthRules';
+          isMut: true;
+          isSigner: false;
+          isOptional: true;
+          docs: ['The collateral token auth rules account.'];
         },
         {
           name: 'tokenVault';
@@ -457,6 +477,12 @@ export type Lending = {
           docs: ['The wallet address of the borrower.'];
         },
         {
+          name: 'systemProgram';
+          isMut: false;
+          isSigner: false;
+          docs: ['The System Program.'];
+        },
+        {
           name: 'tokenProgram';
           isMut: false;
           isSigner: false;
@@ -469,9 +495,16 @@ export type Lending = {
           docs: ['The Metaplex Token Metadata Program.'];
         },
         {
-          name: 'systemProgram';
+          name: 'authRulesProgram';
           isMut: false;
           isSigner: false;
+          docs: ['The Metaplex Token Auth Rules Program.'];
+        },
+        {
+          name: 'instructions';
+          isMut: false;
+          isSigner: false;
+          docs: ['The Instructions Sysvar.'];
         }
       ];
       args: [
@@ -513,7 +546,7 @@ export type Lending = {
         },
         {
           name: 'collateralMetadata';
-          isMut: false;
+          isMut: true;
           isSigner: false;
           docs: ['The collateral metadata account.'];
         },
@@ -521,7 +554,21 @@ export type Lending = {
           name: 'collateralEdition';
           isMut: false;
           isSigner: false;
-          docs: ['The collateral metadata account.'];
+          docs: ['The collateral master edition account.'];
+        },
+        {
+          name: 'collateralTokenRecord';
+          isMut: true;
+          isSigner: false;
+          isOptional: true;
+          docs: ['The collateral token record account.'];
+        },
+        {
+          name: 'collateralTokenAuthRules';
+          isMut: true;
+          isSigner: false;
+          isOptional: true;
+          docs: ['The collateral token auth rules account.'];
         },
         {
           name: 'escrow';
@@ -559,6 +606,12 @@ export type Lending = {
           docs: ['The wallet address of the borrower.'];
         },
         {
+          name: 'systemProgram';
+          isMut: false;
+          isSigner: false;
+          docs: ['The System Program.'];
+        },
+        {
           name: 'tokenProgram';
           isMut: false;
           isSigner: false;
@@ -571,16 +624,22 @@ export type Lending = {
           docs: ['The Metaplex Token Metadata Program.'];
         },
         {
-          name: 'systemProgram';
+          name: 'authRulesProgram';
           isMut: false;
           isSigner: false;
-          docs: ['The System Program.'];
+          docs: ['The Metaplex Token Auth Rules Program.'];
         },
         {
           name: 'rent';
           isMut: false;
           isSigner: false;
           docs: ['The Rent Sysvar.'];
+        },
+        {
+          name: 'instructions';
+          isMut: false;
+          isSigner: false;
+          docs: ['The Instructions Sysvar.'];
         }
       ];
       args: [];
@@ -608,6 +667,25 @@ export type Lending = {
           docs: ['The collateral token mint.'];
         },
         {
+          name: 'collateralMetadata';
+          isMut: true;
+          isSigner: false;
+          docs: ['The collateral metadata account.'];
+        },
+        {
+          name: 'collateralEdition';
+          isMut: false;
+          isSigner: false;
+          docs: ['The collateral master edition account.'];
+        },
+        {
+          name: 'collateralTokenAuthRules';
+          isMut: true;
+          isSigner: false;
+          isOptional: true;
+          docs: ['The collateral token auth rules account.'];
+        },
+        {
           name: 'escrow';
           isMut: true;
           isSigner: false;
@@ -617,6 +695,7 @@ export type Lending = {
           name: 'escrowTokenAccount';
           isMut: true;
           isSigner: false;
+          docs: ["The escrow's token account."];
         },
         {
           name: 'lenderCollateralAccount';
@@ -625,16 +704,24 @@ export type Lending = {
           docs: ["The lender's collateral account."];
         },
         {
-          name: 'collateralEdition';
-          isMut: false;
+          name: 'lenderCollateralTokenRecord';
+          isMut: true;
           isSigner: false;
-          docs: ['The collateral master edition account.'];
+          isOptional: true;
+          docs: ["The lender's collateral token record account."];
         },
         {
           name: 'borrowerCollateralAccount';
           isMut: true;
           isSigner: false;
           docs: ["The borrower's collateral account."];
+        },
+        {
+          name: 'borrowerCollateralTokenRecord';
+          isMut: true;
+          isSigner: false;
+          isOptional: true;
+          docs: ["The borrower's collateral token record account."];
         },
         {
           name: 'borrower';
@@ -645,15 +732,28 @@ export type Lending = {
           name: 'lenderAccount';
           isMut: true;
           isSigner: false;
+          docs: ["The lender's user account."];
         },
         {
           name: 'lender';
           isMut: true;
           isSigner: true;
-          docs: ['The wallet address of the borrower.'];
+          docs: ['The wallet address of the lender.'];
+        },
+        {
+          name: 'systemProgram';
+          isMut: false;
+          isSigner: false;
+          docs: ['The System Program.'];
         },
         {
           name: 'tokenProgram';
+          isMut: false;
+          isSigner: false;
+          docs: ['The Token Program.'];
+        },
+        {
+          name: 'associatedTokenProgram';
           isMut: false;
           isSigner: false;
           docs: ['The Token Program.'];
@@ -663,6 +763,18 @@ export type Lending = {
           isMut: false;
           isSigner: false;
           docs: ['The Metaplex Token Metadata Program.'];
+        },
+        {
+          name: 'authRulesProgram';
+          isMut: false;
+          isSigner: false;
+          docs: ['The Metaplex Token Auth Rules Program.'];
+        },
+        {
+          name: 'instructions';
+          isMut: false;
+          isSigner: false;
+          docs: ['The Instructions Sysvar.'];
         }
       ];
       args: [];
@@ -804,7 +916,7 @@ export type Lending = {
           {
             name: 'tokenMint';
             docs: [
-              'The mint of the token used to originate loans in using this book'
+              'The mint of the token used to originate loans in using this book.'
             ];
             type: 'publicKey';
           },
@@ -886,7 +998,7 @@ export type Lending = {
           },
           {
             name: 'id';
-            docs: ['the id of this profile //'];
+            docs: ['the id of this profile.'];
             type: 'u64';
           },
           {
@@ -922,9 +1034,16 @@ export type Lending = {
             };
           },
           {
+            name: 'tokenStandard';
+            docs: ['The token standard of the underlying NFT.'];
+            type: {
+              defined: 'TokenStandard';
+            };
+          },
+          {
             name: 'padding';
             type: {
-              array: ['u8', 13];
+              array: ['u8', 12];
             };
           },
           {
@@ -976,7 +1095,7 @@ export type Lending = {
           },
           {
             name: 'ltvAmount';
-            docs: ['The maximum LTV amount, denominated in basis points.'];
+            docs: ['The LTV amount, denominated in basis points.'];
             type: 'u64';
           },
           {
@@ -1123,6 +1242,23 @@ export type Lending = {
           },
           {
             name: 'Suspended';
+          }
+        ];
+      };
+    },
+    {
+      name: 'TokenStandard';
+      type: {
+        kind: 'enum';
+        variants: [
+          {
+            name: 'Legacy';
+          },
+          {
+            name: 'Programmable';
+          },
+          {
+            name: 'ProgrammableWithRuleSet';
           }
         ];
       };
@@ -1375,6 +1511,11 @@ export type Lending = {
           name: 'repaymentAmount';
           type: 'u64';
           index: false;
+        },
+        {
+          name: 'loanAmount';
+          type: 'u64';
+          index: false;
         }
       ];
     },
@@ -1512,71 +1653,76 @@ export type Lending = {
     },
     {
       code: 6011;
+      name: 'InvalidTokenStandard';
+      msg: 'Invalid Token Standard';
+    },
+    {
+      code: 6012;
       name: 'MetadataWithoutCollection';
       msg: 'The given Metadata does not have a Collection.';
     },
     {
-      code: 6012;
+      code: 6013;
       name: 'MetadataCollectionUnverified';
       msg: 'The given Metadata Collection is unverified.';
     },
     {
-      code: 6013;
+      code: 6014;
       name: 'LoanAlreadyOriginated';
       msg: 'The given Loan has already been originated.';
     },
     {
-      code: 6014;
+      code: 6015;
       name: 'LoanAlreadyDefaulted';
       msg: 'The given Loan has already defaulted.';
     },
     {
-      code: 6015;
+      code: 6016;
       name: 'CollectionLendingProfileWithLoanOffers';
       msg: 'The given Collection Lending Profile has existing Loan offers.';
     },
     {
-      code: 6016;
+      code: 6017;
       name: 'CollectionLendingProfileWithAccumulatedFees';
       msg: 'The given Collection Lending Profile has accumulated fees.';
     },
     {
-      code: 6017;
+      code: 6018;
       name: 'CollectionLendingProfileWithoutAccumulatedFees';
       msg: 'The given Collection Lending Profile does not have accumulated fees.';
     },
     {
-      code: 6018;
+      code: 6019;
       name: 'CollectionLendingProfileSuspended';
       msg: 'The given Collection Lending Profile has been suspended.';
     },
     {
-      code: 6019;
+      code: 6020;
       name: 'RemainingAccountsMissing';
       msg: 'Remaining accounts expected by this instruction are missing.';
     },
     {
-      code: 6020;
+      code: 6021;
       name: 'MissingOracleFloorPriceAccount';
       msg: 'Oracle Floor Price Feed account is missing.';
     },
     {
-      code: 6021;
+      code: 6022;
       name: 'InvalidOracleFloorPriceAccount';
       msg: 'Invalid Floor Price Feed account.';
     },
     {
-      code: 6022;
+      code: 6023;
       name: 'StaleOracleFeed';
       msg: 'The Oracle Floor Price Feed for this Collection Lending Profile is stale.';
     },
     {
-      code: 6023;
+      code: 6024;
       name: 'LoanTypeDisabled';
       msg: 'This loan type is disabled.';
     },
     {
-      code: 6024;
+      code: 6025;
       name: 'LoanAmountExceedsMaxLtvAmount';
       msg: 'The loan amount for the current Floor Price exceeds the maximum LTV loan amount for this loan.';
     }
@@ -1584,7 +1730,7 @@ export type Lending = {
 };
 
 export const IDL: Lending = {
-  version: '0.1.3',
+  version: '0.1.7',
   name: 'lending',
   instructions: [
     {
@@ -1996,10 +2142,30 @@ export const IDL: Lending = {
           docs: ['The collateral token mint.']
         },
         {
+          name: 'collateralMetadata',
+          isMut: true,
+          isSigner: false,
+          docs: ['The collateral metadata account.']
+        },
+        {
           name: 'collateralEdition',
           isMut: false,
           isSigner: false,
           docs: ['The collateral metadata account.']
+        },
+        {
+          name: 'collateralTokenRecord',
+          isMut: true,
+          isSigner: false,
+          isOptional: true,
+          docs: ['The collateral token record account.']
+        },
+        {
+          name: 'collateralTokenAuthRules',
+          isMut: true,
+          isSigner: false,
+          isOptional: true,
+          docs: ['The collateral token auth rules account.']
         },
         {
           name: 'tokenVault',
@@ -2042,6 +2208,12 @@ export const IDL: Lending = {
           docs: ['The wallet address of the borrower.']
         },
         {
+          name: 'systemProgram',
+          isMut: false,
+          isSigner: false,
+          docs: ['The System Program.']
+        },
+        {
           name: 'tokenProgram',
           isMut: false,
           isSigner: false,
@@ -2054,9 +2226,16 @@ export const IDL: Lending = {
           docs: ['The Metaplex Token Metadata Program.']
         },
         {
-          name: 'systemProgram',
+          name: 'authRulesProgram',
           isMut: false,
-          isSigner: false
+          isSigner: false,
+          docs: ['The Metaplex Token Auth Rules Program.']
+        },
+        {
+          name: 'instructions',
+          isMut: false,
+          isSigner: false,
+          docs: ['The Instructions Sysvar.']
         }
       ],
       args: [
@@ -2098,7 +2277,7 @@ export const IDL: Lending = {
         },
         {
           name: 'collateralMetadata',
-          isMut: false,
+          isMut: true,
           isSigner: false,
           docs: ['The collateral metadata account.']
         },
@@ -2106,7 +2285,21 @@ export const IDL: Lending = {
           name: 'collateralEdition',
           isMut: false,
           isSigner: false,
-          docs: ['The collateral metadata account.']
+          docs: ['The collateral master edition account.']
+        },
+        {
+          name: 'collateralTokenRecord',
+          isMut: true,
+          isSigner: false,
+          isOptional: true,
+          docs: ['The collateral token record account.']
+        },
+        {
+          name: 'collateralTokenAuthRules',
+          isMut: true,
+          isSigner: false,
+          isOptional: true,
+          docs: ['The collateral token auth rules account.']
         },
         {
           name: 'escrow',
@@ -2144,6 +2337,12 @@ export const IDL: Lending = {
           docs: ['The wallet address of the borrower.']
         },
         {
+          name: 'systemProgram',
+          isMut: false,
+          isSigner: false,
+          docs: ['The System Program.']
+        },
+        {
           name: 'tokenProgram',
           isMut: false,
           isSigner: false,
@@ -2156,16 +2355,22 @@ export const IDL: Lending = {
           docs: ['The Metaplex Token Metadata Program.']
         },
         {
-          name: 'systemProgram',
+          name: 'authRulesProgram',
           isMut: false,
           isSigner: false,
-          docs: ['The System Program.']
+          docs: ['The Metaplex Token Auth Rules Program.']
         },
         {
           name: 'rent',
           isMut: false,
           isSigner: false,
           docs: ['The Rent Sysvar.']
+        },
+        {
+          name: 'instructions',
+          isMut: false,
+          isSigner: false,
+          docs: ['The Instructions Sysvar.']
         }
       ],
       args: []
@@ -2193,21 +2398,10 @@ export const IDL: Lending = {
           docs: ['The collateral token mint.']
         },
         {
-          name: 'escrow',
+          name: 'collateralMetadata',
           isMut: true,
           isSigner: false,
-          docs: ['The escrow.']
-        },
-        {
-          name: 'escrowTokenAccount',
-          isMut: true,
-          isSigner: false
-        },
-        {
-          name: 'lenderCollateralAccount',
-          isMut: true,
-          isSigner: false,
-          docs: ["The lender's collateral account."]
+          docs: ['The collateral metadata account.']
         },
         {
           name: 'collateralEdition',
@@ -2216,10 +2410,49 @@ export const IDL: Lending = {
           docs: ['The collateral master edition account.']
         },
         {
+          name: 'collateralTokenAuthRules',
+          isMut: true,
+          isSigner: false,
+          isOptional: true,
+          docs: ['The collateral token auth rules account.']
+        },
+        {
+          name: 'escrow',
+          isMut: true,
+          isSigner: false,
+          docs: ['The escrow.']
+        },
+        {
+          name: 'escrowTokenAccount',
+          isMut: true,
+          isSigner: false,
+          docs: ["The escrow's token account."]
+        },
+        {
+          name: 'lenderCollateralAccount',
+          isMut: true,
+          isSigner: false,
+          docs: ["The lender's collateral account."]
+        },
+        {
+          name: 'lenderCollateralTokenRecord',
+          isMut: true,
+          isSigner: false,
+          isOptional: true,
+          docs: ["The lender's collateral token record account."]
+        },
+        {
           name: 'borrowerCollateralAccount',
           isMut: true,
           isSigner: false,
           docs: ["The borrower's collateral account."]
+        },
+        {
+          name: 'borrowerCollateralTokenRecord',
+          isMut: true,
+          isSigner: false,
+          isOptional: true,
+          docs: ["The borrower's collateral token record account."]
         },
         {
           name: 'borrower',
@@ -2229,16 +2462,29 @@ export const IDL: Lending = {
         {
           name: 'lenderAccount',
           isMut: true,
-          isSigner: false
+          isSigner: false,
+          docs: ["The lender's user account."]
         },
         {
           name: 'lender',
           isMut: true,
           isSigner: true,
-          docs: ['The wallet address of the borrower.']
+          docs: ['The wallet address of the lender.']
+        },
+        {
+          name: 'systemProgram',
+          isMut: false,
+          isSigner: false,
+          docs: ['The System Program.']
         },
         {
           name: 'tokenProgram',
+          isMut: false,
+          isSigner: false,
+          docs: ['The Token Program.']
+        },
+        {
+          name: 'associatedTokenProgram',
           isMut: false,
           isSigner: false,
           docs: ['The Token Program.']
@@ -2248,6 +2494,18 @@ export const IDL: Lending = {
           isMut: false,
           isSigner: false,
           docs: ['The Metaplex Token Metadata Program.']
+        },
+        {
+          name: 'authRulesProgram',
+          isMut: false,
+          isSigner: false,
+          docs: ['The Metaplex Token Auth Rules Program.']
+        },
+        {
+          name: 'instructions',
+          isMut: false,
+          isSigner: false,
+          docs: ['The Instructions Sysvar.']
         }
       ],
       args: []
@@ -2389,7 +2647,7 @@ export const IDL: Lending = {
           {
             name: 'tokenMint',
             docs: [
-              'The mint of the token used to originate loans in using this book'
+              'The mint of the token used to originate loans in using this book.'
             ],
             type: 'publicKey'
           },
@@ -2471,7 +2729,7 @@ export const IDL: Lending = {
           },
           {
             name: 'id',
-            docs: ['the id of this profile //'],
+            docs: ['the id of this profile.'],
             type: 'u64'
           },
           {
@@ -2507,9 +2765,16 @@ export const IDL: Lending = {
             }
           },
           {
+            name: 'tokenStandard',
+            docs: ['The token standard of the underlying NFT.'],
+            type: {
+              defined: 'TokenStandard'
+            }
+          },
+          {
             name: 'padding',
             type: {
-              array: ['u8', 13]
+              array: ['u8', 12]
             }
           },
           {
@@ -2561,7 +2826,7 @@ export const IDL: Lending = {
           },
           {
             name: 'ltvAmount',
-            docs: ['The maximum LTV amount, denominated in basis points.'],
+            docs: ['The LTV amount, denominated in basis points.'],
             type: 'u64'
           },
           {
@@ -2708,6 +2973,23 @@ export const IDL: Lending = {
           },
           {
             name: 'Suspended'
+          }
+        ]
+      }
+    },
+    {
+      name: 'TokenStandard',
+      type: {
+        kind: 'enum',
+        variants: [
+          {
+            name: 'Legacy'
+          },
+          {
+            name: 'Programmable'
+          },
+          {
+            name: 'ProgrammableWithRuleSet'
           }
         ]
       }
@@ -2960,6 +3242,11 @@ export const IDL: Lending = {
           name: 'repaymentAmount',
           type: 'u64',
           index: false
+        },
+        {
+          name: 'loanAmount',
+          type: 'u64',
+          index: false
         }
       ]
     },
@@ -3097,71 +3384,76 @@ export const IDL: Lending = {
     },
     {
       code: 6011,
+      name: 'InvalidTokenStandard',
+      msg: 'Invalid Token Standard'
+    },
+    {
+      code: 6012,
       name: 'MetadataWithoutCollection',
       msg: 'The given Metadata does not have a Collection.'
     },
     {
-      code: 6012,
+      code: 6013,
       name: 'MetadataCollectionUnverified',
       msg: 'The given Metadata Collection is unverified.'
     },
     {
-      code: 6013,
+      code: 6014,
       name: 'LoanAlreadyOriginated',
       msg: 'The given Loan has already been originated.'
     },
     {
-      code: 6014,
+      code: 6015,
       name: 'LoanAlreadyDefaulted',
       msg: 'The given Loan has already defaulted.'
     },
     {
-      code: 6015,
+      code: 6016,
       name: 'CollectionLendingProfileWithLoanOffers',
       msg: 'The given Collection Lending Profile has existing Loan offers.'
     },
     {
-      code: 6016,
+      code: 6017,
       name: 'CollectionLendingProfileWithAccumulatedFees',
       msg: 'The given Collection Lending Profile has accumulated fees.'
     },
     {
-      code: 6017,
+      code: 6018,
       name: 'CollectionLendingProfileWithoutAccumulatedFees',
       msg: 'The given Collection Lending Profile does not have accumulated fees.'
     },
     {
-      code: 6018,
+      code: 6019,
       name: 'CollectionLendingProfileSuspended',
       msg: 'The given Collection Lending Profile has been suspended.'
     },
     {
-      code: 6019,
+      code: 6020,
       name: 'RemainingAccountsMissing',
       msg: 'Remaining accounts expected by this instruction are missing.'
     },
     {
-      code: 6020,
+      code: 6021,
       name: 'MissingOracleFloorPriceAccount',
       msg: 'Oracle Floor Price Feed account is missing.'
     },
     {
-      code: 6021,
+      code: 6022,
       name: 'InvalidOracleFloorPriceAccount',
       msg: 'Invalid Floor Price Feed account.'
     },
     {
-      code: 6022,
+      code: 6023,
       name: 'StaleOracleFeed',
       msg: 'The Oracle Floor Price Feed for this Collection Lending Profile is stale.'
     },
     {
-      code: 6023,
+      code: 6024,
       name: 'LoanTypeDisabled',
       msg: 'This loan type is disabled.'
     },
     {
-      code: 6024,
+      code: 6025,
       name: 'LoanAmountExceedsMaxLtvAmount',
       msg: 'The loan amount for the current Floor Price exceeds the maximum LTV loan amount for this loan.'
     }
