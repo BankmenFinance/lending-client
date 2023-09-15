@@ -615,14 +615,26 @@ export class Loan {
   }
 
   /**
-   * Gets the principal of the Loan, if it has been taken, in native token units.
+   * Gets the principal of the Loan.
    * @returns The principal amount.
    */
   get principal(): BN {
+    if (this.loanType == LoanType.Simple) {
+      return this.state.principalAmount;
+    }
+
+    return this.state.maxLtvAmount;
+  }
+
+  /**
+   * Gets the repayment amount of the Loan, if it has been taken, in native token units.
+   * @returns The principal amount.
+   */
+  get repaymentAmount(): BN {
     if (this.borrower.equals(PublicKey.default)) {
       return new BN(0);
     }
-    return this.state.principalAmount;
+    return this.state.repaymentAmount;
   }
 
   /**
