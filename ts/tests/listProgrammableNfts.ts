@@ -3,18 +3,11 @@
 import { loadWallet } from 'utils';
 import { Cluster } from '@bankmenfi/lending-client/types';
 import { LendingClient } from '@bankmenfi/lending-client/client/lending';
-import { Loan } from '@bankmenfi/lending-client/accounts';
-import {
-  ComputeBudgetInstruction,
-  ComputeBudgetProgram,
-  PublicKey,
-  Transaction
-} from '@solana/web3.js';
+import { PublicKey } from '@solana/web3.js';
 import { Metaplex, keypairIdentity } from '@metaplex-foundation/js';
 import NodeWallet from '@coral-xyz/anchor/dist/cjs/nodewallet';
 import { CollectionLendingProfile } from '../src/accounts/collectionLendingProfile';
 import { CONFIGS } from '@bankmenfi/lending-client/constants';
-import { BN } from '@coral-xyz/anchor';
 import { getAssociatedTokenAddress } from '@solana/spl-token';
 
 // Load  Env Variables

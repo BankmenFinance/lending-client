@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-var-requires */
 import { loadWallet } from 'utils';
 import { Cluster } from '@bankmenfi/lending-client/types';
@@ -50,7 +49,7 @@ export const main = async () => {
 
   // Derive the user's account address
   // this account holds stats from the user's usage of the program
-  const [userAccountAddress, userAccountBump] = deriveUserAccountAddress(
+  const [userAccountAddress] = deriveUserAccountAddress(
     lendingClient.walletPubkey,
     lendingClient.programId
   );
@@ -70,7 +69,7 @@ export const main = async () => {
 
   // We need to make sure that the lender and the borrower have a token account
   // for the token mint of the Collection Lending Profile, even if it is SOL being used for the loans.
-  const lenderTokenAccount = await getOrCreateAssociatedTokenAccount(
+  await getOrCreateAssociatedTokenAccount(
     lendingClient.connection,
     wallet,
     collectionLendingProfile.tokenMint,

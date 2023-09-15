@@ -1,19 +1,13 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-var-requires */
 import { loadWallet } from 'utils';
 import { Cluster } from '@bankmenfi/lending-client/types';
 import { LendingClient } from '@bankmenfi/lending-client/client/lending';
 import { Loan } from '@bankmenfi/lending-client/accounts';
 import { PublicKey, Transaction } from '@solana/web3.js';
-import { Metaplex, Metadata, toAccountInfo } from '@metaplex-foundation/js';
+import { Metaplex } from '@metaplex-foundation/js';
 import NodeWallet from '@coral-xyz/anchor/dist/cjs/nodewallet';
 import { CollectionLendingProfile } from '../src/accounts/collectionLendingProfile';
 import { CONFIGS } from '@bankmenfi/lending-client/constants';
-import {
-  deserializeTokenRecord,
-  fetchTokenRecord
-} from '@metaplex-foundation/mpl-token-metadata';
-import { getAssociatedTokenAddress } from '@project-serum/associated-token';
 
 // Load  Env Variables
 require('dotenv').config({
@@ -45,7 +39,7 @@ export const main = async () => {
 
   // Specify a collection lending profile here
   const collectionLendingProfileAddress = new PublicKey(
-    'DhcBDFaMJrMsMKbqWSb48vaH8wNmDeTe2MGbfmhXkEz8'
+    '4oEJB1ubdtHyXXq5htBGQ3qNVhykP69LL1pDtsxLoYDz'
   );
   // Load the collection lending profile
   const collectionLendingProfile = await CollectionLendingProfile.load(
@@ -92,14 +86,14 @@ export const main = async () => {
 
   // Here we have to fetch an NFT from the user that actually belongs to this collection
   const collateralMint = new PublicKey(
-    '4UWVL34G1czjCY1YZp6aaLREp6A2giUcmGzK7z9YFgcu'
+    'BFZVSvmi9DNpygevKTobeevou71Dreeofe9cbH2GatZP'
   );
 
   const metadata = await metaplex
     .nfts()
     .findByMint({ mintAddress: collateralMint });
 
-  const { accounts, ixs } = await filteredLoans[0].takeLoan(
+  const { ixs } = await filteredLoans[0].takeLoan(
     metaplex,
     collectionLendingProfile,
     metadata

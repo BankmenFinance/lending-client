@@ -1,11 +1,9 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-var-requires */
 import { loadWallet } from 'utils';
 import { Cluster } from '@bankmenfi/lending-client/types';
 import { LendingClient } from '@bankmenfi/lending-client/client/lending';
 import { Loan } from '@bankmenfi/lending-client/accounts';
 import { PublicKey, Transaction } from '@solana/web3.js';
-import { Metaplex } from '@metaplex-foundation/js';
 import NodeWallet from '@coral-xyz/anchor/dist/cjs/nodewallet';
 import { CollectionLendingProfile } from '../src/accounts/collectionLendingProfile';
 import { CONFIGS } from '@bankmenfi/lending-client/constants';
@@ -35,8 +33,6 @@ export const main = async () => {
     RPC_ENDPOINT,
     new NodeWallet(wallet)
   );
-
-  const metaplex = new Metaplex(lendingClient.connection, { cluster: CLUSTER });
 
   // Specify a collection lending profile here
   const collectionLendingProfileAddress = new PublicKey(
@@ -84,9 +80,7 @@ export const main = async () => {
       loanToRescind.state.repaymentAmount.sub(loanToRescind.state.paidAmount)
   );
 
-  const { accounts, ixs } = await loanToRescind.rescindLoan(
-    collectionLendingProfile
-  );
+  const { ixs } = await loanToRescind.rescindLoan(collectionLendingProfile);
 
   const tx = new Transaction();
 

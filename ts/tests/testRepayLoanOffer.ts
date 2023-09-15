@@ -1,15 +1,9 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-var-requires */
 import { loadWallet } from 'utils';
 import { Cluster } from '@bankmenfi/lending-client/types';
 import { LendingClient } from '@bankmenfi/lending-client/client/lending';
 import { Loan } from '@bankmenfi/lending-client/accounts';
-import {
-  ComputeBudgetInstruction,
-  ComputeBudgetProgram,
-  PublicKey,
-  Transaction
-} from '@solana/web3.js';
+import { PublicKey, Transaction } from '@solana/web3.js';
 import { Metaplex } from '@metaplex-foundation/js';
 import NodeWallet from '@coral-xyz/anchor/dist/cjs/nodewallet';
 import { CollectionLendingProfile } from '../src/accounts/collectionLendingProfile';
@@ -104,7 +98,7 @@ export const main = async () => {
       loanToRepay.state.repaymentAmount.sub(loanToRepay.state.paidAmount)
   );
 
-  const { accounts, ixs } = await loanToRepay.repayLoan(
+  const { ixs } = await loanToRepay.repayLoan(
     metaplex,
     collectionLendingProfile,
     metadata

@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-var-requires */
 import { delay, loadWallet } from 'utils';
 import { Cluster } from '@bankmenfi/lending-client/types';

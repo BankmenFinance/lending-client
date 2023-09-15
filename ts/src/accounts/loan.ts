@@ -39,6 +39,7 @@ import { ASSOCIATED_TOKEN_PROGRAM_ID } from '@solana/spl-token';
 import { TransactionAccounts } from '../types/index';
 import { BN } from '@coral-xyz/anchor';
 import { bnToDate } from '../utils';
+import { AccountVersion } from '../types/on-chain';
 
 /**
  * Represents a Loan.
@@ -310,7 +311,7 @@ export class Loan {
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     if (
-      (this.state.loanType as LoanType) == LoanType.LoanToValue &&
+      this.loanType.equals(LoanType.LoanToValue) &&
       !PublicKey.default.equals(floorPriceOracle)
     ) {
       ix.keys.push({
@@ -558,6 +559,14 @@ export class Loan {
   }
 
   /**
+   * Gets the Collection Lending Profile of this Loan.
+   * @returns The Public Key of the lender.
+   */
+  get profile(): PublicKey {
+    return this.state.profile;
+  }
+
+  /**
    * Gets the lender associated with this Loan.
    * @returns The Public Key of the lender.
    */
@@ -583,11 +592,19 @@ export class Loan {
   }
 
   /**
+   * Gets the account version of this Loan.
+   * @returns The Account Version.
+   */
+  get accountVersion(): AccountVersion {
+    return new AccountVersion(this.state.accountVersion);
+  }
+
+  /**
    * Gets the token standard of the collateral of this Loan.
    * @returns The Token Standard.
    */
   get tokenStandard(): TokenStandard {
-    return this.state.tokenStandard;
+    return new TokenStandard(this.state.tokenStandard);
   }
 
   /**
@@ -595,7 +612,7 @@ export class Loan {
    * @returns The Loan Type.
    */
   get loanType(): LoanType {
-    return this.state.loanType;
+    return new LoanType(this.state.loanType);
   }
 
   /**
@@ -619,7 +636,7 @@ export class Loan {
    * @returns The principal amount.
    */
   get principal(): BN {
-    if (this.loanType == LoanType.Simple) {
+    if (!this.borrower.equals(PublicKey.default)) {
       return this.state.principalAmount;
     }
 
@@ -631,9 +648,6 @@ export class Loan {
    * @returns The principal amount.
    */
   get repaymentAmount(): BN {
-    if (this.borrower.equals(PublicKey.default)) {
-      return new BN(0);
-    }
     return this.state.repaymentAmount;
   }
 
@@ -642,9 +656,6 @@ export class Loan {
    * @returns The amount paid.
    */
   get paidAmount(): BN {
-    if (this.borrower.equals(PublicKey.default)) {
-      return new BN(0);
-    }
     return this.state.paidAmount;
   }
 

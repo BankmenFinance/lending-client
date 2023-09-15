@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-var-requires */
 import { loadWallet } from 'utils';
 import { Cluster, Status } from '@bankmenfi/lending-client/types';
@@ -46,7 +45,7 @@ export const main = async () => {
 
   const { ixs } = await collectionLendingProfile.setStatus(
     lendingClient,
-    Status.Active
+    new Status(Status.Active)
   );
 
   const tx = new Transaction();

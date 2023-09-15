@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-var-requires */
 import { loadWallet } from 'utils';
 import { Cluster } from '@bankmenfi/lending-client/types';
@@ -6,7 +5,6 @@ import { LendingClient } from '@bankmenfi/lending-client/client/lending';
 import { Loan } from '@bankmenfi/lending-client/accounts';
 import { PublicKey } from '@solana/web3.js';
 import NodeWallet from '@coral-xyz/anchor/dist/cjs/nodewallet';
-import { CollectionLendingProfile } from '../src/accounts/collectionLendingProfile';
 import { CONFIGS } from '@bankmenfi/lending-client/constants';
 import { BN } from '@coral-xyz/anchor';
 
@@ -39,11 +37,6 @@ export const main = async () => {
   // Specify a collection lending profile here
   const collectionLendingProfileAddress = new PublicKey(
     '3ShpjRuYNGa9hLK85Bx216vhutkyyYzH8MUwHzGzZYfe'
-  );
-  // Load the collection lending profile
-  const collectionLendingProfile = await CollectionLendingProfile.load(
-    lendingClient,
-    collectionLendingProfileAddress
   );
 
   const loans = await Loan.loadAll(

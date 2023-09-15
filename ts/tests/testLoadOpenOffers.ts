@@ -1,14 +1,12 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-var-requires */
 import { delay, loadWallet } from 'utils';
-import { Cluster, LoanType } from '@bankmenfi/lending-client/types';
+import { Cluster } from '@bankmenfi/lending-client/types';
 import { LendingClient } from '@bankmenfi/lending-client/client/lending';
 import { Loan } from '@bankmenfi/lending-client/accounts';
 import { PublicKey } from '@solana/web3.js';
 import NodeWallet from '@coral-xyz/anchor/dist/cjs/nodewallet';
 import { CollectionLendingProfile } from '../src/accounts/collectionLendingProfile';
 import { CONFIGS } from '@bankmenfi/lending-client/constants';
-import { BN } from '@coral-xyz/anchor';
 
 // Load  Env Variables
 require('dotenv').config({
@@ -24,6 +22,10 @@ const CLUSTER = (process.env.CLUSTER as Cluster) || 'devnet';
 const RPC_ENDPOINT = process.env.RPC_ENDPOINT || CONFIGS[CLUSTER].RPC_ENDPOINT;
 const KP_PATH = process.env.KEYPAIR_PATH;
 
+const COLLECTION = new PublicKey(
+  'EW8mqV277inu7v4rF983tpii445oGDuDQJQtXRwabfZ5'
+);
+
 export const main = async () => {
   console.log('Running testLoadOpenOffers.');
 
@@ -37,9 +39,11 @@ export const main = async () => {
   );
 
   // Load the collection lending profile
-  const collectionLendingProfiles = await CollectionLendingProfile.loadAll(
-    lendingClient
-  );
+  const collectionLendingProfiles =
+    await CollectionLendingProfile.loadAllWithOptions(
+      lendingClient,
+      COLLECTION
+    );
   console.log(`Found ${collectionLendingProfiles.length} Lending Profiles.`);
 
   for (const lendingProfile of collectionLendingProfiles) {
@@ -49,17 +53,14 @@ export const main = async () => {
 
     const loans = await Loan.loadAllWithOptions(
       lendingClient,
-      lendingProfile.address,
-      wallet.publicKey
+      lendingProfile.address
     );
     console.log(
-      `Found ${loans.length} Loan Accounts for this Lending Profile where the loaded wallet is a Lender.`
+      `Found ${loans.length} Loan Accounts for this Lending Profile.`
     );
 
-    const filteredLoans = loans.filter(
-      (l) =>
-        l.state.lender.equals(wallet.publicKey) &&
-        PublicKey.default.equals(l.state.borrower)
+    const filteredLoans = loans.filter((l) =>
+      PublicKey.default.equals(l.state.borrower)
     );
 
     console.log(

@@ -11,6 +11,10 @@ export type CreateCollectionLendingProfileArgs = TypeDef<
   Lending
 >;
 export type OfferLoanArgs = TypeDef<Lending['types'][1], Lending>;
+type _Status = TypeDef<Lending['types'][2], Lending>;
+type _TokenStandard = TypeDef<Lending['types'][3], Lending>;
+type _LoanType = TypeDef<Lending['types'][4], Lending>;
+type _AccountVersion = TypeDef<Lending['types'][5], Lending>;
 
 export type CollectionLendingProfileCreated = Event<
   Lending['events'][0],
@@ -44,59 +48,110 @@ export type LoanForeclosed = Event<Lending['events'][10], Lending>;
 
 export interface CollectionLendingProfileState
   extends _CollectionLendingProfile {
-  status: Status;
+  status: _Status;
+  accountVersion: _AccountVersion;
 }
 
 export interface LoanState extends _LoanState {
-  loanType: LoanType;
-  accountVersion: AccountVersion;
-  tokenStandard: TokenStandard;
+  loanType: _LoanType;
+  accountVersion: _AccountVersion;
+  tokenStandard: _TokenStandard;
 }
 
-export class Status {
+export class Status extends Object {
   static readonly Active = { active: {} };
   static readonly Suspended = { suspended: {} };
 
-  public toString = (): string => {
-    if ((this as Status) == Status.Active) {
+  constructor(readonly inner: _Status) {
+    super(inner);
+  }
+
+  public override toString = (): string => {
+    if (this.inner.active) {
       return 'Active';
-    } else if ((this as Status) == Status.Suspended) {
+    } else if (this.inner.suspended) {
       return 'Suspended';
     }
   };
-}
 
-export class LoanType {
-  static readonly Simple = { simple: {} };
-  static readonly LoanToValue = { loanToValue: {} };
-
-  public toString = (): string => {
-    if ((this as LoanType) == LoanType.Simple) {
-      return 'Simple';
-    } else if ((this as LoanType) == LoanType.LoanToValue) {
-      return 'LTV';
-    }
+  public equals = (object: object): boolean => {
+    const status = object as _Status;
+    return (
+      status.active == this.inner.active ||
+      status.suspended == this.inner.suspended
+    );
   };
 }
 
-export class TokenStandard {
+export class LoanType extends Object {
+  static readonly Simple = { simple: {} };
+  static readonly LoanToValue = { loanToValue: {} };
+
+  constructor(readonly inner: _LoanType) {
+    super(inner);
+  }
+
+  public override toString = (): string => {
+    if (this.inner.simple) {
+      return 'Simple';
+    } else if (this.inner.loanToValue) {
+      return 'LTV';
+    }
+  };
+
+  public equals = (object: object): boolean => {
+    const loanType = object as _LoanType;
+    const eq =
+      loanType.simple === this.inner.simple ||
+      loanType.loanToValue == this.inner.loanToValue;
+    return eq;
+  };
+}
+
+export class TokenStandard extends Object {
   static readonly Legacy = { legacy: {} };
   static readonly Programmable = { programmable: {} };
   static readonly ProgrammableWithRuleSet = { programmableWithRuleSet: {} };
 
-  public toString = (): string => {
-    if ((this as TokenStandard) == TokenStandard.Legacy) {
+  constructor(readonly inner: _TokenStandard) {
+    super(inner);
+  }
+
+  public override toString = (): string => {
+    if (this.inner.legacy) {
       return 'Legacy';
-    } else if ((this as TokenStandard) == TokenStandard.Programmable) {
+    } else if (this.inner.programmable) {
       return 'Programmable';
-    } else if (
-      (this as TokenStandard) == TokenStandard.ProgrammableWithRuleSet
-    ) {
+    } else if (this.inner.programmableWithRuleSet) {
       return 'Programmable With Rule Set';
     }
   };
+
+  public equals = (object: object): boolean => {
+    const tokenStandard = object as _TokenStandard;
+    return (
+      tokenStandard.legacy == this.inner.legacy ||
+      tokenStandard.programmable == this.inner.programmable ||
+      tokenStandard.programmableWithRuleSet ==
+        this.inner.programmableWithRuleSet
+    );
+  };
 }
 
-export class AccountVersion {
+export class AccountVersion extends Object {
   static readonly Base = { base: {} };
+
+  constructor(readonly inner: _AccountVersion) {
+    super(inner);
+  }
+
+  public override toString = (): string => {
+    if (this.inner.base) {
+      return 'Base';
+    }
+  };
+
+  public equals = (object: object): boolean => {
+    return (object as _AccountVersion).base == this.inner.base;
+  };
 }

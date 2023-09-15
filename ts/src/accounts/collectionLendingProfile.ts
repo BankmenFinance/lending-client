@@ -19,6 +19,7 @@ import { TOKEN_PROGRAM_ID } from '@coral-xyz/anchor/dist/cjs/utils/token';
 import { getAssociatedTokenAddress } from '@project-serum/associated-token';
 import BN from 'bn.js';
 import { BASIS_POINTS_DIVISOR } from '../constants';
+import { AccountVersion } from '../types/on-chain';
 import {
   basisPointsToApr,
   getDurationAndUnitFromTime,
@@ -105,6 +106,58 @@ export class CollectionLendingProfile {
   ): Promise<CollectionLendingProfile[]> {
     const lendingProfileAccounts =
       await client.accounts.collectionLendingProfile.all();
+    const loans = [];
+
+    for (const lendingProfileAccount of lendingProfileAccounts) {
+      loans.push(
+        new CollectionLendingProfile(
+          client,
+          lendingProfileAccount.publicKey,
+          lendingProfileAccount.account as CollectionLendingProfileState,
+          onStateUpdateHandler
+        )
+      );
+    }
+
+    return loans;
+  }
+
+  /**
+   * Loads all existing Collection Lending Profiles.
+   * @param client The Lending Client instance.
+   * @param collectionMint The Collection Mint associated with the Collection Lending Profile, this is used as a filter.
+   * @param tokenMint The Mint of the token used to lend in the Collection Lending Profile, this is used as a filter.
+   * @param onStateUpdateHandler A state update handler.
+   * @returns A promise which may resolve an array of Collection Lending Profiles.
+   */
+  static async loadAllWithOptions(
+    client: LendingClient,
+    collectionMint?: PublicKey,
+    tokenMint?: PublicKey,
+    onStateUpdateHandler?: StateUpdateHandler<CollectionLendingProfileState>
+  ): Promise<CollectionLendingProfile[]> {
+    const filters = [];
+
+    if (collectionMint) {
+      filters.push({
+        memcmp: {
+          offset: 56,
+          bytes: collectionMint.toString()
+        }
+      });
+    }
+
+    if (tokenMint) {
+      filters.push({
+        memcmp: {
+          offset: 120,
+          bytes: tokenMint.toString()
+        }
+      });
+    }
+
+    const lendingProfileAccounts =
+      await client.accounts.collectionLendingProfile.all(filters);
     const loans = [];
 
     for (const lendingProfileAccount of lendingProfileAccounts) {
@@ -325,7 +378,23 @@ export class CollectionLendingProfile {
   }
 
   /**
-   * Gets the  Token Mint associated with this Collection Lending Profile.
+   * Gets the account version of the Collection Lending Profile.
+   * @returns The account version.
+   */
+  get accountVersion(): AccountVersion {
+    return new AccountVersion(this.state.accountVersion);
+  }
+
+  /**
+   * Gets the status of the Collection Lending Profile.
+   * @returns The status.
+   */
+  get status(): Status {
+    return new Status(this.state.status);
+  }
+
+  /**
+   * Gets the Token Mint associated with this Collection Lending Profile.
    * @returns The Public Key of the SPL Token Mint.
    */
   get tokenMint(): PublicKey {

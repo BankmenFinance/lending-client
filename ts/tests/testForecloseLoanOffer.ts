@@ -1,10 +1,9 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-var-requires */
 import { loadWallet } from 'utils';
 import { Cluster } from '@bankmenfi/lending-client/types';
 import { LendingClient } from '@bankmenfi/lending-client/client/lending';
 import { Loan } from '@bankmenfi/lending-client/accounts';
-import { ComputeBudgetProgram, PublicKey, Transaction } from '@solana/web3.js';
+import { PublicKey, Transaction } from '@solana/web3.js';
 import { Metaplex } from '@metaplex-foundation/js';
 import NodeWallet from '@coral-xyz/anchor/dist/cjs/nodewallet';
 import { CollectionLendingProfile } from '../src/accounts/collectionLendingProfile';
@@ -102,14 +101,14 @@ export const main = async () => {
   );
 
   // We need to make sure that the lender has a token account for the collateral
-  const lenderTokenAccount = await getOrCreateAssociatedTokenAccount(
+  await getOrCreateAssociatedTokenAccount(
     lendingClient.connection,
     wallet,
     collateralMint,
     lendingClient.walletPubkey
   );
 
-  const { accounts, ixs } = await loanToForeclose.forecloseLoan(
+  const { ixs } = await loanToForeclose.forecloseLoan(
     metaplex,
     collectionLendingProfile,
     metadata
