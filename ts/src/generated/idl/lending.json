@@ -1,5 +1,5 @@
 {
-  "version": "0.1.7",
+  "version": "0.2.1",
   "name": "lending",
   "instructions": [
     {
@@ -11,14 +11,17 @@
         {
           "name": "profile",
           "isMut": true,
-          "isSigner": false
+          "isSigner": false,
+          "docs": [
+            "The book of loans for a given collection."
+          ]
         },
         {
           "name": "collection",
           "isMut": false,
           "isSigner": false,
           "docs": [
-            "The Metaplex Collection mint."
+            "The Metaplex Collection NFT SPL Token Mint."
           ]
         },
         {
@@ -32,7 +35,10 @@
         {
           "name": "tokenVault",
           "isMut": true,
-          "isSigner": false
+          "isSigner": false,
+          "docs": [
+            "The fee token vault."
+          ]
         },
         {
           "name": "vault",
@@ -94,32 +100,50 @@
     },
     {
       "name": "enableLtv",
+      "docs": [
+        "Enables LTV Loans for a given [`CollectionLendingProfile`]."
+      ],
       "accounts": [
         {
           "name": "profile",
           "isMut": true,
-          "isSigner": false
+          "isSigner": false,
+          "docs": [
+            "The book of loans for a given collection."
+          ]
         },
         {
           "name": "authority",
           "isMut": false,
-          "isSigner": true
+          "isSigner": true,
+          "docs": [
+            "The authority of the [`CollectionLendingProfile`]."
+          ]
         }
       ],
       "args": []
     },
     {
       "name": "disableLtv",
+      "docs": [
+        "Disables LTV Loans for a given [`CollectionLendingProfile`]."
+      ],
       "accounts": [
         {
           "name": "profile",
           "isMut": true,
-          "isSigner": false
+          "isSigner": false,
+          "docs": [
+            "The book of loans for a given collection."
+          ]
         },
         {
           "name": "authority",
           "isMut": false,
-          "isSigner": true
+          "isSigner": true,
+          "docs": [
+            "The authority of the [`CollectionLendingProfile`]."
+          ]
         }
       ],
       "args": []
@@ -127,38 +151,56 @@
     {
       "name": "closeCollectionLendingProfile",
       "docs": [
-        "Closes a [`CollectionLendingProfile`]"
+        "Closes a [`CollectionLendingProfile`]."
       ],
       "accounts": [
         {
           "name": "profile",
           "isMut": true,
-          "isSigner": false
+          "isSigner": false,
+          "docs": [
+            "The book of loans for a given collection."
+          ]
         },
         {
           "name": "tokenVault",
           "isMut": true,
-          "isSigner": false
+          "isSigner": false,
+          "docs": [
+            "The fee token vault."
+          ]
         },
         {
           "name": "vault",
           "isMut": false,
-          "isSigner": false
-        },
-        {
-          "name": "authority",
-          "isMut": false,
-          "isSigner": true
+          "isSigner": false,
+          "docs": [
+            "The native vault or token vault signer."
+          ]
         },
         {
           "name": "rentDestination",
           "isMut": true,
-          "isSigner": false
+          "isSigner": false,
+          "docs": [
+            "The rent destination for the accounts closed with this operation."
+          ]
+        },
+        {
+          "name": "authority",
+          "isMut": false,
+          "isSigner": true,
+          "docs": [
+            "The authority of the [`CollectionLendingProfile`]."
+          ]
         },
         {
           "name": "tokenProgram",
           "isMut": false,
-          "isSigner": false
+          "isSigner": false,
+          "docs": [
+            "The Token Program."
+          ]
         }
       ],
       "args": []
@@ -166,7 +208,7 @@
     {
       "name": "setCollectionLendingProfileStatus",
       "docs": [
-        "Sets the [Status] of a [`CollectionLendingProfile`]"
+        "Sets the [`Status`] of a [`CollectionLendingProfile`]."
       ],
       "accounts": [
         {
@@ -198,7 +240,7 @@
     {
       "name": "setCollectionLendingProfileParams",
       "docs": [
-        "Sets the parameters of a [`CollectionLendingProfile`]"
+        "Sets the parameters of a [`CollectionLendingProfile`]."
       ],
       "accounts": [
         {
@@ -262,11 +304,11 @@
           ]
         },
         {
-          "name": "loanMint",
-          "isMut": false,
+          "name": "lenderAccount",
+          "isMut": true,
           "isSigner": false,
           "docs": [
-            "The token mint of the asset being lent."
+            "The lender's user account."
           ]
         },
         {
@@ -275,6 +317,14 @@
           "isSigner": false,
           "docs": [
             "The escrow."
+          ]
+        },
+        {
+          "name": "loanMint",
+          "isMut": false,
+          "isSigner": false,
+          "docs": [
+            "The token mint of the asset being lent."
           ]
         },
         {
@@ -292,11 +342,6 @@
           "docs": [
             "The lender's token account."
           ]
-        },
-        {
-          "name": "lenderAccount",
-          "isMut": true,
-          "isSigner": false
         },
         {
           "name": "lender",
@@ -367,15 +412,15 @@
           "isMut": true,
           "isSigner": false,
           "docs": [
-            "The loan offered by the lender"
+            "The loan offered by the lender."
           ]
         },
         {
-          "name": "loanMint",
-          "isMut": false,
+          "name": "lenderAccount",
+          "isMut": true,
           "isSigner": false,
           "docs": [
-            "The token mint of the asset being lent."
+            "The lender's user account."
           ]
         },
         {
@@ -384,6 +429,14 @@
           "isSigner": false,
           "docs": [
             "The escrow."
+          ]
+        },
+        {
+          "name": "loanMint",
+          "isMut": false,
+          "isSigner": false,
+          "docs": [
+            "The token mint of the asset being lent."
           ]
         },
         {
@@ -401,11 +454,6 @@
           "docs": [
             "The lender's token account."
           ]
-        },
-        {
-          "name": "lenderAccount",
-          "isMut": true,
-          "isSigner": false
         },
         {
           "name": "lender",
@@ -457,19 +505,19 @@
           ]
         },
         {
+          "name": "borrowerAccount",
+          "isMut": true,
+          "isSigner": false,
+          "docs": [
+            "The borrower's user account."
+          ]
+        },
+        {
           "name": "escrow",
           "isMut": false,
           "isSigner": false,
           "docs": [
             "The escrow."
-          ]
-        },
-        {
-          "name": "escrowTokenAccount",
-          "isMut": true,
-          "isSigner": false,
-          "docs": [
-            "The escrow's token account."
           ]
         },
         {
@@ -557,7 +605,10 @@
         {
           "name": "lender",
           "isMut": true,
-          "isSigner": false
+          "isSigner": false,
+          "docs": [
+            "The lender's wallet."
+          ]
         },
         {
           "name": "lenderTokenAccount",
@@ -568,9 +619,12 @@
           ]
         },
         {
-          "name": "borrowerAccount",
+          "name": "escrowTokenAccount",
           "isMut": true,
-          "isSigner": false
+          "isSigner": false,
+          "docs": [
+            "The escrow's token account."
+          ]
         },
         {
           "name": "borrower",
@@ -651,6 +705,22 @@
           ]
         },
         {
+          "name": "borrowerAccount",
+          "isMut": true,
+          "isSigner": false,
+          "docs": [
+            "The borrower's user account."
+          ]
+        },
+        {
+          "name": "escrow",
+          "isMut": true,
+          "isSigner": false,
+          "docs": [
+            "The escrow."
+          ]
+        },
+        {
           "name": "loanMint",
           "isMut": false,
           "isSigner": false,
@@ -701,14 +771,6 @@
           ]
         },
         {
-          "name": "escrow",
-          "isMut": true,
-          "isSigner": false,
-          "docs": [
-            "The escrow."
-          ]
-        },
-        {
           "name": "escrowTokenAccount",
           "isMut": true,
           "isSigner": false,
@@ -731,11 +793,6 @@
           "docs": [
             "The borrower's collateral account."
           ]
-        },
-        {
-          "name": "borrowerAccount",
-          "isMut": true,
-          "isSigner": false
         },
         {
           "name": "borrower",
@@ -819,6 +876,22 @@
           ]
         },
         {
+          "name": "lenderAccount",
+          "isMut": true,
+          "isSigner": false,
+          "docs": [
+            "The lender's user account."
+          ]
+        },
+        {
+          "name": "escrow",
+          "isMut": true,
+          "isSigner": false,
+          "docs": [
+            "The escrow."
+          ]
+        },
+        {
           "name": "collateralMint",
           "isMut": false,
           "isSigner": false,
@@ -849,14 +922,6 @@
           "isOptional": true,
           "docs": [
             "The collateral token auth rules account."
-          ]
-        },
-        {
-          "name": "escrow",
-          "isMut": true,
-          "isSigner": false,
-          "docs": [
-            "The escrow."
           ]
         },
         {
@@ -905,14 +970,6 @@
           "name": "borrower",
           "isMut": true,
           "isSigner": false
-        },
-        {
-          "name": "lenderAccount",
-          "isMut": true,
-          "isSigner": false,
-          "docs": [
-            "The lender's user account."
-          ]
         },
         {
           "name": "lender",
@@ -975,6 +1032,9 @@
     },
     {
       "name": "sweepTokenFees",
+      "docs": [
+        "Sweeps accumulated token fees from a [`CollectionLendingProfile`]'s token vault to a destination token account."
+      ],
       "accounts": [
         {
           "name": "profile",
@@ -1037,6 +1097,9 @@
     },
     {
       "name": "sweepNativeFees",
+      "docs": [
+        "Sweeps accumulated native fees from a [`CollectionLendingProfile`]'s vault to a destination account."
+      ],
       "accounts": [
         {
           "name": "profile",
@@ -1070,7 +1133,10 @@
         {
           "name": "systemProgram",
           "isMut": false,
-          "isSigner": false
+          "isSigner": false,
+          "docs": [
+            "The System Program."
+          ]
         }
       ],
       "args": []
@@ -1779,6 +1845,20 @@
         {
           "name": "amount",
           "type": "u64",
+          "index": false
+        },
+        {
+          "name": "loanType",
+          "type": {
+            "defined": "LoanType"
+          },
+          "index": false
+        },
+        {
+          "name": "ltvAmount",
+          "type": {
+            "option": "u16"
+          },
           "index": false
         }
       ]

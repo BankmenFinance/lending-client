@@ -1,5 +1,5 @@
 export type Lending = {
-  version: '0.1.7';
+  version: '0.2.1';
   name: 'lending';
   instructions: [
     {
@@ -10,12 +10,13 @@ export type Lending = {
           name: 'profile';
           isMut: true;
           isSigner: false;
+          docs: ['The book of loans for a given collection.'];
         },
         {
           name: 'collection';
           isMut: false;
           isSigner: false;
-          docs: ['The Metaplex Collection mint.'];
+          docs: ['The Metaplex Collection NFT SPL Token Mint.'];
         },
         {
           name: 'tokenMint';
@@ -27,6 +28,7 @@ export type Lending = {
           name: 'tokenVault';
           isMut: true;
           isSigner: false;
+          docs: ['The fee token vault.'];
         },
         {
           name: 'vault';
@@ -78,76 +80,90 @@ export type Lending = {
     },
     {
       name: 'enableLtv';
+      docs: ['Enables LTV Loans for a given [`CollectionLendingProfile`].'];
       accounts: [
         {
           name: 'profile';
           isMut: true;
           isSigner: false;
+          docs: ['The book of loans for a given collection.'];
         },
         {
           name: 'authority';
           isMut: false;
           isSigner: true;
+          docs: ['The authority of the [`CollectionLendingProfile`].'];
         }
       ];
       args: [];
     },
     {
       name: 'disableLtv';
+      docs: ['Disables LTV Loans for a given [`CollectionLendingProfile`].'];
       accounts: [
         {
           name: 'profile';
           isMut: true;
           isSigner: false;
+          docs: ['The book of loans for a given collection.'];
         },
         {
           name: 'authority';
           isMut: false;
           isSigner: true;
+          docs: ['The authority of the [`CollectionLendingProfile`].'];
         }
       ];
       args: [];
     },
     {
       name: 'closeCollectionLendingProfile';
-      docs: ['Closes a [`CollectionLendingProfile`]'];
+      docs: ['Closes a [`CollectionLendingProfile`].'];
       accounts: [
         {
           name: 'profile';
           isMut: true;
           isSigner: false;
+          docs: ['The book of loans for a given collection.'];
         },
         {
           name: 'tokenVault';
           isMut: true;
           isSigner: false;
+          docs: ['The fee token vault.'];
         },
         {
           name: 'vault';
           isMut: false;
           isSigner: false;
-        },
-        {
-          name: 'authority';
-          isMut: false;
-          isSigner: true;
+          docs: ['The native vault or token vault signer.'];
         },
         {
           name: 'rentDestination';
           isMut: true;
           isSigner: false;
+          docs: [
+            'The rent destination for the accounts closed with this operation.'
+          ];
+        },
+        {
+          name: 'authority';
+          isMut: false;
+          isSigner: true;
+          docs: ['The authority of the [`CollectionLendingProfile`].'];
         },
         {
           name: 'tokenProgram';
           isMut: false;
           isSigner: false;
+          docs: ['The Token Program.'];
         }
       ];
       args: [];
     },
     {
       name: 'setCollectionLendingProfileStatus';
-      docs: ['Sets the [Status] of a [`CollectionLendingProfile`]'];
+      docs: ['Sets the [`Status`] of a [`CollectionLendingProfile`].'];
       accounts: [
         {
           name: 'profile';
@@ -173,7 +189,7 @@ export type Lending = {
     },
     {
       name: 'setCollectionLendingProfileParams';
-      docs: ['Sets the parameters of a [`CollectionLendingProfile`]'];
+      docs: ['Sets the parameters of a [`CollectionLendingProfile`].'];
       accounts: [
         {
           name: 'profile';
@@ -228,16 +244,22 @@ export type Lending = {
           docs: ['The loan offered by the lender.'];
         },
         {
-          name: 'loanMint';
-          isMut: false;
+          name: 'lenderAccount';
+          isMut: true;
           isSigner: false;
-          docs: ['The token mint of the asset being lent.'];
+          docs: ["The lender's user account."];
         },
         {
           name: 'escrow';
           isMut: true;
           isSigner: false;
           docs: ['The escrow.'];
+        },
+        {
+          name: 'loanMint';
+          isMut: false;
+          isSigner: false;
+          docs: ['The token mint of the asset being lent.'];
         },
         {
           name: 'escrowTokenAccount';
@@ -250,11 +272,6 @@ export type Lending = {
           isMut: true;
           isSigner: false;
           docs: ["The lender's token account."];
-        },
-        {
-          name: 'lenderAccount';
-          isMut: true;
-          isSigner: false;
         },
         {
           name: 'lender';
@@ -312,19 +329,25 @@ export type Lending = {
           name: 'loan';
           isMut: true;
           isSigner: false;
-          docs: ['The loan offered by the lender'];
+          docs: ['The loan offered by the lender.'];
         },
         {
-          name: 'loanMint';
-          isMut: false;
+          name: 'lenderAccount';
+          isMut: true;
           isSigner: false;
-          docs: ['The token mint of the asset being lent.'];
+          docs: ["The lender's user account."];
         },
         {
           name: 'escrow';
           isMut: true;
           isSigner: false;
           docs: ['The escrow.'];
+        },
+        {
+          name: 'loanMint';
+          isMut: false;
+          isSigner: false;
+          docs: ['The token mint of the asset being lent.'];
         },
         {
           name: 'escrowTokenAccount';
@@ -337,11 +360,6 @@ export type Lending = {
           isMut: true;
           isSigner: false;
           docs: ["The lender's token account."];
-        },
-        {
-          name: 'lenderAccount';
-          isMut: true;
-          isSigner: false;
         },
         {
           name: 'lender';
@@ -381,16 +399,16 @@ export type Lending = {
           docs: ['The loan offered by the lender.'];
         },
         {
+          name: 'borrowerAccount';
+          isMut: true;
+          isSigner: false;
+          docs: ["The borrower's user account."];
+        },
+        {
           name: 'escrow';
           isMut: false;
           isSigner: false;
           docs: ['The escrow.'];
-        },
-        {
-          name: 'escrowTokenAccount';
-          isMut: true;
-          isSigner: false;
-          docs: ["The escrow's token account."];
         },
         {
           name: 'vault';
@@ -458,6 +476,7 @@ export type Lending = {
           name: 'lender';
           isMut: true;
           isSigner: false;
+          docs: ["The lender's wallet."];
         },
         {
           name: 'lenderTokenAccount';
@@ -466,9 +485,10 @@ export type Lending = {
           docs: ["The lender's token account."];
         },
         {
-          name: 'borrowerAccount';
+          name: 'escrowTokenAccount';
           isMut: true;
           isSigner: false;
+          docs: ["The escrow's token account."];
         },
         {
           name: 'borrower';
@@ -533,6 +553,18 @@ export type Lending = {
           docs: ['The loan offered by the lender.'];
         },
         {
+          name: 'borrowerAccount';
+          isMut: true;
+          isSigner: false;
+          docs: ["The borrower's user account."];
+        },
+        {
+          name: 'escrow';
+          isMut: true;
+          isSigner: false;
+          docs: ['The escrow.'];
+        },
+        {
           name: 'loanMint';
           isMut: false;
           isSigner: false;
@@ -571,12 +603,6 @@ export type Lending = {
           docs: ['The collateral token auth rules account.'];
         },
         {
-          name: 'escrow';
-          isMut: true;
-          isSigner: false;
-          docs: ['The escrow.'];
-        },
-        {
           name: 'escrowTokenAccount';
           isMut: true;
           isSigner: false;
@@ -593,11 +619,6 @@ export type Lending = {
           isMut: true;
           isSigner: false;
           docs: ["The borrower's collateral account."];
-        },
-        {
-          name: 'borrowerAccount';
-          isMut: true;
-          isSigner: false;
         },
         {
           name: 'borrower';
@@ -661,6 +682,18 @@ export type Lending = {
           docs: ['The loan offered by the lender.'];
         },
         {
+          name: 'lenderAccount';
+          isMut: true;
+          isSigner: false;
+          docs: ["The lender's user account."];
+        },
+        {
+          name: 'escrow';
+          isMut: true;
+          isSigner: false;
+          docs: ['The escrow.'];
+        },
+        {
           name: 'collateralMint';
           isMut: false;
           isSigner: false;
@@ -684,12 +717,6 @@ export type Lending = {
           isSigner: false;
           isOptional: true;
           docs: ['The collateral token auth rules account.'];
-        },
-        {
-          name: 'escrow';
-          isMut: true;
-          isSigner: false;
-          docs: ['The escrow.'];
         },
         {
           name: 'escrowTokenAccount';
@@ -727,12 +754,6 @@ export type Lending = {
           name: 'borrower';
           isMut: true;
           isSigner: false;
-        },
-        {
-          name: 'lenderAccount';
-          isMut: true;
-          isSigner: false;
-          docs: ["The lender's user account."];
         },
         {
           name: 'lender';
@@ -781,6 +802,9 @@ export type Lending = {
     },
     {
       name: 'sweepTokenFees';
+      docs: [
+        "Sweeps accumulated token fees from a [`CollectionLendingProfile`]'s token vault to a destination token account."
+      ];
       accounts: [
         {
           name: 'profile';
@@ -831,6 +855,9 @@ export type Lending = {
     },
     {
       name: 'sweepNativeFees';
+      docs: [
+        "Sweeps accumulated native fees from a [`CollectionLendingProfile`]'s vault to a destination account."
+      ];
       accounts: [
         {
           name: 'profile';
@@ -859,6 +886,7 @@ export type Lending = {
           name: 'systemProgram';
           isMut: false;
           isSigner: false;
+          docs: ['The System Program.'];
         }
       ];
       args: [];
@@ -1451,6 +1479,20 @@ export type Lending = {
           name: 'amount';
           type: 'u64';
           index: false;
+        },
+        {
+          name: 'loanType';
+          type: {
+            defined: 'LoanType';
+          };
+          index: false;
+        },
+        {
+          name: 'ltvAmount';
+          type: {
+            option: 'u16';
+          };
+          index: false;
         }
       ];
     },
@@ -1730,7 +1772,7 @@ export type Lending = {
 };
 
 export const IDL: Lending = {
-  version: '0.1.7',
+  version: '0.2.1',
   name: 'lending',
   instructions: [
     {
@@ -1740,13 +1782,14 @@ export const IDL: Lending = {
         {
           name: 'profile',
           isMut: true,
-          isSigner: false
+          isSigner: false,
+          docs: ['The book of loans for a given collection.']
         },
         {
           name: 'collection',
           isMut: false,
           isSigner: false,
-          docs: ['The Metaplex Collection mint.']
+          docs: ['The Metaplex Collection NFT SPL Token Mint.']
         },
         {
           name: 'tokenMint',
@@ -1757,7 +1800,8 @@ export const IDL: Lending = {
         {
           name: 'tokenVault',
           isMut: true,
-          isSigner: false
+          isSigner: false,
+          docs: ['The fee token vault.']
         },
         {
           name: 'vault',
@@ -1809,76 +1853,90 @@ export const IDL: Lending = {
     },
     {
       name: 'enableLtv',
+      docs: ['Enables LTV Loans for a given [`CollectionLendingProfile`].'],
       accounts: [
         {
           name: 'profile',
           isMut: true,
-          isSigner: false
+          isSigner: false,
+          docs: ['The book of loans for a given collection.']
         },
         {
           name: 'authority',
           isMut: false,
-          isSigner: true
+          isSigner: true,
+          docs: ['The authority of the [`CollectionLendingProfile`].']
         }
       ],
       args: []
     },
     {
       name: 'disableLtv',
+      docs: ['Disables LTV Loans for a given [`CollectionLendingProfile`].'],
       accounts: [
         {
           name: 'profile',
           isMut: true,
-          isSigner: false
+          isSigner: false,
+          docs: ['The book of loans for a given collection.']
         },
         {
           name: 'authority',
           isMut: false,
-          isSigner: true
+          isSigner: true,
+          docs: ['The authority of the [`CollectionLendingProfile`].']
         }
       ],
       args: []
     },
     {
       name: 'closeCollectionLendingProfile',
-      docs: ['Closes a [`CollectionLendingProfile`]'],
+      docs: ['Closes a [`CollectionLendingProfile`].'],
       accounts: [
         {
           name: 'profile',
           isMut: true,
-          isSigner: false
+          isSigner: false,
+          docs: ['The book of loans for a given collection.']
         },
         {
           name: 'tokenVault',
           isMut: true,
-          isSigner: false
+          isSigner: false,
+          docs: ['The fee token vault.']
         },
         {
           name: 'vault',
           isMut: false,
-          isSigner: false
-        },
-        {
-          name: 'authority',
-          isMut: false,
-          isSigner: true
+          isSigner: false,
+          docs: ['The native vault or token vault signer.']
         },
         {
           name: 'rentDestination',
           isMut: true,
-          isSigner: false
+          isSigner: false,
+          docs: [
+            'The rent destination for the accounts closed with this operation.'
+          ]
+        },
+        {
+          name: 'authority',
+          isMut: false,
+          isSigner: true,
+          docs: ['The authority of the [`CollectionLendingProfile`].']
         },
         {
           name: 'tokenProgram',
           isMut: false,
-          isSigner: false
+          isSigner: false,
+          docs: ['The Token Program.']
         }
       ],
       args: []
     },
     {
       name: 'setCollectionLendingProfileStatus',
-      docs: ['Sets the [Status] of a [`CollectionLendingProfile`]'],
+      docs: ['Sets the [`Status`] of a [`CollectionLendingProfile`].'],
       accounts: [
         {
           name: 'profile',
@@ -1904,7 +1962,7 @@ export const IDL: Lending = {
     },
     {
       name: 'setCollectionLendingProfileParams',
-      docs: ['Sets the parameters of a [`CollectionLendingProfile`]'],
+      docs: ['Sets the parameters of a [`CollectionLendingProfile`].'],
       accounts: [
         {
           name: 'profile',
@@ -1959,16 +2017,22 @@ export const IDL: Lending = {
           docs: ['The loan offered by the lender.']
         },
         {
-          name: 'loanMint',
-          isMut: false,
+          name: 'lenderAccount',
+          isMut: true,
           isSigner: false,
-          docs: ['The token mint of the asset being lent.']
+          docs: ["The lender's user account."]
         },
         {
           name: 'escrow',
           isMut: true,
           isSigner: false,
           docs: ['The escrow.']
+        },
+        {
+          name: 'loanMint',
+          isMut: false,
+          isSigner: false,
+          docs: ['The token mint of the asset being lent.']
         },
         {
           name: 'escrowTokenAccount',
@@ -1981,11 +2045,6 @@ export const IDL: Lending = {
           isMut: true,
           isSigner: false,
           docs: ["The lender's token account."]
-        },
-        {
-          name: 'lenderAccount',
-          isMut: true,
-          isSigner: false
         },
         {
           name: 'lender',
@@ -2043,19 +2102,25 @@ export const IDL: Lending = {
           name: 'loan',
           isMut: true,
           isSigner: false,
-          docs: ['The loan offered by the lender']
+          docs: ['The loan offered by the lender.']
         },
         {
-          name: 'loanMint',
-          isMut: false,
+          name: 'lenderAccount',
+          isMut: true,
           isSigner: false,
-          docs: ['The token mint of the asset being lent.']
+          docs: ["The lender's user account."]
         },
         {
           name: 'escrow',
           isMut: true,
           isSigner: false,
           docs: ['The escrow.']
+        },
+        {
+          name: 'loanMint',
+          isMut: false,
+          isSigner: false,
+          docs: ['The token mint of the asset being lent.']
         },
         {
           name: 'escrowTokenAccount',
@@ -2068,11 +2133,6 @@ export const IDL: Lending = {
           isMut: true,
           isSigner: false,
           docs: ["The lender's token account."]
-        },
-        {
-          name: 'lenderAccount',
-          isMut: true,
-          isSigner: false
         },
         {
           name: 'lender',
@@ -2112,16 +2172,16 @@ export const IDL: Lending = {
           docs: ['The loan offered by the lender.']
         },
         {
+          name: 'borrowerAccount',
+          isMut: true,
+          isSigner: false,
+          docs: ["The borrower's user account."]
+        },
+        {
           name: 'escrow',
           isMut: false,
           isSigner: false,
           docs: ['The escrow.']
-        },
-        {
-          name: 'escrowTokenAccount',
-          isMut: true,
-          isSigner: false,
-          docs: ["The escrow's token account."]
         },
         {
           name: 'vault',
@@ -2188,7 +2248,8 @@ export const IDL: Lending = {
         {
           name: 'lender',
           isMut: true,
-          isSigner: false
+          isSigner: false,
+          docs: ["The lender's wallet."]
         },
         {
           name: 'lenderTokenAccount',
@@ -2197,9 +2258,10 @@ export const IDL: Lending = {
           docs: ["The lender's token account."]
         },
         {
-          name: 'borrowerAccount',
+          name: 'escrowTokenAccount',
           isMut: true,
-          isSigner: false
+          isSigner: false,
+          docs: ["The escrow's token account."]
         },
         {
           name: 'borrower',
@@ -2264,6 +2326,18 @@ export const IDL: Lending = {
           docs: ['The loan offered by the lender.']
         },
         {
+          name: 'borrowerAccount',
+          isMut: true,
+          isSigner: false,
+          docs: ["The borrower's user account."]
+        },
+        {
+          name: 'escrow',
+          isMut: true,
+          isSigner: false,
+          docs: ['The escrow.']
+        },
+        {
           name: 'loanMint',
           isMut: false,
           isSigner: false,
@@ -2302,12 +2376,6 @@ export const IDL: Lending = {
           docs: ['The collateral token auth rules account.']
         },
         {
-          name: 'escrow',
-          isMut: true,
-          isSigner: false,
-          docs: ['The escrow.']
-        },
-        {
           name: 'escrowTokenAccount',
           isMut: true,
           isSigner: false,
@@ -2324,11 +2392,6 @@ export const IDL: Lending = {
           isMut: true,
           isSigner: false,
           docs: ["The borrower's collateral account."]
-        },
-        {
-          name: 'borrowerAccount',
-          isMut: true,
-          isSigner: false
         },
         {
           name: 'borrower',
@@ -2392,6 +2455,18 @@ export const IDL: Lending = {
           docs: ['The loan offered by the lender.']
         },
         {
+          name: 'lenderAccount',
+          isMut: true,
+          isSigner: false,
+          docs: ["The lender's user account."]
+        },
+        {
+          name: 'escrow',
+          isMut: true,
+          isSigner: false,
+          docs: ['The escrow.']
+        },
+        {
           name: 'collateralMint',
           isMut: false,
           isSigner: false,
@@ -2415,12 +2490,6 @@ export const IDL: Lending = {
           isSigner: false,
           isOptional: true,
           docs: ['The collateral token auth rules account.']
-        },
-        {
-          name: 'escrow',
-          isMut: true,
-          isSigner: false,
-          docs: ['The escrow.']
         },
         {
           name: 'escrowTokenAccount',
@@ -2458,12 +2527,6 @@ export const IDL: Lending = {
           name: 'borrower',
           isMut: true,
           isSigner: false
-        },
-        {
-          name: 'lenderAccount',
-          isMut: true,
-          isSigner: false,
-          docs: ["The lender's user account."]
         },
         {
           name: 'lender',
@@ -2512,6 +2575,9 @@ export const IDL: Lending = {
     },
     {
       name: 'sweepTokenFees',
+      docs: [
+        "Sweeps accumulated token fees from a [`CollectionLendingProfile`]'s token vault to a destination token account."
+      ],
       accounts: [
         {
           name: 'profile',
@@ -2562,6 +2628,9 @@ export const IDL: Lending = {
     },
     {
       name: 'sweepNativeFees',
+      docs: [
+        "Sweeps accumulated native fees from a [`CollectionLendingProfile`]'s vault to a destination account."
+      ],
       accounts: [
         {
           name: 'profile',
@@ -2589,7 +2658,8 @@ export const IDL: Lending = {
         {
           name: 'systemProgram',
           isMut: false,
-          isSigner: false
+          isSigner: false,
+          docs: ['The System Program.']
         }
       ],
       args: []
@@ -3181,6 +3251,20 @@ export const IDL: Lending = {
         {
           name: 'amount',
           type: 'u64',
+          index: false
+        },
+        {
+          name: 'loanType',
+          type: {
+            defined: 'LoanType'
+          },
+          index: false
+        },
+        {
+          name: 'ltvAmount',
+          type: {
+            option: 'u16'
+          },
           index: false
         }
       ]
