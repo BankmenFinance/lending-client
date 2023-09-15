@@ -1839,6 +1839,20 @@
                     "name": "amount",
                     "type": "u64",
                     "index": false
+                },
+                {
+                    "name": "loanType",
+                    "type": {
+                        "defined": "LoanType"
+                    },
+                    "index": false
+                },
+                {
+                    "name": "ltvAmount",
+                    "type": {
+                        "option": "u16"
+                    },
+                    "index": false
                 }
             ]
         },
