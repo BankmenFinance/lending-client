@@ -1,13 +1,16 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { PublicKey, SystemProgram, SYSVAR_RENT_PUBKEY } from '@solana/web3.js';
 import { LendingClient } from '../client';
-import { deriveCollectionLendingProfileAddress } from '../utils';
+import {
+  convertSecondsToTime,
+  deriveCollectionLendingProfileAddress
+} from '../utils';
 import {
   CollectionLendingProfileState,
   CreateCollectionLendingProfileArgs,
   Status
 } from '../types/on-chain';
-import { StateUpdateHandler } from '../types';
+import { StateUpdateHandler, TransactionAccounts } from '../types';
 import {
   deriveProfileTokenVaultAddress,
   deriveProfileVaultAddress
@@ -15,6 +18,12 @@ import {
 import { TOKEN_PROGRAM_ID } from '@coral-xyz/anchor/dist/cjs/utils/token';
 import { getAssociatedTokenAddress } from '@project-serum/associated-token';
 import BN from 'bn.js';
+import { BASIS_POINTS_DIVISOR } from '../constants';
+import {
+  basisPointsToApr,
+  getDurationAndUnitFromTime,
+  convertAprToApy
+} from '../utils/shared';
 
 /**
  * Represents a Collection Lending Profile.
@@ -46,7 +55,7 @@ export class CollectionLendingProfile {
     tokenMint: PublicKey,
     profileAuthority: PublicKey,
     args: CreateCollectionLendingProfileArgs
-  ) {
+  ): Promise<TransactionAccounts> {
     const [profile, profileBump] = deriveCollectionLendingProfileAddress(
       collectionMint,
       tokenMint,
@@ -144,7 +153,10 @@ export class CollectionLendingProfile {
    * @param feesDestination The destination of the fees accumulated.
    * @returns The accounts, instructions and signers, if necessary.
    */
-  async sweepNativeFees(client: LendingClient, feesDestination: PublicKey) {
+  async sweepNativeFees(
+    client: LendingClient,
+    feesDestination: PublicKey
+  ): Promise<TransactionAccounts> {
     const [vault, vaultBump] = deriveProfileVaultAddress(
       this.address,
       client.programId
@@ -173,7 +185,10 @@ export class CollectionLendingProfile {
    * @param feesDestination The destination of the fees accumulated.
    * @returns The accounts, instructions and signers, if necessary.
    */
-  async sweepTokenFees(client: LendingClient, feesDestination: PublicKey) {
+  async sweepTokenFees(
+    client: LendingClient,
+    feesDestination: PublicKey
+  ): Promise<TransactionAccounts> {
     const [vault, vaultBump] = deriveProfileVaultAddress(
       this.address,
       client.programId
@@ -208,7 +223,10 @@ export class CollectionLendingProfile {
    * @param status The new status.
    * @returns The accounts, instructions and signers, if necessary.
    */
-  async setStatus(client: LendingClient, status: Status) {
+  async setStatus(
+    client: LendingClient,
+    status: Status
+  ): Promise<TransactionAccounts> {
     console.log(status);
     const ix = await client.methods
       .setCollectionLendingProfileStatus(status as never)
@@ -238,7 +256,7 @@ export class CollectionLendingProfile {
     loanDuration?: BN,
     interestRate?: BN,
     feeRate?: BN
-  ) {
+  ): Promise<TransactionAccounts> {
     const ix = await client.methods
       .setCollectionLendingProfileParams(loanDuration, interestRate, feeRate)
       .accountsStrict({
@@ -260,7 +278,10 @@ export class CollectionLendingProfile {
    * @param floorPriceOracle The Floor Price Oracle
    * @returns The accounts, instructions and signers, if necessary.
    */
-  async enableLtv(client: LendingClient, floorPriceOracle: PublicKey) {
+  async enableLtv(
+    client: LendingClient,
+    floorPriceOracle: PublicKey
+  ): Promise<TransactionAccounts> {
     const ix = await client.methods
       .enableLtv()
       .accountsStrict({
@@ -287,7 +308,7 @@ export class CollectionLendingProfile {
    * @param client The Lending Client instance.
    * @returns The accounts, instructions and signers, if necessary.
    */
-  async disableLtv(client: LendingClient) {
+  async disableLtv(client: LendingClient): Promise<TransactionAccounts> {
     const ix = await client.methods
       .disableLtv()
       .accountsStrict({
@@ -304,26 +325,149 @@ export class CollectionLendingProfile {
   }
 
   /**
-   * Gets the SPL Token Mint associated with this Collection Lending Profile.
+   * Gets the  Token Mint associated with this Collection Lending Profile.
    * @returns The Public Key of the SPL Token Mint.
    */
-  get tokenMint() {
+  get tokenMint(): PublicKey {
     return this.state.tokenMint;
   }
 
   /**
-   * Gets the SPL Token Vault associated with this Collection Lending Profile.
+   * Gets the Token Vault associated with this Collection Lending Profile.
    * @returns The Public Key of the SPL Token Account.
    */
-  get tokenVault() {
+  get tokenVault(): PublicKey {
     return this.state.tokenVault;
   }
+
   /**
-   * Gets the SPL Token Mint of the Collection NFT associated with this Collection Lending Profile.
-   * @returns The Public Key of the SPL Token Mint of the Collection NFT..
+   * Gets the Token Mint of the Collection NFT associated with this Collection Lending Profile.
+   * @returns The Public Key of the SPL Token Mint of the Collection NFT.
    */
-  get collectionMint() {
+  get collectionMint(): PublicKey {
     return this.state.collection;
+  }
+
+  /**
+   * Gets the amount of fees that the Collection Lending Profile has accumulated.
+   * @returns The amount of fees accumulated.
+   */
+  get feesAccumulated(): BN {
+    return this.state.feesAccumulated;
+  }
+
+  /**
+   * Gets the fee rate taken by the Collection Lending Profile, denominated in basis points.
+   * @returns The fee rate.
+   */
+  get feeRateBps(): BN {
+    return this.state.feeRate;
+  }
+
+  /**
+   * Gets the fee rate taken by the Collection Lending Profile, denominated in basis points.
+   * @returns The fee rate.
+   */
+  get feeRate(): number {
+    return this.state.feeRate.div(BASIS_POINTS_DIVISOR).toNumber();
+  }
+
+  /**
+   * Gets the interest rate offered by the Collection Lending Profile, denominated in basis points.
+   * @returns The interest rate.
+   */
+  get interestRateBps(): BN {
+    return this.state.interestRate;
+  }
+
+  /**
+   * Gets the interest rate offered by the Collection Lending Profile, denominated in basis points.
+   * @returns The interest rate.
+   */
+  get interestRateApy(): number {
+    const timeDuration = convertSecondsToTime(
+      this.state.loanDuration.toNumber()
+    );
+    const { duration, durationUnit } = getDurationAndUnitFromTime(timeDuration);
+    const interestRateApr = basisPointsToApr(
+      this.interestRateBps.toNumber(),
+      duration,
+      durationUnit
+    );
+
+    return convertAprToApy(interestRateApr, duration, durationUnit);
+  }
+
+  /**
+   * Gets the duration of loans associated with this Collection Lending Profile.
+   * @returns The duration in seconds.
+   */
+  get loanDurationSeconds(): BN {
+    return this.state.loanDuration;
+  }
+
+  /**
+   * Gets the duration of loans associated with this Collection Lending Profile.
+   * @returns The duration of time, specified as 'weeks:days:hours:minutes:seconds'.
+   */
+  get loanDuration(): string {
+    return convertSecondsToTime(this.state.loanDuration.toNumber());
+  }
+
+  /**
+   * Gets the number of loans that the Collection Lending Profile has foreclosed.
+   * @returns The number of loans foreclosed.
+   */
+  get loansForeclosed(): BN {
+    return this.state.loansForeclosed;
+  }
+
+  /**
+   * Gets the number of loans that the Collection Lending Profile has repaid.
+   * @returns The number of loans repaid.
+   */
+  get loansRepaid(): BN {
+    return this.state.loansRepaid;
+  }
+
+  /**
+   * Gets the number of loans that the Collection Lending Profile has originated.
+   * @returns The number of loans originated.
+   */
+  get loansOriginated(): BN {
+    return this.state.loansOriginated;
+  }
+
+  /**
+   * Gets the number of loans that the Collection Lending Profile has offered.
+   * @returns The number of loans offered.
+   */
+  get loansOffered(): BN {
+    return this.state.loansOffered;
+  }
+
+  /**
+   * Gets the number of loans that the Collection Lending Profile has rescinded.
+   * @returns The number of loans rescinded.
+   */
+  get loansRescinded(): BN {
+    return this.state.loansRescinded;
+  }
+
+  /**
+   * Gets the native token amount of the Collection Lending Profile's loan token that it's loans originated.
+   * @returns The total token amount originated.
+   */
+  get loanAmountOriginated(): BN {
+    return this.state.loanAmountOriginated;
+  }
+
+  /**
+   * Gets the native token amount of the Collection Lending Profile's loan token that has been repaid.
+   * @returns The total token amount repaid.
+   */
+  get loanAmountRepaid(): BN {
+    return this.state.loanAmountRepaid;
   }
 
   /**
@@ -337,7 +481,7 @@ export class CollectionLendingProfile {
   /**
    * Subscribes to state changes of this account.
    */
-  subscribe() {
+  subscribe(): void {
     this.client.accounts.collectionLendingProfile
       .subscribe(this.address)
       .on('change', (state: CollectionLendingProfileState) => {
@@ -352,7 +496,7 @@ export class CollectionLendingProfile {
   /**
    * Unsubscribes to state changes of this account.
    */
-  async unsubscribe() {
+  async unsubscribe(): Promise<void> {
     await this.client.accounts.collectionLendingProfile.unsubscribe(
       this.address
     );

@@ -16,6 +16,10 @@ import { WRAPPED_SOL_MINT } from '@metaplex-foundation/js';
 import { BN } from 'bn.js';
 import NodeWallet from '@coral-xyz/anchor/dist/cjs/nodewallet';
 import { CONFIGS } from '@bankmenfi/lending-clientconstants';
+import {
+  getDurationAndUnitFromTime,
+  convertSecondsToTime
+} from '../src/utils/shared';
 
 // Load  Env Variables
 require('dotenv').config({
@@ -43,22 +47,33 @@ export const main = async () => {
     new NodeWallet(wallet)
   );
 
-  // calculate desired APR for 150% APY
-  const apr = convertApyToApr(150, 1, 'days');
-  console.log('APR: ' + apr);
-
-  const interestRateBps = aprToBasisPoints(apr, 1, 'days');
-  console.log('Interest Rate (bps): ' + interestRateBps);
-
-  const interestRateApr = basisPointsToApr(interestRateBps, 1, 'days');
-  console.log('Interest Rate (APR): ' + interestRateApr);
-
-  const apy = convertAprToApy(interestRateApr, 1, 'days');
-  console.log('APY Converted Back: ' + apy);
-
   // Calculate loan duration in seconds
   const loanDuration = convertTimeToSeconds('0:1:0:0');
-  console.log('Loan Duration: ' + loanDuration);
+  console.log(`Loan Duration: ${loanDuration} seconds`);
+
+  const timeDurationString = convertSecondsToTime(loanDuration);
+  console.log(`Loan Duration: ${timeDurationString}`);
+
+  const { duration, durationUnit } =
+    getDurationAndUnitFromTime(timeDurationString);
+  console.log(`Duration: ${duration} | Unit: ${durationUnit}`);
+
+  // calculate desired APR for 150% APY
+  const apr = convertApyToApr(150, duration, durationUnit);
+  console.log('APR: ' + apr);
+
+  const interestRateBps = aprToBasisPoints(apr, duration, durationUnit);
+  console.log('Interest Rate (bps): ' + interestRateBps);
+
+  const interestRateApr = basisPointsToApr(
+    interestRateBps,
+    duration,
+    durationUnit
+  );
+  console.log('Interest Rate (APR): ' + interestRateApr);
+
+  const apy = convertAprToApy(interestRateApr, duration, durationUnit);
+  console.log('APY Converted Back: ' + apy);
 
   // Specify a collection mint here
   const collectionMint = new PublicKey(

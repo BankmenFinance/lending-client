@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-var-requires */
-import { loadWallet } from 'utils';
+import { delay, loadWallet } from 'utils';
 import { Cluster } from '@bankmenfi/lending-client/types';
 import { Connection, PublicKey } from '@solana/web3.js';
 import {
@@ -27,10 +27,6 @@ const RPC_ENDPOINT = process.env.RPC_ENDPOINT || CONFIGS[CLUSTER].RPC_ENDPOINT;
 const COLLECTION = new PublicKey(
   '7CdaMhWfcR57uFzGUMKyuiqeAqdzdEdF4Y4ghti12p7J'
 );
-
-function delay(ms: number) {
-  return new Promise((resolve) => setTimeout(resolve, ms));
-}
 
 async function createCollectionNft(metaplex: Metaplex) {
   try {

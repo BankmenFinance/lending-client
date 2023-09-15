@@ -38,7 +38,7 @@ export const main = async () => {
 
   // Specify a collection lending profile here
   const collectionLendingProfileAddress = new PublicKey(
-    'DhcBDFaMJrMsMKbqWSb48vaH8wNmDeTe2MGbfmhXkEz8'
+    '3ShpjRuYNGa9hLK85Bx216vhutkyyYzH8MUwHzGzZYfe'
   );
   // Load the collection lending profile
   const collectionLendingProfile = await CollectionLendingProfile.load(
@@ -64,17 +64,17 @@ export const main = async () => {
       'Loan: ' +
         loan.address +
         '\n\tLender: ' +
-        loan.state.lender +
+        loan.lender +
         '\n\tBorrower: ' +
-        loan.state.borrower +
+        loan.borrower +
         '\n\tPrincipal: ' +
-        loan.state.principalAmount +
+        loan.principal +
         '\n\tPaid: ' +
-        loan.state.paidAmount +
+        loan.paidAmount +
         '\n\tDue Timestamp: ' +
-        loan.state.dueTimestamp +
+        loan.dueTimestamp +
         '\n\tSeconds Until Default: ' +
-        loan.state.dueTimestamp.sub(currentTimestamp)
+        loan.dueTimestamp.sub(currentTimestamp)
     );
   }
 };

@@ -44,9 +44,9 @@ export const fetchGraphqlData = async (
 };
 
 /**
- * Fetches GraphQL data from the GBG API.
+ * Converts a given duration of time to seconds.
  * @param duration The duration of time, specified as 'weeks:days:hours:minutes:seconds'.
- * @returns The decoded value.
+ * @returns The duration of time in seconds.
  */
 export function convertTimeToSeconds(duration: string): number {
   const timeParts = duration.split(':').map(Number);
@@ -85,6 +85,103 @@ export function convertTimeToSeconds(duration: string): number {
 }
 
 /**
+ * Converts a time string to duration and unit.
+ * @param duration The duration of time, specified as 'weeks:days:hours:minutes:seconds'.
+ * @returns The duration and duration unit of time.
+ */
+export function getDurationAndUnitFromTime(duration: string): {
+  duration: number;
+  durationUnit: 'hours' | 'days' | 'weeks';
+} {
+  const timeParts = duration.split(':').map(Number);
+  const numTimeParts = timeParts.length;
+
+  if (numTimeParts === 3) {
+    // If there are three time parts, assume it's the number of  hours, minutes, and seconds
+    if (timeParts[0] !== 0) {
+      return {
+        duration: timeParts[0],
+        durationUnit: 'hours'
+      };
+    }
+    throw new Error('Invalid duration format');
+  } else if (numTimeParts === 4) {
+    // If there are four time parts, assume it's the number of days, hours, minutes, and seconds
+    if (timeParts[0] !== 0) {
+      return {
+        duration: timeParts[0],
+        durationUnit: 'days'
+      };
+    } else if (timeParts[1] !== 0) {
+      return {
+        duration: timeParts[1],
+        durationUnit: 'hours'
+      };
+    }
+    throw new Error('Invalid duration format');
+  } else if (numTimeParts === 5) {
+    // If there are five time parts, assume it's the number of weeks, days, hours, minutes, and seconds
+    if (timeParts[0] !== 0) {
+      return {
+        duration: timeParts[0],
+        durationUnit: 'weeks'
+      };
+    } else if (timeParts[1] !== 0) {
+      return {
+        duration: timeParts[1],
+        durationUnit: 'days'
+      };
+    } else if (timeParts[2] !== 0) {
+      return {
+        duration: timeParts[2],
+        durationUnit: 'hours'
+      };
+    }
+    throw new Error('Invalid duration format');
+  } else {
+    // If there are more than five time parts, throw an error
+    throw new Error('Invalid duration format');
+  }
+}
+
+function padTo2Digits(num: number) {
+  return num.toString().padStart(2, '0');
+}
+
+/**
+ * Converts a given duration of seconds to a string which defines time.
+ * @param duration The duration of time in seconds, MUST be greater than one hour.
+ * @returns The duration of time in seconds.
+ */
+export function convertSecondsToTime(seconds: number): string {
+  let minutes = Math.floor(seconds / 60);
+  let hours = Math.floor(minutes / 60);
+  let days = Math.floor(hours / 24);
+  const weeks = Math.floor(days / 7);
+
+  seconds = seconds % 60;
+  minutes = minutes % 60;
+  hours = hours % 24;
+  days = days % 7;
+
+  if (weeks != 0) {
+    // return as 'weeks:days:hours:minutes:seconds'
+    return `${padTo2Digits(weeks)}:${padTo2Digits(days)}:${padTo2Digits(
+      hours
+    )}:${padTo2Digits(minutes)}:${padTo2Digits(seconds)}`;
+  } else if (days != 0) {
+    // return as 'days:hours:minutes:seconds'
+    return `${padTo2Digits(days)}:${padTo2Digits(hours)}:${padTo2Digits(
+      minutes
+    )}:${padTo2Digits(seconds)}`;
+  }
+  // return as 'hours:minutes:seconds'
+  return `${padTo2Digits(hours)}:${padTo2Digits(minutes)}:${padTo2Digits(
+    seconds
+  )}`;
+}
+
+/**
  * Converts a given APR into basis points for the duration.
  * @param apr The APR as percentage in decimal notation, e.g 0.15 for 15% APR.
  * @param duration The amount of periods in the duration unit.
@@ -94,7 +191,7 @@ export function convertTimeToSeconds(duration: string): number {
 export function aprToBasisPoints(
   apr: number,
   duration: number,
-  durationUnit: 'hours' | 'days' | 'weeks' | 'months' | 'years'
+  durationUnit: 'hours' | 'days' | 'weeks'
 ): number {
   const periodsPerYear = getPeriodsPerYear(duration, durationUnit);
 
@@ -116,7 +213,7 @@ export function aprToBasisPoints(
 export function convertApyToApr(
   apy: number,
   duration: number,
-  durationUnit: 'hours' | 'days' | 'weeks' | 'months' | 'years'
+  durationUnit: 'hours' | 'days' | 'weeks'
 ): number {
   const decimalApy = apy / 100;
   const periodsPerYear = getPeriodsPerYear(duration, durationUnit);
@@ -136,7 +233,7 @@ export function convertApyToApr(
 export function convertAprToApy(
   apr: number,
   duration: number,
-  durationUnit: 'hours' | 'days' | 'weeks' | 'months' | 'years'
+  durationUnit: 'hours' | 'days' | 'weeks'
 ): number {
   const decimalApr = apr / 100;
   const periodsPerYear = getPeriodsPerYear(duration, durationUnit);
@@ -148,7 +245,7 @@ export function convertAprToApy(
 
 function getPeriodsPerYear(
   duration: number,
-  durationUnit: 'hours' | 'days' | 'weeks' | 'months' | 'years'
+  durationUnit: 'hours' | 'days' | 'weeks'
 ): number {
   switch (durationUnit) {
     case 'hours':
@@ -159,12 +256,6 @@ function getPeriodsPerYear(
       break;
     case 'weeks':
       return 52 / duration;
-      break;
-    case 'months':
-      return 12 / duration;
-      break;
-    case 'years':
-      return 1 / duration;
       break;
     default:
       throw new Error(`Invalid duration unit: ${durationUnit}`);
@@ -181,7 +272,7 @@ function getPeriodsPerYear(
 export function basisPointsToApr(
   bps: number,
   duration: number,
-  durationUnit: 'hours' | 'days' | 'weeks' | 'months' | 'years'
+  durationUnit: 'hours' | 'days' | 'weeks'
 ): number {
   const periodsPerYear = getPeriodsPerYear(duration, durationUnit);
   const periodicInterestRate = bps / 100;

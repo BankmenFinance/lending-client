@@ -6,7 +6,12 @@ import {
   SYSVAR_INSTRUCTIONS_PUBKEY
 } from '@solana/web3.js';
 import { LendingClient } from '../client';
-import { LoanState, OfferLoanArgs } from '../types/on-chain';
+import {
+  LoanState,
+  OfferLoanArgs,
+  LoanType,
+  TokenStandard
+} from '../types/on-chain';
 import { StateUpdateHandler } from '../types';
 import {
   ASSOCIATED_PROGRAM_ID,
@@ -29,11 +34,11 @@ import {
   NftWithToken
 } from '@metaplex-foundation/js';
 import { MPL_TOKEN_AUTH_RULES_PROGRAM_ID } from '@metaplex-foundation/mpl-token-auth-rules';
-import {
-  MPL_TOKEN_METADATA_PROGRAM_ID,
-  TokenStandard
-} from '@metaplex-foundation/mpl-token-metadata';
+import { MPL_TOKEN_METADATA_PROGRAM_ID } from '@metaplex-foundation/mpl-token-metadata';
 import { ASSOCIATED_TOKEN_PROGRAM_ID } from '@solana/spl-token';
+import { TransactionAccounts } from '../types/index';
+import { BN } from '@coral-xyz/anchor';
+import { bnToDate } from '../utils';
 
 /**
  * Represents a Loan.
@@ -62,7 +67,7 @@ export class Loan {
     client: LendingClient,
     collectionLendingProfile: CollectionLendingProfile,
     args: OfferLoanArgs
-  ) {
+  ): Promise<TransactionAccounts> {
     const [loan, loanBump] = deriveLoanAddress(
       collectionLendingProfile.address,
       client.walletPubkey,
@@ -148,6 +153,68 @@ export class Loan {
   /**
    * Loads all existing Loans, if a Collection Lending Profile is specified, only Loans associated to it will be loaded.
    * @param client The Lending Client instance.
+   * @param collectionLendingProfile The associated Collection Lending Profile, this is used as a filter.
+   * @param lender The associated Lender, this is used as a filter.
+   * @param borrower The associated Lender, this is used as a filter.
+   * @param onStateUpdateHandler A state update handler.
+   * @returns A promise which may resolve an array of Loans.
+   */
+  static async loadAllWithOptions(
+    client: LendingClient,
+    collectionLendingProfile?: PublicKey,
+    lender?: PublicKey,
+    borrower?: PublicKey,
+    onStateUpdateHandler?: StateUpdateHandler<LoanState>
+  ): Promise<Loan[]> {
+    const filters = [];
+
+    if (collectionLendingProfile) {
+      filters.push({
+        memcmp: {
+          offset: 24,
+          bytes: collectionLendingProfile.toString()
+        }
+      });
+    }
+
+    if (lender) {
+      filters.push({
+        memcmp: {
+          offset: 56,
+          bytes: lender.toString()
+        }
+      });
+    }
+
+    if (borrower) {
+      filters.push({
+        memcmp: {
+          offset: 120,
+          bytes: collectionLendingProfile.toString()
+        }
+      });
+    }
+
+    const loanAccounts = await client.accounts.loan.all(filters);
+    const loans = [];
+
+    for (const loanAccount of loanAccounts) {
+      loans.push(
+        new Loan(
+          client,
+          loanAccount.publicKey,
+          loanAccount.account as LoanState,
+          onStateUpdateHandler
+        )
+      );
+    }
+
+    return loans;
+  }
+
+  /**
+   * Loads all existing Loans, if a Collection Lending Profile is specified, only Loans associated to it will be loaded.
+   * @param client The Lending Client instance.
    * @param address The address of the Loan to load.
    * @param onStateUpdateHandler A state update handler.
    * @returns A promise which may resolve a Loan.
@@ -176,7 +243,7 @@ export class Loan {
     metaplex: Metaplex,
     collectionLendingProfile: CollectionLendingProfile,
     metadata: Sft | SftWithToken | Nft | NftWithToken
-  ) {
+  ): Promise<TransactionAccounts> {
     const [escrow, escrowBump] = deriveLoanEscrowAddress(
       this.address,
       this.client.programId
@@ -243,7 +310,7 @@ export class Loan {
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     if (
-      (this.state.loanType as any).loanToValue &&
+      (this.state.loanType as LoanType) == LoanType.LoanToValue &&
       !PublicKey.default.equals(floorPriceOracle)
     ) {
       ix.keys.push({
@@ -277,7 +344,7 @@ export class Loan {
     metaplex: Metaplex,
     collectionLendingProfile: CollectionLendingProfile,
     metadata: Sft | SftWithToken | Nft | NftWithToken
-  ) {
+  ): Promise<TransactionAccounts> {
     const [escrow, escrowBump] = deriveLoanEscrowAddress(
       this.address,
       this.client.programId
@@ -370,7 +437,7 @@ export class Loan {
     metaplex: Metaplex,
     collectionLendingProfile: CollectionLendingProfile,
     metadata: Sft | SftWithToken | Nft | NftWithToken
-  ) {
+  ): Promise<TransactionAccounts> {
     const [escrow, escrowBump] = deriveLoanEscrowAddress(
       this.address,
       this.client.programId
@@ -452,7 +519,9 @@ export class Loan {
    * @param collectionLendingProfile The Collection Lending Profile.
    * @returns The accounts, instructions and signers, if necessary.
    */
-  async rescindLoan(collectionLendingProfile: CollectionLendingProfile) {
+  async rescindLoan(
+    collectionLendingProfile: CollectionLendingProfile
+  ): Promise<TransactionAccounts> {
     const [escrow, escrowBump] = deriveLoanEscrowAddress(
       this.address,
       this.client.programId
@@ -489,9 +558,88 @@ export class Loan {
   }
 
   /**
+   * Gets the lender associated with this Loan.
+   * @returns The Public Key of the lender.
+   */
+  get lender(): PublicKey {
+    return this.state.lender;
+  }
+
+  /**
+   * Gets the borrower associated with this Loan.
+   * @returns The Public Key of the borrower.
+   */
+  get borrower(): PublicKey {
+    return this.state.lender;
+  }
+
+  /**
+   * Gets the Token Mint of the token borrow associated with the Loan.
+   * This does NOT represent the Token Mint of the collateral of the Loan.
+   * @returns The Public Key of the SPL Token Mint.
+   */
+  get loanMint(): PublicKey {
+    return this.state.loanMint;
+  }
+
+  /**
+   * Gets the token standard of the collateral of this Loan.
+   * @returns The Token Standard.
+   */
+  get tokenStandard(): TokenStandard {
+    return this.state.tokenStandard;
+  }
+
+  /**
+   * Gets the type of the Loan.
+   * @returns The Loan Type.
+   */
+  get loanType(): LoanType {
+    return this.state.loanType;
+  }
+
+  /**
+   * Gets the timestamp at which this Loan is due.
+   * @returns The due timestamp.
+   */
+  get dueTimestamp(): BN {
+    return this.state.dueTimestamp;
+  }
+
+  /**
+   * Gets the date at which this Loan is due.
+   * @returns The due date.
+   */
+  get dueDate(): Date {
+    return bnToDate(this.state.dueTimestamp);
+  }
+
+  /**
+   * Gets the principal of the Loan, if it has been taken, in native token units.
+   * @returns The principal amount.
+   */
+  get principal(): BN {
+    if (this.borrower.equals(PublicKey.default)) {
+      return new BN(0);
+    }
+    return this.state.principalAmount;
+  }
+
+  /**
+   * Gets the of the Loan that has been paid, if it has been taken, in native token units.
+   * @returns The amount paid.
+   */
+  get paidAmount(): BN {
+    if (this.borrower.equals(PublicKey.default)) {
+      return new BN(0);
+    }
+    return this.state.paidAmount;
+  }
+
+  /**
    * Subscribes to state changes of this account.
    */
-  subscribe() {
+  subscribe(): void {
     this.client.accounts.collectionLendingProfile
       .subscribe(this.address)
       .on('change', (state: LoanState) => {
@@ -506,7 +654,7 @@ export class Loan {
   /**
    * Unsubscribes to state changes of this account.
    */
-  async unsubscribe() {
+  async unsubscribe(): Promise<void> {
     await this.client.accounts.collectionLendingProfile.unsubscribe(
       this.address
     );

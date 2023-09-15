@@ -1,12 +1,39 @@
 import { PublicKey } from '@solana/web3.js';
 import type { Cluster, Config } from '../types';
+import { BN } from '@coral-xyz/anchor';
 
+/**
+ * The divisor for calculations where the numerators are denominated in basis points.
+ */
+export const BASIS_POINTS_DIVISOR = new BN(10000);
+
+/**
+ * The static seed for a Collection Lending Profile's Program Derived Address.
+ */
 export const B_COLLECTION_LENDING_PROFILE = 'COLLECTION_LENDING_PROFILE';
+/**
+ * The static seed for a Collection Lending Profile's Token Vault Program Derived Address.
+ */
 export const B_PROFILE_VAULT = 'PROFILE_VAULT';
+/**
+ * The static seed for a Collection Lending Profile's Vault Program Derived Address.
+ */
 export const B_VAULT = 'VAULT';
+/**
+ * The static seed for a Loan's Program Derived Address.
+ */
 export const B_LOAN = 'LOAN';
+/**
+ * The static seed for a Loan's Escrow Program Derived Address.
+ */
 export const B_ESCROW = 'ESCROW';
+/**
+ * The static seed for a Loan's Escrow Token Account Derived Address.
+ */
 export const B_ESCROW_TOKEN_ACCOUNT = 'ESCROW_TOKEN_ACCOUNT';
+/**
+ * The static seed for a User's Program Derived Address.
+ */
 export const B_USER = 'USER_ACCOUNT';
 
 export const CONFIGS: { [key in Cluster]: Config } = {

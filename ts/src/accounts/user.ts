@@ -3,6 +3,7 @@ import { PublicKey } from '@solana/web3.js';
 import { LendingClient } from '../client';
 import { UserAccountState } from '../types/on-chain';
 import { StateUpdateHandler } from '../types';
+import { BN } from '@coral-xyz/anchor';
 
 /**
  * Represents a User.
@@ -71,9 +72,57 @@ export class User {
   }
 
   /**
+   * Gets the authority of this User Account.
+   * @returns The Public Key of the authority.
+   */
+  get authority(): PublicKey {
+    return this.state.authority;
+  }
+
+  /**
+   * Gets the number of loans that the User has foreclosed.
+   * @returns The number of loans foreclosed.
+   */
+  get loansForeclosed(): BN {
+    return this.state.loansForeclosed;
+  }
+
+  /**
+   * Gets the number of loans that the User has repaid.
+   * @returns The number of loans repaid.
+   */
+  get loansRepaid(): BN {
+    return this.state.loansRepaid;
+  }
+
+  /**
+   * Gets the number of loans that the User has taken.
+   * @returns The number of loans taken.
+   */
+  get loansTaken(): BN {
+    return this.state.loansTaken;
+  }
+
+  /**
+   * Gets the number of loans that the User has offered.
+   * @returns The number of loans offered.
+   */
+  get loansOffered(): BN {
+    return this.state.loansOffered;
+  }
+
+  /**
+   * Gets the number of loans that the User has rescinded.
+   * @returns The number of loans rescinded.
+   */
+  get loansRescinded(): BN {
+    return this.state.loansRescinded;
+  }
+
+  /**
    * Subscribes to state changes of this account.
    */
-  subscribe() {
+  subscribe(): void {
     this.client.accounts.collectionLendingProfile
       .subscribe(this.address)
       .on('change', (state: UserAccountState) => {
@@ -88,7 +137,7 @@ export class User {
   /**
    * Unsubscribes to state changes of this account.
    */
-  async unsubscribe() {
+  async unsubscribe(): Promise<void> {
     await this.client.accounts.collectionLendingProfile.unsubscribe(
       this.address
     );
