@@ -103,9 +103,7 @@ impl std::fmt::Debug for LoanOfferCreated {
             .field("loan_mint", &self.loan_mint)
             .field("lender", &self.lender)
             .field("lender_account", &self.lender_account)
-            .field("loan_type", &self.loan_type)
             .field("amount", &self.amount)
-            .field("ltv_amount", &self.ltv_amount)
             .finish()
     }
 }
