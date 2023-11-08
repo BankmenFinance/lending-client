@@ -35,7 +35,7 @@ import {
 } from '@metaplex-foundation/js';
 import { MPL_TOKEN_AUTH_RULES_PROGRAM_ID } from '@metaplex-foundation/mpl-token-auth-rules';
 import { MPL_TOKEN_METADATA_PROGRAM_ID } from '@metaplex-foundation/mpl-token-metadata';
-import { ASSOCIATED_TOKEN_PROGRAM_ID } from '@solana/spl-token';
+import { ASSOCIATED_TOKEN_PROGRAM_ID, NATIVE_MINT } from '@solana/spl-token';
 import { TransactionAccounts } from '../types/index';
 import { BN } from '@coral-xyz/anchor';
 import { bnToDate } from '../utils';
@@ -79,35 +79,60 @@ export class Loan {
       loan,
       client.programId
     );
-    const [escrowTokenAccount, escrowTokenAccountbump] =
-      deriveEscrowTokenAccount(escrow, client.programId);
     const [userAccount, userAccountBump] = deriveUserAccountAddress(
       client.walletPubkey,
       client.programId
     );
-    const lenderTokenAccount =
-      await collectionLendingProfile.getAssociatedTokenAddress();
-    const ix = await client.methods
-      .offerLoan(args)
-      .accountsStrict({
-        profile: collectionLendingProfile.address,
-        loan,
-        loanMint: collectionLendingProfile.tokenMint,
-        escrow,
-        escrowTokenAccount,
-        lenderTokenAccount,
-        lender: client.walletPubkey,
-        lenderAccount: userAccount,
-        systemProgram: SystemProgram.programId,
-        tokenProgram: TOKEN_PROGRAM_ID,
-        associatedTokenProgram: ASSOCIATED_PROGRAM_ID,
-        rent: SYSVAR_RENT_PUBKEY
-      })
-      .instruction();
+
+    const accounts = [loan, escrow];
+    const ixs = [];
+
+    if (collectionLendingProfile.tokenMint.equals(NATIVE_MINT)) {
+      ixs.push(
+        await client.methods
+          .offerLoan(args)
+          .accountsStrict({
+            profile: collectionLendingProfile.address,
+            loan,
+            escrow,
+            lender: client.walletPubkey,
+            lenderAccount: userAccount,
+            systemProgram: SystemProgram.programId,
+            rent: SYSVAR_RENT_PUBKEY
+          })
+          .instruction()
+      );
+    } else {
+      const [escrowTokenAccount, escrowTokenAccountbump] =
+        deriveEscrowTokenAccount(escrow, client.programId);
+      const lenderTokenAccount =
+        await collectionLendingProfile.getAssociatedTokenAddress();
+
+      accounts.push(escrowTokenAccount);
+      ixs.push(
+        await client.methods
+          .offerTokenLoan(args)
+          .accountsStrict({
+            profile: collectionLendingProfile.address,
+            loan,
+            loanMint: collectionLendingProfile.tokenMint,
+            escrow,
+            escrowTokenAccount,
+            lenderTokenAccount,
+            lender: client.walletPubkey,
+            lenderAccount: userAccount,
+            systemProgram: SystemProgram.programId,
+            tokenProgram: TOKEN_PROGRAM_ID,
+            associatedTokenProgram: ASSOCIATED_PROGRAM_ID,
+            rent: SYSVAR_RENT_PUBKEY
+          })
+          .instruction()
+      );
+    }
 
     return {
-      accounts: [loan, escrow, escrowTokenAccount],
-      ixs: [ix],
+      accounts,
+      ixs,
       signers: []
     };
   }
@@ -249,8 +274,6 @@ export class Loan {
       this.address,
       this.client.programId
     );
-    const [escrowTokenAccount, escrowTokenAccountbump] =
-      deriveEscrowTokenAccount(escrow, this.client.programId);
     const [userAccount, userAccountBump] = deriveUserAccountAddress(
       this.client.walletPubkey,
       this.client.programId
@@ -267,13 +290,12 @@ export class Loan {
       this.client.walletPubkey,
       metadata.address
     );
-    const borrowerTokenAccount =
-      await collectionLendingProfile.getAssociatedTokenAddress();
     const collateralTokenRecord = metaplex.nfts().pdas().tokenRecord({
       mint: metadata.address,
       token: borrowerCollateralAccount
     });
     let collateralTokenAuthRules = null;
+
     if (
       metadata.programmableConfig &&
       metadata.programmableConfig.ruleSet &&
@@ -281,36 +303,69 @@ export class Loan {
     ) {
       collateralTokenAuthRules = metadata.programmableConfig.ruleSet;
     }
-    const ix = await this.client.methods
-      .takeLoan()
-      .accountsStrict({
-        profile: collectionLendingProfile.address,
-        loan: this.address,
-        loanMint: collectionLendingProfile.tokenMint,
-        collateralMint: metadata.address,
-        collateralMetadata,
-        collateralEdition,
-        collateralTokenRecord,
-        collateralTokenAuthRules,
-        escrow,
-        escrowTokenAccount,
-        borrowerTokenAccount,
-        borrowerCollateralAccount,
-        borrowerAccount: userAccount,
-        borrower: this.client.walletPubkey,
-        systemProgram: SystemProgram.programId,
-        tokenProgram: TOKEN_PROGRAM_ID,
-        metadataProgram: MPL_TOKEN_METADATA_PROGRAM_ID,
-        authRulesProgram: MPL_TOKEN_AUTH_RULES_PROGRAM_ID,
-        rent: SYSVAR_RENT_PUBKEY,
-        instructions: SYSVAR_INSTRUCTIONS_PUBKEY
-      })
-      .instruction();
+
+    let ix = null;
+
+    if (collectionLendingProfile.tokenMint.equals(NATIVE_MINT)) {
+      ix = await this.client.methods
+        .takeLoan()
+        .accountsStrict({
+          profile: collectionLendingProfile.address,
+          loan: this.address,
+          collateralMint: metadata.address,
+          collateralMetadata,
+          collateralEdition,
+          collateralTokenRecord,
+          collateralTokenAuthRules,
+          escrow,
+          borrowerCollateralAccount,
+          borrowerAccount: userAccount,
+          borrower: this.client.walletPubkey,
+          systemProgram: SystemProgram.programId,
+          tokenProgram: TOKEN_PROGRAM_ID,
+          metadataProgram: MPL_TOKEN_METADATA_PROGRAM_ID,
+          authRulesProgram: MPL_TOKEN_AUTH_RULES_PROGRAM_ID,
+          rent: SYSVAR_RENT_PUBKEY,
+          instructions: SYSVAR_INSTRUCTIONS_PUBKEY
+        })
+        .instruction();
+    } else {
+      const [escrowTokenAccount, escrowTokenAccountbump] =
+        deriveEscrowTokenAccount(escrow, this.client.programId);
+      const borrowerTokenAccount =
+        await collectionLendingProfile.getAssociatedTokenAddress();
+      ix = await this.client.methods
+        .takeTokenLoan()
+        .accountsStrict({
+          profile: collectionLendingProfile.address,
+          loan: this.address,
+          loanMint: collectionLendingProfile.tokenMint,
+          collateralMint: metadata.address,
+          collateralMetadata,
+          collateralEdition,
+          collateralTokenRecord,
+          collateralTokenAuthRules,
+          escrow,
+          escrowTokenAccount,
+          borrowerTokenAccount,
+          borrowerCollateralAccount,
+          borrowerAccount: userAccount,
+          borrower: this.client.walletPubkey,
+          systemProgram: SystemProgram.programId,
+          tokenProgram: TOKEN_PROGRAM_ID,
+          metadataProgram: MPL_TOKEN_METADATA_PROGRAM_ID,
+          authRulesProgram: MPL_TOKEN_AUTH_RULES_PROGRAM_ID,
+          rent: SYSVAR_RENT_PUBKEY,
+          instructions: SYSVAR_INSTRUCTIONS_PUBKEY
+        })
+        .instruction();
+    }
 
     const floorPriceOracle = collectionLendingProfile.state.floorPriceOracle;
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     if (
+      ix &&
       this.loanType.equals(LoanType.LoanToValue) &&
       !PublicKey.default.equals(floorPriceOracle)
     ) {
@@ -350,8 +405,6 @@ export class Loan {
       this.address,
       this.client.programId
     );
-    const [escrowTokenAccount, escrowTokenAccountbump] =
-      deriveEscrowTokenAccount(escrow, this.client.programId);
     const [vault, vaultBump] = deriveProfileVaultAddress(
       collectionLendingProfile.address,
       this.client.programId
@@ -376,13 +429,8 @@ export class Loan {
       mint: metadata.address,
       token: borrowerCollateralAccount
     });
-    const borrowerTokenAccount =
-      await collectionLendingProfile.getAssociatedTokenAddress();
-    const lenderTokenAccount = await getAssociatedTokenAddress(
-      this.state.lender,
-      collectionLendingProfile.tokenMint
-    );
     let collateralTokenAuthRules = null;
+
     if (
       metadata.programmableConfig &&
       metadata.programmableConfig.ruleSet &&
@@ -390,38 +438,79 @@ export class Loan {
     ) {
       collateralTokenAuthRules = metadata.programmableConfig.ruleSet;
     }
-    const ix = await this.client.methods
-      .repayLoan(this.state.repaymentAmount.sub(this.state.paidAmount))
-      .accountsStrict({
-        profile: collectionLendingProfile.address,
-        loan: this.address,
-        escrow,
-        escrowTokenAccount,
-        vault,
-        loanMint: collectionLendingProfile.tokenMint,
-        collateralMint: metadata.address,
-        collateralEdition,
-        collateralMetadata,
-        collateralTokenRecord,
-        collateralTokenAuthRules,
-        tokenVault: collectionLendingProfile.tokenVault,
-        borrowerTokenAccount,
-        borrowerCollateralAccount,
-        lender: this.state.lender,
-        lenderTokenAccount: lenderTokenAccount,
-        borrowerAccount: userAccount,
-        borrower: this.client.walletPubkey,
-        systemProgram: SystemProgram.programId,
-        tokenProgram: TOKEN_PROGRAM_ID,
-        metadataProgram: MPL_TOKEN_METADATA_PROGRAM_ID,
-        authRulesProgram: MPL_TOKEN_AUTH_RULES_PROGRAM_ID,
-        instructions: SYSVAR_INSTRUCTIONS_PUBKEY
-      })
-      .instruction();
+
+    const ixs = [];
+
+    if (collectionLendingProfile.tokenMint.equals(NATIVE_MINT)) {
+      ixs.push(
+        await this.client.methods
+          .repayLoan(this.state.repaymentAmount.sub(this.state.paidAmount))
+          .accountsStrict({
+            profile: collectionLendingProfile.address,
+            loan: this.address,
+            escrow,
+            vault,
+            collateralMint: metadata.address,
+            collateralEdition,
+            collateralMetadata,
+            collateralTokenRecord,
+            collateralTokenAuthRules,
+            borrowerCollateralAccount,
+            lender: this.state.lender,
+            borrowerAccount: userAccount,
+            borrower: this.client.walletPubkey,
+            systemProgram: SystemProgram.programId,
+            tokenProgram: TOKEN_PROGRAM_ID,
+            metadataProgram: MPL_TOKEN_METADATA_PROGRAM_ID,
+            authRulesProgram: MPL_TOKEN_AUTH_RULES_PROGRAM_ID,
+            instructions: SYSVAR_INSTRUCTIONS_PUBKEY
+          })
+          .instruction()
+      );
+    } else {
+      const [escrowTokenAccount, escrowTokenAccountbump] =
+        deriveEscrowTokenAccount(escrow, this.client.programId);
+      const borrowerTokenAccount =
+        await collectionLendingProfile.getAssociatedTokenAddress();
+      const lenderTokenAccount = await getAssociatedTokenAddress(
+        this.state.lender,
+        collectionLendingProfile.tokenMint
+      );
+      ixs.push(
+        await this.client.methods
+          .repayTokenLoan(this.state.repaymentAmount.sub(this.state.paidAmount))
+          .accountsStrict({
+            profile: collectionLendingProfile.address,
+            loan: this.address,
+            escrow,
+            escrowTokenAccount,
+            vault,
+            loanMint: collectionLendingProfile.tokenMint,
+            collateralMint: metadata.address,
+            collateralEdition,
+            collateralMetadata,
+            collateralTokenRecord,
+            collateralTokenAuthRules,
+            tokenVault: collectionLendingProfile.tokenVault,
+            borrowerTokenAccount,
+            borrowerCollateralAccount,
+            lender: this.state.lender,
+            lenderTokenAccount: lenderTokenAccount,
+            borrowerAccount: userAccount,
+            borrower: this.client.walletPubkey,
+            systemProgram: SystemProgram.programId,
+            tokenProgram: TOKEN_PROGRAM_ID,
+            metadataProgram: MPL_TOKEN_METADATA_PROGRAM_ID,
+            authRulesProgram: MPL_TOKEN_AUTH_RULES_PROGRAM_ID,
+            instructions: SYSVAR_INSTRUCTIONS_PUBKEY
+          })
+          .instruction()
+      );
+    }
 
     return {
       accounts: [],
-      ixs: [ix],
+      ixs,
       signers: []
     };
   }
@@ -443,8 +532,6 @@ export class Loan {
       this.address,
       this.client.programId
     );
-    const [escrowTokenAccount, escrowTokenAccountbump] =
-      deriveEscrowTokenAccount(escrow, this.client.programId);
     const [userAccount, userAccountBump] = deriveUserAccountAddress(
       this.client.walletPubkey,
       this.client.programId
@@ -481,36 +568,73 @@ export class Loan {
     ) {
       collateralTokenAuthRules = metadata.programmableConfig.ruleSet;
     }
-    const ix = await this.client.methods
-      .forecloseLoan()
-      .accountsStrict({
-        profile: collectionLendingProfile.address,
-        loan: this.address,
-        escrow,
-        escrowTokenAccount,
-        lenderCollateralAccount,
-        lenderCollateralTokenRecord,
-        collateralMint: metadata.address,
-        collateralEdition,
-        collateralMetadata,
-        collateralTokenAuthRules,
-        borrowerCollateralAccount,
-        borrowerCollateralTokenRecord,
-        borrower: this.state.borrower,
-        lenderAccount: userAccount,
-        lender: this.client.walletPubkey,
-        systemProgram: SystemProgram.programId,
-        tokenProgram: TOKEN_PROGRAM_ID,
-        associatedTokenProgram: ASSOCIATED_TOKEN_PROGRAM_ID,
-        metadataProgram: MPL_TOKEN_METADATA_PROGRAM_ID,
-        authRulesProgram: MPL_TOKEN_AUTH_RULES_PROGRAM_ID,
-        instructions: SYSVAR_INSTRUCTIONS_PUBKEY
-      })
-      .instruction();
+
+    const ixs = [];
+
+    if (collectionLendingProfile.tokenMint.equals(NATIVE_MINT)) {
+      ixs.push(
+        await this.client.methods
+          .forecloseLoan()
+          .accountsStrict({
+            profile: collectionLendingProfile.address,
+            loan: this.address,
+            escrow,
+            lenderCollateralAccount,
+            lenderCollateralTokenRecord,
+            collateralMint: metadata.address,
+            collateralEdition,
+            collateralMetadata,
+            collateralTokenAuthRules,
+            borrowerCollateralAccount,
+            borrowerCollateralTokenRecord,
+            borrower: this.state.borrower,
+            lenderAccount: userAccount,
+            lender: this.client.walletPubkey,
+            systemProgram: SystemProgram.programId,
+            tokenProgram: TOKEN_PROGRAM_ID,
+            associatedTokenProgram: ASSOCIATED_TOKEN_PROGRAM_ID,
+            metadataProgram: MPL_TOKEN_METADATA_PROGRAM_ID,
+            authRulesProgram: MPL_TOKEN_AUTH_RULES_PROGRAM_ID,
+            instructions: SYSVAR_INSTRUCTIONS_PUBKEY
+          })
+          .instruction()
+      );
+    } else {
+      const [escrowTokenAccount, escrowTokenAccountbump] =
+        deriveEscrowTokenAccount(escrow, this.client.programId);
+      ixs.push(
+        await this.client.methods
+          .forecloseTokenLoan()
+          .accountsStrict({
+            profile: collectionLendingProfile.address,
+            loan: this.address,
+            escrow,
+            escrowTokenAccount,
+            lenderCollateralAccount,
+            lenderCollateralTokenRecord,
+            collateralMint: metadata.address,
+            collateralEdition,
+            collateralMetadata,
+            collateralTokenAuthRules,
+            borrowerCollateralAccount,
+            borrowerCollateralTokenRecord,
+            borrower: this.state.borrower,
+            lenderAccount: userAccount,
+            lender: this.client.walletPubkey,
+            systemProgram: SystemProgram.programId,
+            tokenProgram: TOKEN_PROGRAM_ID,
+            associatedTokenProgram: ASSOCIATED_TOKEN_PROGRAM_ID,
+            metadataProgram: MPL_TOKEN_METADATA_PROGRAM_ID,
+            authRulesProgram: MPL_TOKEN_AUTH_RULES_PROGRAM_ID,
+            instructions: SYSVAR_INSTRUCTIONS_PUBKEY
+          })
+          .instruction()
+      );
+    }
 
     return {
       accounts: [],
-      ixs: [ix],
+      ixs,
       signers: []
     };
   }
@@ -527,33 +651,54 @@ export class Loan {
       this.address,
       this.client.programId
     );
-    const [escrowTokenAccount, escrowTokenAccountbump] =
-      deriveEscrowTokenAccount(escrow, this.client.programId);
     const [lenderAccount, lenderAccountBump] = deriveUserAccountAddress(
       this.client.walletPubkey,
       this.client.programId
     );
-    const lenderTokenAccount =
-      await collectionLendingProfile.getAssociatedTokenAddress();
-    const ix = await this.client.methods
-      .rescindLoan()
-      .accountsStrict({
-        profile: collectionLendingProfile.address,
-        loan: this.address,
-        loanMint: this.state.loanMint,
-        escrow,
-        escrowTokenAccount,
-        lenderTokenAccount,
-        lenderAccount,
-        lender: this.state.lender,
-        tokenProgram: TOKEN_PROGRAM_ID,
-        systemProgram: SystemProgram.programId
-      })
-      .instruction();
+
+    const ixs = [];
+
+    if (collectionLendingProfile.tokenMint.equals(NATIVE_MINT)) {
+      ixs.push(
+        await this.client.methods
+          .rescindLoan()
+          .accountsStrict({
+            profile: collectionLendingProfile.address,
+            loan: this.address,
+            escrow,
+            lenderAccount,
+            lender: this.state.lender,
+            systemProgram: SystemProgram.programId
+          })
+          .instruction()
+      );
+    } else {
+      const [escrowTokenAccount, escrowTokenAccountbump] =
+        deriveEscrowTokenAccount(escrow, this.client.programId);
+      const lenderTokenAccount =
+        await collectionLendingProfile.getAssociatedTokenAddress();
+      ixs.push(
+        await this.client.methods
+          .rescindTokenLoan()
+          .accountsStrict({
+            profile: collectionLendingProfile.address,
+            loan: this.address,
+            loanMint: this.state.loanMint,
+            escrow,
+            escrowTokenAccount,
+            lenderTokenAccount,
+            lenderAccount,
+            lender: this.state.lender,
+            tokenProgram: TOKEN_PROGRAM_ID,
+            systemProgram: SystemProgram.programId
+          })
+          .instruction()
+      );
+    }
 
     return {
       accounts: [],
-      ixs: [ix],
+      ixs,
       signers: []
     };
   }

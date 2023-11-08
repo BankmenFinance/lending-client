@@ -1,5 +1,5 @@
 export type Lending = {
-  version: '0.2.1';
+  version: '0.3.0';
   name: 'lending';
   instructions: [
     {
@@ -256,6 +256,64 @@ export type Lending = {
           docs: ['The escrow.'];
         },
         {
+          name: 'lender';
+          isMut: true;
+          isSigner: true;
+          docs: ["The lender's wallet."];
+        },
+        {
+          name: 'systemProgram';
+          isMut: false;
+          isSigner: false;
+          docs: ['The System Program.'];
+        },
+        {
+          name: 'rent';
+          isMut: false;
+          isSigner: false;
+          docs: ['The Rent Sysvar.'];
+        }
+      ];
+      args: [
+        {
+          name: 'args';
+          type: {
+            defined: 'OfferLoanArgs';
+          };
+        }
+      ];
+    },
+    {
+      name: 'offerTokenLoan';
+      docs: [
+        'Creates a [`Loan`] offer and adds it to the corresponding [`CollectionLendingProfile`].'
+      ];
+      accounts: [
+        {
+          name: 'profile';
+          isMut: true;
+          isSigner: false;
+          docs: ['The book of loans for a given collection.'];
+        },
+        {
+          name: 'loan';
+          isMut: true;
+          isSigner: false;
+          docs: ['The loan offered by the lender.'];
+        },
+        {
+          name: 'lenderAccount';
+          isMut: true;
+          isSigner: false;
+          docs: ["The lender's user account."];
+        },
+        {
+          name: 'escrow';
+          isMut: true;
+          isSigner: false;
+          docs: ['The escrow.'];
+        },
+        {
           name: 'loanMint';
           isMut: false;
           isSigner: false;
@@ -344,6 +402,51 @@ export type Lending = {
           docs: ['The escrow.'];
         },
         {
+          name: 'lender';
+          isMut: true;
+          isSigner: true;
+          docs: ["The lender's wallet."];
+        },
+        {
+          name: 'systemProgram';
+          isMut: false;
+          isSigner: false;
+          docs: ['The System Program.'];
+        }
+      ];
+      args: [];
+    },
+    {
+      name: 'rescindTokenLoan';
+      docs: [
+        'Rescinds a [`Loan`] offer and removes it from the corresponding [`CollectionLendingProfile`].'
+      ];
+      accounts: [
+        {
+          name: 'profile';
+          isMut: true;
+          isSigner: false;
+          docs: ['The book of loans for a given collection.'];
+        },
+        {
+          name: 'loan';
+          isMut: true;
+          isSigner: false;
+          docs: ['The loan offered by the lender.'];
+        },
+        {
+          name: 'lenderAccount';
+          isMut: true;
+          isSigner: false;
+          docs: ["The lender's user account."];
+        },
+        {
+          name: 'escrow';
+          isMut: true;
+          isSigner: false;
+          docs: ['The escrow.'];
+        },
+        {
           name: 'loanMint';
           isMut: false;
           isSigner: false;
@@ -384,6 +487,128 @@ export type Lending = {
     },
     {
       name: 'repayLoan';
+      docs: ['Repays a [`Loan`] and closes it.'];
+      accounts: [
+        {
+          name: 'profile';
+          isMut: true;
+          isSigner: false;
+          docs: ['The book of loans for a given collection.'];
+        },
+        {
+          name: 'loan';
+          isMut: true;
+          isSigner: false;
+          docs: ['The loan offered by the lender.'];
+        },
+        {
+          name: 'borrowerAccount';
+          isMut: true;
+          isSigner: false;
+          docs: ["The borrower's user account."];
+        },
+        {
+          name: 'escrow';
+          isMut: false;
+          isSigner: false;
+          docs: ['The escrow.'];
+        },
+        {
+          name: 'vault';
+          isMut: true;
+          isSigner: false;
+          docs: ['The native fee vault.'];
+        },
+        {
+          name: 'collateralMint';
+          isMut: false;
+          isSigner: false;
+          docs: ['The collateral token mint.'];
+        },
+        {
+          name: 'collateralMetadata';
+          isMut: true;
+          isSigner: false;
+          docs: ['The collateral metadata account.'];
+        },
+        {
+          name: 'collateralEdition';
+          isMut: false;
+          isSigner: false;
+          docs: ['The collateral metadata account.'];
+        },
+        {
+          name: 'collateralTokenRecord';
+          isMut: true;
+          isSigner: false;
+          isOptional: true;
+          docs: ['The collateral token record account.'];
+        },
+        {
+          name: 'collateralTokenAuthRules';
+          isMut: true;
+          isSigner: false;
+          isOptional: true;
+          docs: ['The collateral token auth rules account.'];
+        },
+        {
+          name: 'borrowerCollateralAccount';
+          isMut: true;
+          isSigner: false;
+          docs: ["The borrower's collateral account."];
+        },
+        {
+          name: 'lender';
+          isMut: true;
+          isSigner: false;
+          docs: ["The lender's wallet."];
+        },
+        {
+          name: 'borrower';
+          isMut: true;
+          isSigner: true;
+          docs: ['The wallet address of the borrower.'];
+        },
+        {
+          name: 'systemProgram';
+          isMut: false;
+          isSigner: false;
+          docs: ['The System Program.'];
+        },
+        {
+          name: 'tokenProgram';
+          isMut: false;
+          isSigner: false;
+          docs: ['The Token Program.'];
+        },
+        {
+          name: 'metadataProgram';
+          isMut: false;
+          isSigner: false;
+          docs: ['The Metaplex Token Metadata Program.'];
+        },
+        {
+          name: 'authRulesProgram';
+          isMut: false;
+          isSigner: false;
+          docs: ['The Metaplex Token Auth Rules Program.'];
+        },
+        {
+          name: 'instructions';
+          isMut: false;
+          isSigner: false;
+          docs: ['The Instructions Sysvar.'];
+        }
+      ];
+      args: [
+        {
+          name: 'amount';
+          type: 'u64';
+        }
+      ];
+    },
+    {
+      name: 'repayTokenLoan';
       docs: ['Repays a [`Loan`] and closes it.'];
       accounts: [
         {
@@ -565,6 +790,119 @@ export type Lending = {
           docs: ['The escrow.'];
         },
         {
+          name: 'collateralMint';
+          isMut: false;
+          isSigner: false;
+          docs: ['The collateral token mint.'];
+        },
+        {
+          name: 'collateralMetadata';
+          isMut: true;
+          isSigner: false;
+          docs: ['The collateral metadata account.'];
+        },
+        {
+          name: 'collateralEdition';
+          isMut: false;
+          isSigner: false;
+          docs: ['The collateral master edition account.'];
+        },
+        {
+          name: 'collateralTokenRecord';
+          isMut: true;
+          isSigner: false;
+          isOptional: true;
+          docs: ['The collateral token record account.'];
+        },
+        {
+          name: 'collateralTokenAuthRules';
+          isMut: true;
+          isSigner: false;
+          isOptional: true;
+          docs: ['The collateral token auth rules account.'];
+        },
+        {
+          name: 'borrowerCollateralAccount';
+          isMut: true;
+          isSigner: false;
+          docs: ["The borrower's collateral account."];
+        },
+        {
+          name: 'borrower';
+          isMut: true;
+          isSigner: true;
+          docs: ['The wallet address of the borrower.'];
+        },
+        {
+          name: 'systemProgram';
+          isMut: false;
+          isSigner: false;
+          docs: ['The System Program.'];
+        },
+        {
+          name: 'tokenProgram';
+          isMut: false;
+          isSigner: false;
+          docs: ['The Token Program.'];
+        },
+        {
+          name: 'metadataProgram';
+          isMut: false;
+          isSigner: false;
+          docs: ['The Metaplex Token Metadata Program.'];
+        },
+        {
+          name: 'authRulesProgram';
+          isMut: false;
+          isSigner: false;
+          docs: ['The Metaplex Token Auth Rules Program.'];
+        },
+        {
+          name: 'rent';
+          isMut: false;
+          isSigner: false;
+          docs: ['The Rent Sysvar.'];
+        },
+        {
+          name: 'instructions';
+          isMut: false;
+          isSigner: false;
+          docs: ['The Instructions Sysvar.'];
+        }
+      ];
+      args: [];
+    },
+    {
+      name: 'takeTokenLoan';
+      docs: [
+        "Takes a [`Loan`] and pledges a token that is part of a collection as it's collateral."
+      ];
+      accounts: [
+        {
+          name: 'profile';
+          isMut: true;
+          isSigner: false;
+          docs: ['The book of loans for a given collection.'];
+        },
+        {
+          name: 'loan';
+          isMut: true;
+          isSigner: false;
+          docs: ['The loan offered by the lender.'];
+        },
+        {
+          name: 'borrowerAccount';
+          isMut: true;
+          isSigner: false;
+          docs: ["The borrower's user account."];
+        },
+        {
+          name: 'escrow';
+          isMut: true;
+          isSigner: false;
+          docs: ['The escrow.'];
+        },
+        {
           name: 'loanMint';
           isMut: false;
           isSigner: false;
@@ -667,6 +1005,135 @@ export type Lending = {
     },
     {
       name: 'forecloseLoan';
+      docs: ["Forecloses a [`Loan`] and claims it's collateral."];
+      accounts: [
+        {
+          name: 'profile';
+          isMut: true;
+          isSigner: false;
+          docs: ['The book of loans for a given collection.'];
+        },
+        {
+          name: 'loan';
+          isMut: true;
+          isSigner: false;
+          docs: ['The loan offered by the lender.'];
+        },
+        {
+          name: 'lenderAccount';
+          isMut: true;
+          isSigner: false;
+          docs: ["The lender's user account."];
+        },
+        {
+          name: 'escrow';
+          isMut: true;
+          isSigner: false;
+          docs: ['The escrow.'];
+        },
+        {
+          name: 'collateralMint';
+          isMut: false;
+          isSigner: false;
+          docs: ['The collateral token mint.'];
+        },
+        {
+          name: 'collateralMetadata';
+          isMut: true;
+          isSigner: false;
+          docs: ['The collateral metadata account.'];
+        },
+        {
+          name: 'collateralEdition';
+          isMut: false;
+          isSigner: false;
+          docs: ['The collateral master edition account.'];
+        },
+        {
+          name: 'collateralTokenAuthRules';
+          isMut: true;
+          isSigner: false;
+          isOptional: true;
+          docs: ['The collateral token auth rules account.'];
+        },
+        {
+          name: 'lenderCollateralAccount';
+          isMut: true;
+          isSigner: false;
+          docs: ["The lender's collateral account."];
+        },
+        {
+          name: 'lenderCollateralTokenRecord';
+          isMut: true;
+          isSigner: false;
+          isOptional: true;
+          docs: ["The lender's collateral token record account."];
+        },
+        {
+          name: 'borrowerCollateralAccount';
+          isMut: true;
+          isSigner: false;
+          docs: ["The borrower's collateral account."];
+        },
+        {
+          name: 'borrowerCollateralTokenRecord';
+          isMut: true;
+          isSigner: false;
+          isOptional: true;
+          docs: ["The borrower's collateral token record account."];
+        },
+        {
+          name: 'borrower';
+          isMut: true;
+          isSigner: false;
+        },
+        {
+          name: 'lender';
+          isMut: true;
+          isSigner: true;
+          docs: ['The wallet address of the lender.'];
+        },
+        {
+          name: 'systemProgram';
+          isMut: false;
+          isSigner: false;
+          docs: ['The System Program.'];
+        },
+        {
+          name: 'tokenProgram';
+          isMut: false;
+          isSigner: false;
+          docs: ['The Token Program.'];
+        },
+        {
+          name: 'associatedTokenProgram';
+          isMut: false;
+          isSigner: false;
+          docs: ['The Token Program.'];
+        },
+        {
+          name: 'metadataProgram';
+          isMut: false;
+          isSigner: false;
+          docs: ['The Metaplex Token Metadata Program.'];
+        },
+        {
+          name: 'authRulesProgram';
+          isMut: false;
+          isSigner: false;
+          docs: ['The Metaplex Token Auth Rules Program.'];
+        },
+        {
+          name: 'instructions';
+          isMut: false;
+          isSigner: false;
+          docs: ['The Instructions Sysvar.'];
+        }
+      ];
+      args: [];
+    },
+    {
+      name: 'forecloseTokenLoan';
       docs: ["Forecloses a [`Loan`] and claims it's collateral."];
       accounts: [
         {
@@ -1772,7 +2239,7 @@ export type Lending = {
 };
 
 export const IDL: Lending = {
-  version: '0.2.1',
+  version: '0.3.0',
   name: 'lending',
   instructions: [
     {
@@ -2029,6 +2496,64 @@ export const IDL: Lending = {
           docs: ['The escrow.']
         },
         {
+          name: 'lender',
+          isMut: true,
+          isSigner: true,
+          docs: ["The lender's wallet."]
+        },
+        {
+          name: 'systemProgram',
+          isMut: false,
+          isSigner: false,
+          docs: ['The System Program.']
+        },
+        {
+          name: 'rent',
+          isMut: false,
+          isSigner: false,
+          docs: ['The Rent Sysvar.']
+        }
+      ],
+      args: [
+        {
+          name: 'args',
+          type: {
+            defined: 'OfferLoanArgs'
+          }
+        }
+      ]
+    },
+    {
+      name: 'offerTokenLoan',
+      docs: [
+        'Creates a [`Loan`] offer and adds it to the corresponding [`CollectionLendingProfile`].'
+      ],
+      accounts: [
+        {
+          name: 'profile',
+          isMut: true,
+          isSigner: false,
+          docs: ['The book of loans for a given collection.']
+        },
+        {
+          name: 'loan',
+          isMut: true,
+          isSigner: false,
+          docs: ['The loan offered by the lender.']
+        },
+        {
+          name: 'lenderAccount',
+          isMut: true,
+          isSigner: false,
+          docs: ["The lender's user account."]
+        },
+        {
+          name: 'escrow',
+          isMut: true,
+          isSigner: false,
+          docs: ['The escrow.']
+        },
+        {
           name: 'loanMint',
           isMut: false,
           isSigner: false,
@@ -2117,6 +2642,51 @@ export const IDL: Lending = {
           docs: ['The escrow.']
         },
         {
+          name: 'lender',
+          isMut: true,
+          isSigner: true,
+          docs: ["The lender's wallet."]
+        },
+        {
+          name: 'systemProgram',
+          isMut: false,
+          isSigner: false,
+          docs: ['The System Program.']
+        }
+      ],
+      args: []
+    },
+    {
+      name: 'rescindTokenLoan',
+      docs: [
+        'Rescinds a [`Loan`] offer and removes it from the corresponding [`CollectionLendingProfile`].'
+      ],
+      accounts: [
+        {
+          name: 'profile',
+          isMut: true,
+          isSigner: false,
+          docs: ['The book of loans for a given collection.']
+        },
+        {
+          name: 'loan',
+          isMut: true,
+          isSigner: false,
+          docs: ['The loan offered by the lender.']
+        },
+        {
+          name: 'lenderAccount',
+          isMut: true,
+          isSigner: false,
+          docs: ["The lender's user account."]
+        },
+        {
+          name: 'escrow',
+          isMut: true,
+          isSigner: false,
+          docs: ['The escrow.']
+        },
+        {
           name: 'loanMint',
           isMut: false,
           isSigner: false,
@@ -2157,6 +2727,128 @@ export const IDL: Lending = {
     },
     {
       name: 'repayLoan',
+      docs: ['Repays a [`Loan`] and closes it.'],
+      accounts: [
+        {
+          name: 'profile',
+          isMut: true,
+          isSigner: false,
+          docs: ['The book of loans for a given collection.']
+        },
+        {
+          name: 'loan',
+          isMut: true,
+          isSigner: false,
+          docs: ['The loan offered by the lender.']
+        },
+        {
+          name: 'borrowerAccount',
+          isMut: true,
+          isSigner: false,
+          docs: ["The borrower's user account."]
+        },
+        {
+          name: 'escrow',
+          isMut: false,
+          isSigner: false,
+          docs: ['The escrow.']
+        },
+        {
+          name: 'vault',
+          isMut: true,
+          isSigner: false,
+          docs: ['The native fee vault.']
+        },
+        {
+          name: 'collateralMint',
+          isMut: false,
+          isSigner: false,
+          docs: ['The collateral token mint.']
+        },
+        {
+          name: 'collateralMetadata',
+          isMut: true,
+          isSigner: false,
+          docs: ['The collateral metadata account.']
+        },
+        {
+          name: 'collateralEdition',
+          isMut: false,
+          isSigner: false,
+          docs: ['The collateral metadata account.']
+        },
+        {
+          name: 'collateralTokenRecord',
+          isMut: true,
+          isSigner: false,
+          isOptional: true,
+          docs: ['The collateral token record account.']
+        },
+        {
+          name: 'collateralTokenAuthRules',
+          isMut: true,
+          isSigner: false,
+          isOptional: true,
+          docs: ['The collateral token auth rules account.']
+        },
+        {
+          name: 'borrowerCollateralAccount',
+          isMut: true,
+          isSigner: false,
+          docs: ["The borrower's collateral account."]
+        },
+        {
+          name: 'lender',
+          isMut: true,
+          isSigner: false,
+          docs: ["The lender's wallet."]
+        },
+        {
+          name: 'borrower',
+          isMut: true,
+          isSigner: true,
+          docs: ['The wallet address of the borrower.']
+        },
+        {
+          name: 'systemProgram',
+          isMut: false,
+          isSigner: false,
+          docs: ['The System Program.']
+        },
+        {
+          name: 'tokenProgram',
+          isMut: false,
+          isSigner: false,
+          docs: ['The Token Program.']
+        },
+        {
+          name: 'metadataProgram',
+          isMut: false,
+          isSigner: false,
+          docs: ['The Metaplex Token Metadata Program.']
+        },
+        {
+          name: 'authRulesProgram',
+          isMut: false,
+          isSigner: false,
+          docs: ['The Metaplex Token Auth Rules Program.']
+        },
+        {
+          name: 'instructions',
+          isMut: false,
+          isSigner: false,
+          docs: ['The Instructions Sysvar.']
+        }
+      ],
+      args: [
+        {
+          name: 'amount',
+          type: 'u64'
+        }
+      ]
+    },
+    {
+      name: 'repayTokenLoan',
       docs: ['Repays a [`Loan`] and closes it.'],
       accounts: [
         {
@@ -2338,6 +3030,119 @@ export const IDL: Lending = {
           docs: ['The escrow.']
         },
         {
+          name: 'collateralMint',
+          isMut: false,
+          isSigner: false,
+          docs: ['The collateral token mint.']
+        },
+        {
+          name: 'collateralMetadata',
+          isMut: true,
+          isSigner: false,
+          docs: ['The collateral metadata account.']
+        },
+        {
+          name: 'collateralEdition',
+          isMut: false,
+          isSigner: false,
+          docs: ['The collateral master edition account.']
+        },
+        {
+          name: 'collateralTokenRecord',
+          isMut: true,
+          isSigner: false,
+          isOptional: true,
+          docs: ['The collateral token record account.']
+        },
+        {
+          name: 'collateralTokenAuthRules',
+          isMut: true,
+          isSigner: false,
+          isOptional: true,
+          docs: ['The collateral token auth rules account.']
+        },
+        {
+          name: 'borrowerCollateralAccount',
+          isMut: true,
+          isSigner: false,
+          docs: ["The borrower's collateral account."]
+        },
+        {
+          name: 'borrower',
+          isMut: true,
+          isSigner: true,
+          docs: ['The wallet address of the borrower.']
+        },
+        {
+          name: 'systemProgram',
+          isMut: false,
+          isSigner: false,
+          docs: ['The System Program.']
+        },
+        {
+          name: 'tokenProgram',
+          isMut: false,
+          isSigner: false,
+          docs: ['The Token Program.']
+        },
+        {
+          name: 'metadataProgram',
+          isMut: false,
+          isSigner: false,
+          docs: ['The Metaplex Token Metadata Program.']
+        },
+        {
+          name: 'authRulesProgram',
+          isMut: false,
+          isSigner: false,
+          docs: ['The Metaplex Token Auth Rules Program.']
+        },
+        {
+          name: 'rent',
+          isMut: false,
+          isSigner: false,
+          docs: ['The Rent Sysvar.']
+        },
+        {
+          name: 'instructions',
+          isMut: false,
+          isSigner: false,
+          docs: ['The Instructions Sysvar.']
+        }
+      ],
+      args: []
+    },
+    {
+      name: 'takeTokenLoan',
+      docs: [
+        "Takes a [`Loan`] and pledges a token that is part of a collection as it's collateral."
+      ],
+      accounts: [
+        {
+          name: 'profile',
+          isMut: true,
+          isSigner: false,
+          docs: ['The book of loans for a given collection.']
+        },
+        {
+          name: 'loan',
+          isMut: true,
+          isSigner: false,
+          docs: ['The loan offered by the lender.']
+        },
+        {
+          name: 'borrowerAccount',
+          isMut: true,
+          isSigner: false,
+          docs: ["The borrower's user account."]
+        },
+        {
+          name: 'escrow',
+          isMut: true,
+          isSigner: false,
+          docs: ['The escrow.']
+        },
+        {
           name: 'loanMint',
           isMut: false,
           isSigner: false,
@@ -2440,6 +3245,135 @@ export const IDL: Lending = {
     },
     {
       name: 'forecloseLoan',
+      docs: ["Forecloses a [`Loan`] and claims it's collateral."],
+      accounts: [
+        {
+          name: 'profile',
+          isMut: true,
+          isSigner: false,
+          docs: ['The book of loans for a given collection.']
+        },
+        {
+          name: 'loan',
+          isMut: true,
+          isSigner: false,
+          docs: ['The loan offered by the lender.']
+        },
+        {
+          name: 'lenderAccount',
+          isMut: true,
+          isSigner: false,
+          docs: ["The lender's user account."]
+        },
+        {
+          name: 'escrow',
+          isMut: true,
+          isSigner: false,
+          docs: ['The escrow.']
+        },
+        {
+          name: 'collateralMint',
+          isMut: false,
+          isSigner: false,
+          docs: ['The collateral token mint.']
+        },
+        {
+          name: 'collateralMetadata',
+          isMut: true,
+          isSigner: false,
+          docs: ['The collateral metadata account.']
+        },
+        {
+          name: 'collateralEdition',
+          isMut: false,
+          isSigner: false,
+          docs: ['The collateral master edition account.']
+        },
+        {
+          name: 'collateralTokenAuthRules',
+          isMut: true,
+          isSigner: false,
+          isOptional: true,
+          docs: ['The collateral token auth rules account.']
+        },
+        {
+          name: 'lenderCollateralAccount',
+          isMut: true,
+          isSigner: false,
+          docs: ["The lender's collateral account."]
+        },
+        {
+          name: 'lenderCollateralTokenRecord',
+          isMut: true,
+          isSigner: false,
+          isOptional: true,
+          docs: ["The lender's collateral token record account."]
+        },
+        {
+          name: 'borrowerCollateralAccount',
+          isMut: true,
+          isSigner: false,
+          docs: ["The borrower's collateral account."]
+        },
+        {
+          name: 'borrowerCollateralTokenRecord',
+          isMut: true,
+          isSigner: false,
+          isOptional: true,
+          docs: ["The borrower's collateral token record account."]
+        },
+        {
+          name: 'borrower',
+          isMut: true,
+          isSigner: false
+        },
+        {
+          name: 'lender',
+          isMut: true,
+          isSigner: true,
+          docs: ['The wallet address of the lender.']
+        },
+        {
+          name: 'systemProgram',
+          isMut: false,
+          isSigner: false,
+          docs: ['The System Program.']
+        },
+        {
+          name: 'tokenProgram',
+          isMut: false,
+          isSigner: false,
+          docs: ['The Token Program.']
+        },
+        {
+          name: 'associatedTokenProgram',
+          isMut: false,
+          isSigner: false,
+          docs: ['The Token Program.']
+        },
+        {
+          name: 'metadataProgram',
+          isMut: false,
+          isSigner: false,
+          docs: ['The Metaplex Token Metadata Program.']
+        },
+        {
+          name: 'authRulesProgram',
+          isMut: false,
+          isSigner: false,
+          docs: ['The Metaplex Token Auth Rules Program.']
+        },
+        {
+          name: 'instructions',
+          isMut: false,
+          isSigner: false,
+          docs: ['The Instructions Sysvar.']
+        }
+      ],
+      args: []
+    },
+    {
+      name: 'forecloseTokenLoan',
       docs: ["Forecloses a [`Loan`] and claims it's collateral."],
       accounts: [
         {
